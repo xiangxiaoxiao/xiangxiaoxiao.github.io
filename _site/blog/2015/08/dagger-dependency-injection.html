@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta name="baidu-site-verification" content="HvuxptDcq6" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Dagger依赖注入浅析 - Lippi-浮生志 - Lippi.OuYang(ouyanglip@gmail.com)">
+    <title>
+      Dagger依赖注入浅析 - Lippi-浮生志
+    </title>
+    <!-- Bootstrap Core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS 
+    <link href="/css/blog.css" rel="stylesheet">-->
+    <!-- index css -->
+    <link href="/css/index.css" rel="stylesheet">
+	<!-- pagments CSS-->
+	<link href="/css/pygments.css" rel="stylesheet">
+        <!-- jQuery Version 1.11.0 -->
+    <script src="/js/jquery-1.11.0.js"> </script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/bootstrap.min.js"></script>
+   <!-- 回到顶部js-->
+    <script src="/js/index.js"></script>
+
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?085fc257cb1e774f7764a2cf527c393d";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+	<script>
+    (function(){
+     var bp = document.createElement('script');
+	 bp.src = '//push.zhanzhang.baidu.com/push.js';
+	 var s = document.getElementsByTagName("script")[0];
+	 s.parentNode.insertBefore(bp, s);
+	 })();
+	</script>
+
+  </head>
+  
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">
+              Toggle navigation
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+          </button>
+          <a class="navbar-brand" href="/index.html">
+            Lippi-浮生志
+          </a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+            <li>
+              <a href="/categories.html">
+                分 类
+              </a>
+            </li>
+            <li>
+              <a href="/tags.html">
+                标 签
+              </a>
+            </li>
+            <li>
+              <a href="/archives.html">
+                归 档
+              </a>
+            </li>
+            <li>
+              <a href="/faqs.html">
+                备 忘
+              </a>
+            </li>
+            <li>
+              <a href="/about.html">
+                关 于
+              </a>
+            </li>
+          </ul> 
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+        <!-- Blog Entries Column -->
+        <div class="col-md-8">
+          <!-- Blog Post -->
+<!-- Title -->
+<div class="row">
+  <div class="post-area post">
+
+ 	<div class="post-list-body">
+        	<div class="all-posts" post-cate="All">
+ 		<header>
+		<h1>
+		  Dagger依赖注入浅析
+		  <div class="post-date"><a href="https://github.com/LippiOuYang/LippiOuYang.github.io/edit/master/_posts/2015-08-13-dagger-dependency-injection.md" target="_blank">纠错</a>&nbsp;&nbsp;
+			<span class="glyphicon glyphicon-time"></span>
+			13 Aug 2015
+		  </div>
+		</h1>
+ 		</header>
+		<!-- Author -->
+		<hr>
+		 <article>
+		<p>最早接触依赖注入这个概念是在使用Spring框架的时候，一开始没太在意它，后面开发项目的过程中发现使用依赖注入可以降低代码的耦合性,Spring的依赖注入是通过反射机制实现的，而Dagger依赖注入是在编译期生成辅助的类，这些类继承特定父类或实现特定接口，程序在运行时 Dagger 加载这些辅助类，调用相应接口完成依赖生成和注入.</p>
+
+<p>##什么是控制反转？</p>
+
+<p>比如你有一个DataProcessor类，DataProcessor里有一个DataFinder对象，用于查找数据，DataFinder是一个接口，它有一个实现类:IndexDataFinder,如果你要使用DataFinder来查找数据，传统的做法是在DataProcessor构造器里新建一个DataFinder对象，然后再调用DataFinder的findData方法:</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="nf">DataProcessor</span><span class="o">(){</span>
+	<span class="k">this</span><span class="o">.</span><span class="na">dataFinder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IndexDataFinder</span><span class="o">();</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>在上述的实现中，DataProcessor就和DataFinder紧密的耦合在一起．假设后来DataFinder又有一个新的实现类SQLDataFinder,根据需求来选择相应的实现，这时候你要怎么做呢？传统的做法就是给构造器传递一个int参数，根据参数的值来初始化DataFinder,还要处理异常参数如下所示：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="nf">DataProcessor</span><span class="o">(</span><span class="kt">int</span> <span class="n">dataFinderIndex</span><span class="o">){</span>
+	<span class="k">if</span><span class="o">(</span><span class="n">dataFinderIndex</span> <span class="o">==</span> <span class="mi">0</span><span class="o">){</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">dataFinder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IndexDataFinder</span><span class="o">();</span>	
+	<span class="o">}</span><span class="k">else</span> <span class="k">if</span><span class="o">(</span><span class="n">dataFinderIndex</span> <span class="o">==</span> <span class="mi">1</span><span class="o">){</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">dataFinder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SQLDataFinder</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>这样子虽然代码变得简单，但是DataProcessor类仍然依赖于具体的实现，实际上DataProcessor不应该有这么多的控制逻辑，它只需要负责调用dataFinder的方法来完成它的逻辑，至于是什么类型的DataFinder它不应该考虑．我们试着将控制DataFinder的任务交给客户：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="nf">DataProcessor</span><span class="o">(</span><span class="n">DataFinder</span> <span class="n">dataFinder</span><span class="o">){</span>
+	<span class="k">this</span><span class="o">.</span><span class="na">dataFinder</span> <span class="o">=</span> <span class="n">dataFinder</span><span class="o">;</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>这样DataProcessor就不用依赖具体的实现了，不用管到底是哪种类型的DataFinder,也就是说将选择DataFinder的控制权交给了客户端，实现了”控制反转”．控制反转只是一个概念而已，依赖注入是他的一种实现方法，依赖注入就是将实例变量传递到一个对象中去，依赖注入的方法有两种：构造器注入和setter方法注入．</p>
+
+<p>##Dagger依赖注入</p>
+
+<p>Spring IoC和Google Guice的依赖注入都很有名，但它们都是使用Java的反射机制来实现的，这对性能要求比较高的Android平台来说就不太适合了，于是Dagger应运而生.</p>
+
+<p>###编译期</p>
+
+<p>Dagger在编译时使用注解处理工具(APT)对所有的类进行扫描，这里包括两个工具InjectAdapterProcessor和ModuleAdapterProcessor,InjectAdapterProcessor会扫描所有的被@inject注解的元素，包括静态域，实例域和构造器，然后根据这几个元素生成一个内部对象InjectedClass，它的定义如下：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">static</span> <span class="kd">class</span> <span class="nc">InjectedClass</span> <span class="o">{</span>
+	<span class="kd">final</span> <span class="n">TypeElement</span> <span class="n">type</span><span class="o">;</span>
+	<span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Element</span><span class="o">&gt;</span> <span class="n">staticFields</span><span class="o">;</span>
+	<span class="kd">final</span> <span class="n">ExecutableElement</span> <span class="n">constructor</span><span class="o">;</span>
+	<span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Element</span><span class="o">&gt;</span> <span class="n">fields</span><span class="o">;</span>
+	<span class="o">..............</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>根据域是否是静态域注入方式会有不同，非静态域生成InjectAdapter对象并保存在同个被注入类同个目录下，比如被注入的类为A,生成的类名称为A<script type="math/tex">InjectAdapter,InjectAdapter包含了所有需要注入的实例域和构造器参数的信息．如果被注解的是静态域，则生成A</script>StaticInjection.这里需要注意的是如果你是在构造函数上用@inject注解而且构造函数有其他参数，你需要给这些参数添加@inject注解或者在Module中提供provide方法（下面会讲到Module）．InjectAdapter类的生成Dagger用到了JavaPoet这个用于生成Java源文件的类库，用法简介：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">MethodSpec</span> <span class="n">main</span> <span class="o">=</span> <span class="n">MethodSpec</span><span class="o">.</span><span class="na">methodBuilder</span><span class="o">(</span><span class="s">"main"</span><span class="o">)</span>
+<span class="o">.</span><span class="na">addModifiers</span><span class="o">(</span><span class="n">Modifier</span><span class="o">.</span><span class="na">PUBLIC</span><span class="o">,</span> <span class="n">Modifier</span><span class="o">.</span><span class="na">STATIC</span><span class="o">)</span>
+<span class="o">.</span><span class="na">returns</span><span class="o">(</span><span class="kt">void</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="o">.</span><span class="na">addParameter</span><span class="o">(</span><span class="n">String</span><span class="o">[].</span><span class="na">class</span><span class="o">,</span> <span class="s">"args"</span><span class="o">)</span>
+<span class="o">.</span><span class="na">addStatement</span><span class="o">(</span><span class="s">"$T.out.println($S)"</span><span class="o">,</span> <span class="n">System</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="s">"Hello, JavaPoet!"</span><span class="o">)</span>
+<span class="o">.</span><span class="na">build</span><span class="o">();</span>
+
+<span class="n">TypeSpec</span> <span class="n">helloWorld</span> <span class="o">=</span> <span class="n">TypeSpec</span><span class="o">.</span><span class="na">classBuilder</span><span class="o">(</span><span class="s">"HelloWorld"</span><span class="o">)</span>
+<span class="o">.</span><span class="na">addModifiers</span><span class="o">(</span><span class="n">Modifier</span><span class="o">.</span><span class="na">PUBLIC</span><span class="o">,</span> <span class="n">Modifier</span><span class="o">.</span><span class="na">FINAL</span><span class="o">)</span>
+<span class="o">.</span><span class="na">addMethod</span><span class="o">(</span><span class="n">main</span><span class="o">)</span>
+<span class="o">.</span><span class="na">build</span><span class="o">();</span>
+
+<span class="n">JavaFile</span> <span class="n">javaFile</span> <span class="o">=</span> <span class="n">JavaFile</span><span class="o">.</span><span class="na">builder</span><span class="o">(</span><span class="s">"com.example.helloworld"</span><span class="o">,</span> <span class="n">helloWorld</span><span class="o">)</span>
+ <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+
+<span class="n">javaFile</span><span class="o">.</span><span class="na">writeTo</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">);</span></code></pre></figure>
+
+<p>上面这种过注入依赖的方法适合我们自己编写的类，如果是第三方类库的话你没有修改它的源代码给它的构造器或者域添加@inject注解，这时候就需要使用第二种注入依赖的方法.通过新建一个用@Module注解的类，这个类告诉Dagger编译期哪些类要注入依赖，这个Module包含哪些子Module，通过编写provide方法来生成一些依赖实例．具体用法举例如下：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Module</span><span class="o">(</span>
+	<span class="n">injects</span> <span class="o">=</span> <span class="n">CoffeeApp</span><span class="o">.</span><span class="na">class</span><span class="c1">//表示CoffeeApp这个类需要注入依赖</span>
+	<span class="n">includes</span> <span class="o">=</span> <span class="n">PumpModule</span><span class="o">.</span><span class="na">class</span><span class="c1">//包括PumpModule这个Module</span>
+	<span class="o">)</span>	
+<span class="kd">class</span> <span class="nc">DripCoffeeModule</span> <span class="o">{</span>
+	<span class="c1">//所有需要被注入的实例都用@Provides方法提供</span>
+	<span class="nd">@Provides</span> <span class="nd">@Singleton</span> <span class="n">Heater</span> <span class="nf">provideHeater</span><span class="o">()</span> <span class="o">{</span>
+		  <span class="k">return</span> <span class="k">new</span> <span class="nf">ElectricHeater</span><span class="o">();</span>
+	 <span class="o">}</span>
+	<span class="c1">//方法可以有参数，前提是这个参数能够被注入</span>
+	<span class="nd">@Provides</span> <span class="n">Pump</span> <span class="nf">providePump</span><span class="o">(</span><span class="n">Heater</span> <span class="n">heater</span><span class="o">)</span> <span class="o">{</span>
+		 <span class="k">return</span> <span class="k">new</span> <span class="nf">Thermosiphon</span><span class="o">(</span><span class="n">heater</span><span class="o">);</span>	
+	 <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>编译时Dagger编译期扫描所有被@Provides注解的方法，然后扫描它所在的类是否被＠Module注解，根据Module注解的参数injects,includes,complete,library生成ModuleAdapter类，保存为［Module名称］$$ModuleAdapter的形式,内部使用的是generateModuleAdapter方法，定义如下：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">private</span> <span class="n">JavaFile</span> <span class="nf">generateModuleAdapter</span><span class="o">(</span><span class="n">TypeElement</span> <span class="n">type</span><span class="o">,</span>
+  <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">module</span><span class="o">,</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ExecutableElement</span><span class="o">&gt;</span> <span class="n">providerMethods</span><span class="o">)</span> <span class="o">{</span>
+<span class="n">Object</span><span class="o">[]</span> <span class="n">injects</span> <span class="o">=</span> <span class="o">(</span><span class="n">Object</span><span class="o">[])</span> <span class="n">module</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"injects"</span><span class="o">);</span>
+<span class="n">Object</span><span class="o">[]</span> <span class="n">includes</span> <span class="o">=</span> <span class="o">(</span><span class="n">Object</span><span class="o">[])</span> <span class="n">module</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"includes"</span><span class="o">);</span>
+<span class="kt">boolean</span> <span class="n">complete</span> <span class="o">=</span> <span class="o">(</span><span class="n">Boolean</span><span class="o">)</span> <span class="n">module</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"complete"</span><span class="o">);</span>
+<span class="kt">boolean</span> <span class="n">library</span> <span class="o">=</span> <span class="o">(</span><span class="n">Boolean</span><span class="o">)</span> <span class="n">module</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"library"</span><span class="o">);</span>
+<span class="c1">//省略了其他部分</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>运行时，在 Application 或某个具体模块的初始化处，使用ObjectGraph类来加载部分依赖(实质上是利用编译时生成的ModuleAdapters加载了所有的ProvidesBinding)，形成一个不完整的依赖关系图。 这个不完整的依赖关系图生成之后，就可以调用ObjectGraph的相应函数来获取实例和注入依赖了。实现依赖注入的函数有两个：<code class="highlighter-rouge">ObjectGraph.get(Class&lt;T&gt; type)</code>函数，用于直接获取对象；<code class="highlighter-rouge">ObjectGraph.inject(T instance)</code>函数，用于对指定对象进行属性的注入。在这些获取实例和注入依赖的过程中，如果用到了还未加载的依赖，程序会自动对它们进行加载(实质上是加载的编译时生成的InjectAdapter)。在此过程中，内存中的 DAG 也被补充地越来越完整。</p>
+
+<p>简单介绍一些Dagger的Binding 类，它相当于依赖关系 DAG 图中的节点，依赖关系 DAG 图中得每一个节点都有一个由 APT 生成的继承自 Binding 的类与之对应，而依赖关系 DAG 图中的每一个节点与Host和Dependency一一对应，所以每个Host或Dependency必然有一个由 APT 生成的继承自 Binding 的子类与之对应，Binding.java 实现了两个接口，第一个是 javax 的Provider接口，此接口提供了 get() 函数用于返回一个Dependency实例，当然也可以是Host实例。第二个接口是 Dagger 中的MembersInjector接口，此接口提供了 injectMembers() 用来向Host对象中注入Dependency。
+单纯的DependencyBinding只要实现Provider接口，在 get() 函数中返回自己的实例即可。单纯的HostBinding只要实现MembersInjector，在 injectMembers() 函数中调用DependencyBinding的 get() 函数得到依赖，然后对自己的依赖进行注入即可。如果一个类既是Host又是Dependency，则与它对应的Binding这两个接口都需要实现。</p>
+
+<p>还是之前那个例子：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CoffeeApp</span> <span class="kd">implements</span> <span class="n">Runnable</span> <span class="o">{</span>
+  <span class="nd">@Inject</span> <span class="n">CoffeeMaker</span> <span class="n">coffeeMaker</span><span class="o">;</span>
+
+  <span class="nd">@Override</span> <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+		<span class="n">coffeeMaker</span><span class="o">.</span><span class="na">brew</span><span class="o">();</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+	<span class="c1">//建立依赖关系图</span>
+	<span class="n">ObjectGraph</span> <span class="n">objectGraph</span> <span class="o">=</span> <span class="n">ObjectGraph</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="k">new</span> <span class="n">DripCoffeeModule</span><span class="o">());</span>
+	<span class="c1">//调用objectGraph．get(CoffeeApp.class)来获取一个CoffeeApp实例</span>
+	<span class="n">CoffeeApp</span> <span class="n">coffeeApp</span> <span class="o">=</span> <span class="n">objectGraph</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">CoffeeApp</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+	<span class="n">coffeeApp</span><span class="o">.</span><span class="na">run</span><span class="o">();</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>CoffeeMaker的定义如下：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">class</span> <span class="nc">CoffeeMaker</span> <span class="o">{</span>
+  <span class="nd">@Inject</span> <span class="n">Lazy</span><span class="o">&lt;</span><span class="n">Heater</span><span class="o">&gt;</span> <span class="n">heater</span><span class="o">;</span> 
+  <span class="nd">@Inject</span> <span class="n">Pump</span> <span class="n">pump</span><span class="o">;</span>
+
+	 <span class="kd">public</span> <span class="kt">void</span> <span class="nf">brew</span><span class="o">()</span> <span class="o">{</span>
+	 <span class="n">heater</span><span class="o">.</span><span class="na">get</span><span class="o">().</span><span class="na">on</span><span class="o">();</span>
+	 <span class="n">pump</span><span class="o">.</span><span class="na">pump</span><span class="o">();</span>
+	 <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">" [_]P coffee! [_]P "</span><span class="o">);</span>
+	 <span class="n">heater</span><span class="o">.</span><span class="na">get</span><span class="o">().</span><span class="na">off</span><span class="o">();</span>
+	 <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>这样在运行中Dagger会自动注入CoffeeMaker实例以及它依赖的对象heater和pump.
+</code></pre>
+</div>
+
+		  </article>
+		<hr>
+	<br/>
+        <p>
+          本作品由 <a href="mailto:ouyanglip@gmail.com">Lippi.OuYang</a> 创作，采用
+          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="查看协议详细信息" target="_blank">CC BY-NC-SA 3.0 许可协议</a>
+          进行许可。
+        </p>
+	<div style="margin-top:10px;margin-bottom:10px">
+	  
+	  <span class="next">
+	    上篇：
+	    <a href="/blog/2015/07/gradle-tasks-guide.html">
+	      彻底理解Gradle的任务
+	    </a>
+	  </span>
+	   
+	  
+	  <span class="prev">
+	    下篇：
+	    <a href="/blog/2015/08/latex-fonts-settings.html">
+	      Latex中英文环境设置
+	    </a>
+	  </span>
+	  
+	</div>
+	</div>
+	
+        
+	<div post-cate="java">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/hibernate-cache-guide.html" class="post-list-item">
+                    <h2>Hibernate缓存配置笔记</h2>
+                    <span class="date">Jul 24, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-virtual-mechine.html" class="post-list-item">
+                    <h2>Java虚拟机简介</h2>
+                    <span class="date">Apr 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-code-opt-one.html" class="post-list-item">
+                    <h2>优化java代码建议(1)</h2>
+                    <span class="date">Apr 12, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/02/cache.html" class="post-list-item">
+                    <h2>谈谈缓存和基本的缓存算法</h2>
+                    <span class="date">Feb 4, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/12/improve-webServer-performance.html" class="post-list-item">
+                    <h2>谈谈如何提高web服务器并发性能</h2>
+                    <span class="date">Dec 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-inner-class.html" class="post-list-item">
+                    <h2>java中内部类</h2>
+                    <span class="date">Nov 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-concurrent-collections.html" class="post-list-item">
+                    <h2>java同步容器与并发容器</h2>
+                    <span class="date">Nov 8, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/java-multithread.html" class="post-list-item">
+                    <h2>java并发和多线程</h2>
+                    <span class="date">Aug 2, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-UI-Thread.html" class="post-list-item">
+                    <h2>Android UI线程和子线程、Service通信</h2>
+                    <span class="date">Jul 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-networkOnMainThreadException.html" class="post-list-item">
+                    <h2>从android.os.NetworkOnMainThreadException引发的思考</h2>
+                    <span class="date">Jul 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="post-list-item">
+                    <h2>Java编程Tips</h2>
+                    <span class="date">Jun 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/15/in-the-rain.html" class="post-list-item">
+                    <h2>在雨中</h2>
+                    <span class="date">Jun 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-code-opt.html" class="post-list-item">
+                    <h2>C代码优化小贴士</h2>
+                    <span class="date">Dec 27, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/libevent.html" class="post-list-item">
+                    <h2>处理并发之二：libevent的eventbuffer</h2>
+                    <span class="date">Aug 24, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/linux-epoll.html" class="post-list-item">
+                    <h2>处理并发之一：LINUX Epoll机制介绍</h2>
+                    <span class="date">Aug 23, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="programming">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="jekyll">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-syntax.html" class="post-list-item">
+                    <h2>Markdown 语法 (简体中文版)</h2>
+                    <span class="date">Jul 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-basics.html" class="post-list-item">
+                    <h2>markdown 快速入门</h2>
+                    <span class="date">Jul 10, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="other">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/vim-plugins.html" class="post-list-item">
+                    <h2>一些强大的Vim插件</h2>
+                    <span class="date">Mar 20, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="reprints">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/09/android-studio-plugins.html" class="post-list-item">
+                    <h2>提高效率的Android Studio插件</h2>
+                    <span class="date">Sep 9, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/android-opensource.html" class="post-list-item">
+                    <h2>值得推荐的android开源框架</h2>
+                    <span class="date">Oct 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="web">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/04/web-transmission-basis.html" class="post-list-item">
+                    <h2>网络传输基础</h2>
+                    <span class="date">Apr 16, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/web-server.html" class="post-list-item">
+                    <h2>也谈如何构建高性能服务端程序</h2>
+                    <span class="date">Nov 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp-analise.html" class="post-list-item">
+                    <h2>XMPP协议分析-具体分析</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-project.html" class="post-list-item">
+                    <h2>Androidpn 消息推送总结</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-to-use-smack.html" class="post-list-item">
+                    <h2>Smack开发手册</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-introduction.html" class="post-list-item">
+                    <h2>AndroidPN消息推送</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp.html" class="post-list-item">
+                    <h2>XMPP协议分析-原理</h2>
+                    <span class="date">Oct 28, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/jsp-jfreechart.html" class="post-list-item">
+                    <h2>使用Jfreechart生成曲线显示到JSP中</h2>
+                    <span class="date">Oct 22, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-http-works.html" class="post-list-item">
+                    <h2>当我们打开网页时发生了什么</h2>
+                    <span class="date">Oct 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="book">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/11/how-to-evaluate-the-hackers-and-painters.html" class="post-list-item">
+                    <h2>如何评价『黑客与画家』</h2>
+                    <span class="date">Nov 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="algorithm">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/skip-list.html" class="post-list-item">
+                    <h2>skip list跳跃表实现</h2>
+                    <span class="date">Dec 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/graph.html" class="post-list-item">
+                    <h2>计算机算法--图算法介绍</h2>
+                    <span class="date">Nov 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/leveldb.html" class="post-list-item">
+                    <h2>leveldb原理剖析</h2>
+                    <span class="date">Nov 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c/c++">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-open-project.html" class="post-list-item">
+                    <h2>值得推荐的C/C++框架和库</h2>
+                    <span class="date">Dec 13, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/android-links.html" class="post-list-item">
+                    <h2>安卓开发者必备的42个链接</h2>
+                    <span class="date">May 19, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/define-custom-view.html" class="post-list-item">
+                    <h2>Android自定义视图教程</h2>
+                    <span class="date">May 17, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/android-studio-prefrence.html" class="post-list-item">
+                    <h2>Android Studio多渠道打包和代码混淆教程</h2>
+                    <span class="date">Mar 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/05/gradle-dependency-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之依赖管理</h2>
+                    <span class="date">May 5, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/gradle-task-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之任务管理</h2>
+                    <span class="date">Apr 30, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="lambda">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/dagger-dependency-injection.html" class="post-list-item">
+                    <h2>Dagger依赖注入浅析</h2>
+                    <span class="date">Aug 13, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/gradle-tasks-guide.html" class="post-list-item">
+                    <h2>彻底理解Gradle的任务</h2>
+                    <span class="date">Jul 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Latex">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/latex-fonts-settings.html" class="post-list-item">
+                    <h2>Latex中英文环境设置</h2>
+                    <span class="date">Aug 22, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Unix/Linux">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/baidu-spider-forbidden.html" class="post-list-item">
+                    <h2>解决百度爬虫无法抓取github pages</h2>
+                    <span class="date">Feb 18, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/apache-configuration-in-ubuntu.html" class="post-list-item">
+                    <h2>Ubuntu下Apache服务器的配置</h2>
+                    <span class="date">Jan 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/tmux-guide.html" class="post-list-item">
+                    <h2>终端复用软件之tmux简介</h2>
+                    <span class="date">Jan 19, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/08/linux-zsh.html" class="post-list-item">
+                    <h2>Zsh-Linux下最好的Shell简介</h2>
+                    <span class="date">Aug 23, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Git">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/git-guide.html" class="post-list-item">
+                    <h2>Git操作手册|命令速查表</h2>
+                    <span class="date">Feb 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="hi">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/hi.html" class="post-list-item">
+                    <h2>hi</h2>
+                    <span class="date">Feb 22, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	 </div>
+
+</div>
+
+
+<!-- Blog Comments -->
+<div class="media">
+  <!-- UY BEGIN 
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2023801"></script>
+UY END -->
+
+<!-- 多说评论框 start -->
+  <div class="post-comment">
+            <span>Comments</span>
+	<div class="ds-thread" data-thread-key="/blog/2015/08/dagger-dependency-injection" data-title="Dagger依赖注入浅析" data-url="LippiOuYang.github.io/blog/2015/08/dagger-dependency-injection.html">
+	</div>
+ </div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"lippiouyang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+ 
+</div> 
+</div>
+
+        </div>
+
+	 <div id="top" data-toggle="tooltip" data-placement="left" title="回到顶部">
+	      <a href="javascript:;">
+		<div class="arrow"></div>
+		<div class="stick"></div>
+	      </a>
+	    </div>
+
+        <!-- Blog Sidebar Widgets Column -->
+        <div class="col-md-4">
+          <!-- Blog Search Well -->  
+	
+                    <div class="shadow-corner-curl hidden-xs">
+	  <div class="categories-list-header">站内搜索</div>
+<!-- 使用该代码即表示您同意接受 Google 自定义搜索服务条款。 -->
+<!-- 有关服务条款，请访问 http://www.google.com/cse/docs/tos.html?hl=zh-CN -->
+<form name="cse" id="searchbox_demo" action="/search.html">
+  <input type="hidden" name="cref" value="" />
+  <input type="hidden" name="ie" value="utf-8" />
+  <input type="hidden" name="hl" value="zh-CN" />
+  <input name="q" type="text" size="30" />
+  <input type="submit" name="sa" value="搜索" /> 
+</form>
+<script type="text/javascript" src="http://www.google.com/cse/tools/onthefly?form=searchbox_demo&lang=zh-CN"></script>			      
+     
+            
+</div>
+
+
+
+
+
+
+
+
+          <!-- Blog Categories Well -->
+              
+
+    <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        Categories
+      </div>
+      
+      <a href="/index.html" class="categories-list-item" cate="All">
+        All<span class="my-badge"> 61</span>
+      </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="java">
+          java <span class="my-badge">17</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c">
+          c <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="programming">
+          programming <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="jekyll">
+          jekyll <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="other">
+          other <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="reprints">
+          reprints <span class="my-badge">5</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Android">
+          Android <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="web">
+          web <span class="my-badge">9</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="book">
+          book <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="algorithm">
+          algorithm <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c/c++">
+          c/c++ <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="android">
+          android <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Gradle">
+          Gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="lambda">
+          lambda <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="gradle">
+          gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Latex">
+          Latex <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Unix/Linux">
+          Unix/Linux <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Git">
+          Git <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="hi">
+          hi <span class="my-badge">1</span>
+        </a>
+      
+    </div>
+
+
+
+ 
+         
+              <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        热门文章
+      </div>
+
+ <ul class="list-unstyled">
+      	<li><a href="/blog/2015/03/github-pages-blog.html" class="categories-list-item">利用Github-pages建立个人博客</a></li>	
+<li><a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="categories-list-item">一个合格的程序员应该读过哪些书</a></li>
+<li><a href="/blog/2014/12/c-open-project.html" class="categories-list-item">值得推荐的C/C++框架和库</a></li>
+<li><a href="/blog/2014/12/c-code-opt.html" class="categories-list-item">C代码优化小贴士</a></li>	
+<li><a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="categories-list-item">Java编程Tips</a></li>
+<li><a href="/blog/2015/04/gradle-task-management.html" class="categories-list-item">Gradle系列教程之任务管理</a></li>	
+<li><a href="/blog/2015/05/android-links.html" class="categories-list-item">安卓开发者必备的42个链接</a></li>
+<li><a href="/blog/2015/05/gradle-dependency-management.html" class="categories-list-item">Gradle系列教程之依赖管理</a></li>
+<li><a href="/blog/2014/10/android-opensource.html" class="categories-list-item">值得推荐的android开源框架</a></li>	 
+<li><a href="/blog/2015/07/hibernate-cache-guide.html" class="categories-list-item">Hibernate缓存配置笔记</a></li>	
+	 
+     </ul>
+</div>
+ 
+       
+                   <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        相关链接
+      </div>    
+ <ul class="list-unstyled">
+              <li>
+                <a href="https://github.com/" class="categories-list-item">
+                   GitHub 
+                </a>
+              </li>
+<li>
+                <a href="http://www.stackoverflow.com/" class="categories-list-item">
+                   Stack Overflow 
+                </a>
+              </li>
+<li>
+                <a href="http://jekyllrb.com/docs/posts/" class="categories-list-item">
+                  Jekyll文档 
+                </a>
+              </li>
+               
+               <li>
+                <a href="https://news.ycombinator.com/" class="categories-list-item">
+                   Hacker News 
+                </a>
+              </li>        
+              
+              <li>
+                <a href="http://developer.android.com/" class="categories-list-item">
+                   Android Developer 
+                </a>
+              </li>
+              
+              <li>
+                <a href="http://www.ruanyifeng.com/blog/" class="categories-list-item">
+                   Ruanyifeng's Blog 
+                </a>
+              </li>
+
+
+  <li>
+                <a href="http://www.importnew.com/" class="categories-list-item">
+                   ImportNew 
+                </a>
+              </li>
+<li>
+                <a href="http://guides.codepath.com/android" class="categories-list-item">
+                   CodePath Android Cliffnotes 
+                </a>
+              </li>
+<li>
+                <a href="http://androidweekly.net/" class="categories-list-item">
+                   Androidweekly 	
+                </a>
+              </li>
+<li>
+			<a href="http://mvnrepository.com/" class="categories-list-item">
+                   Mvnrepository 
+                </a>
+              </li>
+<li>
+			<a href="http://www.iteye.com/" class="categories-list-item">
+                  Iteye 
+                </a>
+              </li>
+              		
+            </ul>
+
+</div>
+ 
+
+          <!-- Side Widget Well -->
+           
+        </div>
+      </div>
+
+
+
+      <!-- /.row -->
+      <hr>
+      <!-- Footer -->
+      <footer>
+           <p><small>Designed by <a href="https://github.com/EZLippi">Lippi</a> | Free hosted at <a href="https://github.com/EZLippi/EZLippi.github.io">Github</a> | Copyright 2014 - 2016  
+										</p>
+
+	<!--
+<div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <a href="mailto:ouyanglip@gmail.com"><span class="glyphicon glyphicon-envelope"></span> ouyanglip@gmail.com</a>
+        <span class="point"> · </span>
+        
+          
+          <a href="https://github.com/LippiOuYang">
+            <span class="icon">
+              <svg viewBox="0 0 16 16">
+                <path fill="#aaa" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+            Github
+          </a>
+          
+          
+          <span class="point"> · </span>
+          <span><a href="/feed.xml">RSS</a></span>
+          <span class="point"> · </span>
+          <span>Draw my life with code</span>
+          <span class="point"> · </span>
+          <span>&copy; 2014 LippiOuYang</span>
+          <span class="point"> · </span>
+          <span>Designed by <a href="https://github.com/LippiOuYang">Lippi</a></span>
+
+      </div>
+    </div>
+    </div>
+	-->
+ 
+              <div style="display:none;"><script src="http://s95.cnzz.com/z_stat.php?id=1254799848&web_id=1254799848" language="JavaScript"></script></div>
+ 
+
+      </footer>
+    </div>
+    <!-- /.container -->
+  </body>
+
+</html>

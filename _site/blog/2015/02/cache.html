@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta name="baidu-site-verification" content="HvuxptDcq6" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="谈谈缓存和基本的缓存算法 - Lippi-浮生志 - Lippi.OuYang(ouyanglip@gmail.com)">
+    <title>
+      谈谈缓存和基本的缓存算法 - Lippi-浮生志
+    </title>
+    <!-- Bootstrap Core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS 
+    <link href="/css/blog.css" rel="stylesheet">-->
+    <!-- index css -->
+    <link href="/css/index.css" rel="stylesheet">
+	<!-- pagments CSS-->
+	<link href="/css/pygments.css" rel="stylesheet">
+        <!-- jQuery Version 1.11.0 -->
+    <script src="/js/jquery-1.11.0.js"> </script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/bootstrap.min.js"></script>
+   <!-- 回到顶部js-->
+    <script src="/js/index.js"></script>
+
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?085fc257cb1e774f7764a2cf527c393d";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+	<script>
+    (function(){
+     var bp = document.createElement('script');
+	 bp.src = '//push.zhanzhang.baidu.com/push.js';
+	 var s = document.getElementsByTagName("script")[0];
+	 s.parentNode.insertBefore(bp, s);
+	 })();
+	</script>
+
+  </head>
+  
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">
+              Toggle navigation
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+          </button>
+          <a class="navbar-brand" href="/index.html">
+            Lippi-浮生志
+          </a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+            <li>
+              <a href="/categories.html">
+                分 类
+              </a>
+            </li>
+            <li>
+              <a href="/tags.html">
+                标 签
+              </a>
+            </li>
+            <li>
+              <a href="/archives.html">
+                归 档
+              </a>
+            </li>
+            <li>
+              <a href="/faqs.html">
+                备 忘
+              </a>
+            </li>
+            <li>
+              <a href="/about.html">
+                关 于
+              </a>
+            </li>
+          </ul> 
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+        <!-- Blog Entries Column -->
+        <div class="col-md-8">
+          <!-- Blog Post -->
+<!-- Title -->
+<div class="row">
+  <div class="post-area post">
+
+ 	<div class="post-list-body">
+        	<div class="all-posts" post-cate="All">
+ 		<header>
+		<h1>
+		  谈谈缓存和基本的缓存算法
+		  <div class="post-date"><a href="https://github.com/LippiOuYang/LippiOuYang.github.io/edit/master/_posts/2015-02-04-cache.md" target="_blank">纠错</a>&nbsp;&nbsp;
+			<span class="glyphicon glyphicon-time"></span>
+			04 Feb 2015
+		  </div>
+		</h1>
+ 		</header>
+		<!-- Author -->
+		<hr>
+		 <article>
+		<p>很久很久以前，在还没有缓存的时候……用户经常是去请求一个对象，而这个对象是从数据库去取，然后，这个对象变得越来越大，这个用户每次的请求时间也越来越长了，这也把数据库弄得很痛苦，他无时不刻不在工作。所以，这个事情就把用户和数据库弄得很生气，接着就有可能发生下面两件事情：</p>
+
+<ol>
+  <li>用户很烦，在抱怨，甚至不去用这个应用了（这是大多数情况下都会发生的）</li>
+  <li>数据库为打包回家，离开这个应用，然后，就出现了大麻烦（没地方去存储数据了）（发生在极少数情况下）</li>
+</ol>
+
+<p>####上帝派来了缓存####</p>
+
+<p>在几年之后，IBM（60年代）的研究人员引进了一个新概念，它叫“缓存”。</p>
+
+<p>###什么是缓存？</p>
+
+<p>通俗来说，缓存是“存贮数据（使用频繁的数据）的临时地方，因为取原始数据的代价太大了，所以我可以取得快一些。”</p>
+<p>我们都听说过线程池、对象池，缓存可以认为是数据的池，这些数据是从数据库里的真实数据复制出来的，并且为了能别取回，被标上了标签（键 ID）。</p>
+<p><a href="http://img2.tuicool.com/QNvequ.jpg">!</a></p>
+<h4>命中：</h4>
+<p>当客户发起一个请求（我们说他想要查看一个产品信息），我们的应用接受这个请求，并且如果是在第一次检查缓存的时候，需要去数据库读取产品信息。</p>
+<p>如果在缓存中，一个条目通过一个标记被找到了，这个条目就会被使用、我们就叫它缓存命中。所以，命中率也就不难理解了。</p>
+<h4>Cache Miss：</h4>
+<p>但是这里需要注意两点：</p>
+<p>１. 如果还有缓存的空间，那么，没有命中的对象会被存储到缓存中来。</p>
+<p>２. 如果缓存慢了，而又没有命中缓存，那么就会按照某一种策略，把缓存中的旧对象踢出，而把新的对象加入缓存池。而这些策略统称为*替代策略*（缓存算法），这些策略会决定到底应该提出哪些对象。</p>
+<h4>存储成本：</h4>
+<p>当没有命中时，我们会从数据库取出数据，然后放入缓存。而把这个数据放入缓存所需要的时间和空间，就是存储成本。</p>
+<h4>索引成本：</h4>
+<p>和存储成本相仿。</p>
+<h4>失效：</h4>
+<p>当存在缓存中的数据需要更新时，就意味着缓存中的这个数据失效了。</p>
+<h4>替代策略：</h4>
+<p>当缓存没有命中时，并且缓存容量已经满了，就需要在缓存中踢出一个老的条目，加入一条新的条目，而到底应该踢出什么条目，就由替代策略决定。</p>
+<h4>最优替代策略：</h4>
+<p>最优的替代策略就是想把缓存中最没用的条目给踢出去，但是未来是不能够被预知的，所以这种策略是不可能实现的。但是有很多策略，都是朝着这个目前去努力。</p>
+<h1>缓存算法</h1>
+<p>没有人能说清哪种缓存算法优于其他的缓存算法</p>
+<h4>Least Frequently Used（LFU）：</h4>
+<p>大家好，我是 LFU，我会计算为每个缓存对象计算他们被使用的频率。我会把最不常用的缓存对象踢走。</p>
+<h4>Least Recently User（LRU）：</h4>
+<p>我是 LRU 缓存算法，我把最近最少使用的缓存对象给踢走。</p>
+<p>我总是需要去了解在什么时候，用了哪个缓存对象。如果有人想要了解我为什么总能把最近最少使用的对象踢掉，是非常困难的。</p>
+<p>浏览器就是使用了我（LRU）作为缓存算法。新的对象会被放在缓存的顶部，当缓存达到了容量极限，我会把底部的对象踢走，而技巧就是：我会把最新被访问的缓存对象，放到缓存池的顶部。</p>
+<p>所以，经常被读取的缓存对象就会一直呆在缓存池中。有两种方法可以实现我，array 或者是 linked list。</p>
+<p>我的速度很快，我也可以被数据访问模式适配。我有一个大家庭，他们都可以完善我，甚至做的比我更好（我确实有时会嫉妒，但是没关系）。我家庭的一些成员包括 LRU2 和 2Q，他们就是为了完善 LRU 而存在的。</p>
+<h4>Least Recently Used 2（LRU2）：</h4>
+<p>我是 Least Recently Used 2，有人叫我最近最少使用 twice，我更喜欢这个叫法。我会把被两次访问过的对象放入缓存池，当缓存池满了之后，我会把有两次最少使用的缓存对象踢走。因为需要跟踪对象2次，访问负载就会随着缓存池的增加而增加。如果把我用在大容量的缓存池中，就会有问题。另外，我还需要跟踪那么不在缓存的对象，因为他们还没有被第二次读取。我比LRU好，而且是 adoptive to access 模式 。</p>
+<h4>Two Queues（2Q）：</h4>
+<p>我是 Two Queues；我把被访问的数据放到 LRU 的缓存中，如果这个对象再一次被访问，我就把他转移到第二个、更大的 LRU 缓存。</p>
+<p>我踢走缓存对象是为了保持第一个缓存池是第二个缓存池的1/3。当缓存的访问负载是固定的时候，把 LRU 换成 LRU2，就比增加缓存的容量更好。这种机制使得我比 LRU2 更好，我也是 LRU 家族中的一员，而且是 adoptive to access 模式 。</p>
+<h4>Adaptive Replacement Cache（ARC）：</h4>
+<p>我是 ARC，有人说我是介于 LRU 和 LFU 之间，为了提高效果，我是由2个 LRU 组成，第一个，也就是 L1，包含的条目是最近只被使用过一次的，而第二个 LRU，也就是 L2，包含的是最近被使用过两次的条目。因此， L1 放的是新的对象，而 L2 放的是常用的对象。所以，别人才会认为我是介于 LRU 和 LFU 之间的，不过没关系，我不介意。</p>
+<p>我被认为是性能最好的缓存算法之一，能够自调，并且是低负载的。我也保存着历史对象，这样，我就可以记住那些被移除的对象，同时，也让我可以看到被移除的对象是否可以留下，取而代之的是踢走别的对象。我的记忆力很差，但是我很快，适用性也强。</p>
+<h4>Most Recently Used（MRU）：</h4>
+<p>我是 MRU，和 LRU 是对应的。我会移除最近最多被使用的对象，你一定会问我为什么。好吧，让我告诉你，当一次访问过来的时候，有些事情是无法预测的，并且在缓存系统中找出最少最近使用的对象是一项时间复杂度非常高的运算，这就是为什么我是最好的选择。</p>
+<p>我是数据库内存缓存中是多么的常见！每当一次缓存记录的使用，我会把它放到栈的顶端。当栈满了的时候，你猜怎么着？我会把栈顶的对象给换成新进来的对象！</p>
+<h4>First in First out（FIFO）：</h4>
+<p>我是先进先出，我是一个低负载的算法，并且对缓存对象的管理要求不高。我通过一个队列去跟踪所有的缓存对象，最近最常用的缓存对象放在后面，而更早的缓存对象放在前面，当缓存容量满时，排在前面的缓存对象会被踢走，然后把新的缓存对象加进去。我很快，但是我并不适用。</p>
+<h4>Second Chance：</h4>
+<p>大家好，我是 second chance，我是通过 FIFO 修改而来的，被大家叫做 second chance 缓存算法，我比 FIFO 好的地方是我改善了 FIFO 的成本。我是 FIFO 一样也是在观察队列的前端，但是很FIFO的立刻踢出不同，我会检查即将要被踢出的对象有没有之前被使用过的标志（1一个 bit 表示），没有没有被使用过，我就把他踢出；否则，我会把这个标志位清除，然后把这个缓存对象当做新增缓存对象加入队列。你可以想象就这就像一个环队列。当我再一次在队头碰到这个对象时，由于他已经没有这个标志位了，所以我立刻就把他踢开了。我在速度上比 FIFO 快。</p>
+<h4>CLock：</h4>
+<p>我是 Clock，一个更好的 FIFO，也比 second chance 更好。因为我不会像 second chance 那样把有标志的缓存对象放到队列的尾部，但是也可以达到 second chance 的效果。</p>
+<p>我持有一个装有缓存对象的环形列表，头指针指向列表中最老的缓存对象。当缓存 miss 发生并且没有新的缓存空间时，我会问问指针指向的缓存对象的标志位去决定我应该怎么做。如果标志是0，我会直接用新的缓存对象替代这个缓存对象；如果标志位是1，我会把头指针递增，然后重复这个过程，知道新的缓存对象能够被放入。我比 second chance 更快。</p>
+<h4>Simple time-based：</h4>
+<p>我是 simple time-based 缓存算法，我通过绝对的时间周期去失效那些缓存对象。对于新增的对象，我会保存特定的时间。我很快，但是我并不适用。</p>
+<h4>Extended time-based expiration：</h4>
+<p>我是 extended time-based expiration 缓存算法，我是通过相对时间去失效缓存对象的；对于新增的缓存对象，我会保存特定的时间，比如是每5分钟，每天的12点。</p>
+<h4>Sliding time-based expiration：</h4>
+<p>我是 sliding time-based expiration，与前面不同的是，被我管理的缓存对象的生命起点是在这个缓存的最后被访问时间算起的。我很快，但是我也不太适用。</p>
+<h4>其他的缓存算法还考虑到了下面几点：</h4>
+<p>成本：如果缓存对象有不同的成本，应该把那些难以获得的对象保存下来。</p>
+<p>容量：如果缓存对象有不同的大小，应该把那些大的缓存对象清除，这样就可以让更多的小缓存对象进来了。</p>
+<p>时间：一些缓存还保存着缓存的过期时间。电脑会失效他们，因为他们已经过期了。</p>
+<p>根据缓存对象的大小而不管其他的缓存算法可能是有必要的。</p>
+
+<p>在这一部分中，我们来看看如何实现这些著名的缓存算法。以下的代码只是示例用的，如果你想自己实现缓存算法，可能自己还得加上一些额外的工作。</p>
+
+<h4>Random Cache</h4>
+<p>我是随机缓存，我随意的替换缓存实体，没人敢抱怨。你可以说那个被替换的实体很倒霉。通过这些行为，我随意的去处缓存实体。我比 FIFO 机制好，在某些情况下，我甚至比 LRU 好，但是，通常LRU都会比我好。</p>
+
+<h4>看看缓存元素（缓存实体）</h4>
+<p>public class CacheElement</p>
+<p>{</p>
+<p>private Object objectValue;</p>
+<p>private Object objectKey;</p>
+<p>private int index;</p>
+<p>private int hitCount; // getters and setters</p>
+<p>}</p>
+<p>这个缓存实体拥有缓存的key和value，这个实体的数据结构会被以下所有缓存算法用到。</p>
+<h4>缓存算法的公用代码</h4>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java">  	<span class="kd">public</span> <span class="kd">final</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">addElement</span><span class="o">(</span><span class="n">Object</span> <span class="n">key</span><span class="o">,</span> <span class="n">Object</span> 		<span class="n">value</span><span class="o">)</span>
+  	<span class="o">{</span>
+ 	 <span class="kt">int</span> <span class="n">index</span><span class="o">;</span>
+  	<span class="n">Object</span> <span class="n">obj</span><span class="o">;</span>
+  	<span class="c1">// get the entry from the table</span>
+ 	 <span class="n">obj</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+  	<span class="c1">// If we have the entry already in our table</span>
+  	<span class="c1">// then get it and replace only its value.</span>
+  	<span class="n">obj</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+  	<span class="k">if</span> <span class="o">(</span><span class="n">obj</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+  	<span class="o">{</span>
+  	<span class="n">CacheElement</span> <span class="n">element</span><span class="o">;</span>
+ 	 <span class="n">element</span> <span class="o">=</span> <span class="o">(</span><span class="n">CacheElement</span><span class="o">)</span> <span class="n">obj</span><span class="o">;</span>
+  	<span class="n">element</span><span class="o">.</span><span class="na">setObjectValue</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+  	<span class="n">element</span><span class="o">.</span><span class="na">setObjectKey</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+  	<span class="k">return</span><span class="o">;</span>
+  	<span class="o">}</span>
+  	<span class="err">｝</span>
+ 	</code></pre></figure>
+
+<p>上面的代码会被所有的缓存算法实现用到。这段代码是用来检查缓存元素是否在缓存中了，如果是，我们就替换它，但是如果我们找不到这个 key 对应的缓存，我们会怎么做呢？那我们就来深入的看看会发生什么吧！</p>
+
+<h4>看看随机缓存的实现</h4>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java">  	<span class="kd">public</span> <span class="kd">final</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">addElement</span><span class="o">(</span><span class="n">Object</span> <span class="n">key</span><span class="o">,</span> <span class="n">Object</span> 		<span class="n">value</span><span class="o">)</span>
+ 	 <span class="o">{</span>
+ 	 <span class="kt">int</span> <span class="n">index</span><span class="o">;</span>
+  	<span class="n">Object</span> <span class="n">obj</span><span class="o">;</span>
+  	<span class="n">obj</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+  	<span class="k">if</span> <span class="o">(</span><span class="n">obj</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+  	<span class="o">{</span>
+  	<span class="n">CacheElement</span> <span class="n">element</span><span class="o">;</span><span class="c1">// Just replace the value.</span>
+  	<span class="n">element</span> <span class="o">=</span> <span class="o">(</span><span class="n">CacheElement</span><span class="o">)</span> <span class="n">obj</span><span class="o">;</span>
+  	<span class="n">element</span><span class="o">.</span><span class="na">setObjectValue</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+  	<span class="n">element</span><span class="o">.</span><span class="na">setObjectKey</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+  	<span class="k">return</span><span class="o">;</span>
+  	<span class="o">}</span><span class="c1">// If we haven't filled the cache yet, put it at the end.</span>
+  	<span class="k">if</span> <span class="o">(!</span><span class="n">isFull</span><span class="o">())</span>
+  	<span class="o">{</span>
+ 	 <span class="n">index</span> <span class="o">=</span> <span class="n">numEntries</span><span class="o">;</span>
+  	<span class="o">++</span><span class="n">numEntries</span><span class="o">;</span>
+  	<span class="o">}</span>
+  	<span class="k">else</span> <span class="o">{</span> <span class="c1">// Otherwise, replace a random entry.</span>
+  	<span class="n">index</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">cache</span><span class="o">.</span><span class="na">length</span> <span class="o">*</span> <span class="n">random</span><span class="o">.</span><span class="na">nextFloat</span><span class="o">());</span>
+  	<span class="n">table</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">cache</span><span class="o">[</span><span class="n">index</span><span class="o">].</span><span class="na">getObjectKey</span><span class="o">());</span>
+ 	 <span class="o">}</span>
+ 	 <span class="n">cache</span><span class="o">[</span><span class="n">index</span><span class="o">].</span><span class="na">setObjectValue</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+  	<span class="n">cache</span><span class="o">[</span><span class="n">index</span><span class="o">].</span><span class="na">setObjectKey</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+  	<span class="n">table</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">cache</span><span class="o">[</span><span class="n">index</span><span class="o">]);</span>
+  	<span class="o">}</span>
+	</code></pre></figure>
+
+<h4>看看FIFO缓算法的实现</h4>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"> 	 <span class="kd">public</span> <span class="kd">final</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">addElement</span><span class="o">(</span><span class="n">Objectkey</span><span class="o">,</span> <span class="n">Object</span> 		<span class="n">value</span><span class="o">)</span>
+ 	 <span class="o">{</span>
+ 	 <span class="kt">int</span> <span class="n">index</span><span class="o">;</span>
+ 	 <span class="n">Object</span> <span class="n">obj</span><span class="o">;</span>
+ 	 <span class="n">obj</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+ 	 <span class="k">if</span> <span class="o">(</span><span class="n">obj</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+ 	 <span class="o">{</span>
+ 	 <span class="n">CacheElement</span> <span class="n">element</span><span class="o">;</span> <span class="c1">// Just replace the value.</span>
+  	<span class="n">element</span> <span class="o">=</span> <span class="o">(</span><span class="n">CacheElement</span><span class="o">)</span> <span class="n">obj</span><span class="o">;</span>
+  	<span class="n">element</span><span class="o">.</span><span class="na">setObjectValue</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+  	<span class="n">element</span><span class="o">.</span><span class="na">setObjectKey</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+  	<span class="k">return</span><span class="o">;</span>
+  	<span class="o">}</span>
+ 	 <span class="c1">// If we haven't filled the cache yet, put it at the end.</span>
+ 	 <span class="k">if</span> <span class="o">(!</span><span class="n">isFull</span><span class="o">())</span>
+  	<span class="o">{</span>
+ 	 <span class="n">index</span> <span class="o">=</span> <span class="n">numEntries</span><span class="o">;</span>
+  	<span class="o">++</span><span class="n">numEntries</span><span class="o">;</span>
+  	<span class="o">}</span>
+  	<span class="k">else</span> <span class="o">{</span> <span class="c1">// Otherwise, replace the current pointer,</span>
+  	<span class="c1">// entry with the new one.</span>
+  	<span class="n">index</span> <span class="o">=</span> <span class="n">current</span><span class="o">;</span>
+  	<span class="c1">// in order to make Circular FIFO</span>
+  	<span class="k">if</span> <span class="o">(++</span><span class="n">current</span> <span class="o">&amp;</span><span class="n">gt</span><span class="o">;=</span> <span class="n">cache</span><span class="o">.</span><span class="na">length</span><span class="o">)</span>
+ 	 <span class="n">current</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+ 	 <span class="n">table</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">cache</span><span class="o">[</span><span class="n">index</span><span class="o">].</span><span class="na">getObjectKey</span><span class="o">());</span>
+ 	 <span class="o">}</span>
+  	<span class="n">cache</span><span class="o">[</span><span class="n">index</span><span class="o">].</span><span class="na">setObjectValue</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+  	<span class="n">cache</span><span class="o">[</span><span class="n">index</span><span class="o">].</span><span class="na">setObjectKey</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+ 	 <span class="n">table</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">cache</span><span class="o">[</span><span class="n">index</span><span class="o">]);</span>
+  	<span class="o">}</span>
+	</code></pre></figure>
+
+<h4>看看LFU缓存算法的实现</h4>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java">  	<span class="kd">public</span> <span class="kd">synchronized</span> <span class="n">Object</span> <span class="nf">getElement</span><span class="o">(</span><span class="n">Object</span> <span class="n">key</span><span class="o">)</span>
+ 	 <span class="o">{</span>
+ 	 <span class="n">Object</span> <span class="n">obj</span><span class="o">;</span>
+  	<span class="n">obj</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+  	<span class="k">if</span> <span class="o">(</span><span class="n">obj</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+  	<span class="o">{</span>
+  	<span class="n">CacheElement</span> <span class="n">element</span> <span class="o">=</span> <span class="o">(</span><span class="n">CacheElement</span><span class="o">)</span> <span class="n">obj</span><span class="o">;</span>
+  	<span class="n">element</span><span class="o">.</span><span class="na">setHitCount</span><span class="o">(</span><span class="n">element</span><span class="o">.</span><span class="na">getHitCount</span><span class="o">()</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span>
+  	<span class="k">return</span> <span class="n">element</span><span class="o">.</span><span class="na">getObjectValue</span><span class="o">();</span>
+  	<span class="o">}</span>
+ 	 <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+  	<span class="o">}</span>
+  	<span class="kd">public</span> <span class="kd">final</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">addElement</span><span class="o">(</span><span class="n">Object</span> <span class="n">key</span><span class="o">,</span> <span class="n">Object</span> 		<span class="n">value</span><span class="o">)</span>
+ 	 <span class="o">{</span>
+ 	 <span class="n">Object</span> <span class="n">obj</span><span class="o">;</span>
+  	<span class="n">obj</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+  	<span class="k">if</span> <span class="o">(</span><span class="n">obj</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+  	<span class="o">{</span>
+ 	 <span class="n">CacheElement</span> <span class="n">element</span><span class="o">;</span> <span class="c1">// Just replace the value.</span>
+  	<span class="n">element</span> <span class="o">=</span> <span class="o">(</span><span class="n">CacheElement</span><span class="o">)</span> <span class="n">obj</span><span class="o">;</span>
+  	<span class="n">element</span><span class="o">.</span><span class="na">setObjectValue</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+  	<span class="n">element</span><span class="o">.</span><span class="na">setObjectKey</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+  	<span class="k">return</span><span class="o">;</span>
+  	<span class="o">}</span>
+  	<span class="k">if</span> <span class="o">(!</span><span class="n">isFull</span><span class="o">())</span>
+  	<span class="o">{</span>
+  	<span class="n">index</span> <span class="o">=</span> <span class="n">numEntries</span><span class="o">;</span>
+  	<span class="o">++</span><span class="n">numEntries</span><span class="o">;</span>
+  	<span class="o">}</span>
+  	<span class="k">else</span>
+  	<span class="o">{</span>
+  	<span class="n">CacheElement</span> <span class="n">element</span> <span class="o">=</span> <span class="n">removeLfuElement</span><span class="o">();</span>
+  	<span class="n">index</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="na">getIndex</span><span class="o">();</span>
+  	<span class="n">table</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">element</span><span class="o">.</span><span class="na">getObjectKey</span><span class="o">());</span>
+  	<span class="o">}</span>
+  	<span class="n">cache</span><span class="o">[</span><span class="n">index</span><span class="o">].</span><span class="na">setObjectValue</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+  	<span class="n">cache</span><span class="o">[</span><span class="n">index</span><span class="o">].</span><span class="na">setObjectKey</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+  	<span class="n">cache</span><span class="o">[</span><span class="n">index</span><span class="o">].</span><span class="na">setIndex</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+  	<span class="n">table</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">cache</span><span class="o">[</span><span class="n">index</span><span class="o">]);</span>
+  	<span class="o">}</span>
+  	<span class="kd">public</span> <span class="n">CacheElement</span> <span class="nf">removeLfuElement</span><span class="o">()</span>
+  	<span class="o">{</span>
+  	<span class="n">CacheElement</span><span class="o">[]</span> <span class="n">elements</span> <span class="o">=</span> <span class="n">getElementsFromTable</span><span class="o">();</span>
+  	<span class="n">CacheElement</span> <span class="n">leastElement</span> <span class="o">=</span> <span class="n">leastHit</span><span class="o">(</span><span class="n">elements</span><span class="o">);</span>
+  	<span class="k">return</span> <span class="n">leastElement</span><span class="o">;</span>
+  	<span class="o">}</span>
+  	<span class="kd">public</span> <span class="kd">static</span> <span class="n">CacheElement</span> <span class="nf">leastHit</span><span class="o">(</span><span class="n">CacheElement</span><span class="o">[]</span> <span class="n">elements</span><span class="o">)</span>
+  	<span class="o">{</span>
+  	<span class="n">CacheElement</span> <span class="n">lowestElement</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+  	<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="n">elements</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span>
+  	<span class="o">{</span>
+  	<span class="n">CacheElement</span> <span class="n">element</span> <span class="o">=</span> <span class="n">elements</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>
+  	<span class="k">if</span> <span class="o">(</span><span class="n">lowestElement</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+  	<span class="o">{</span>
+  	<span class="n">lowestElement</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
+  	<span class="o">}</span>
+  	<span class="k">else</span> <span class="o">{</span>
+  	<span class="k">if</span> <span class="o">(</span><span class="n">element</span><span class="o">.</span><span class="na">getHitCount</span><span class="o">()</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="n">lowestElement</span><span class="o">.</span><span class="na">getHitCount</span><span class="o">())</span>
+  	<span class="o">{</span>
+  	<span class="n">lowestElement</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
+  	<span class="o">}</span>
+  		<span class="o">}</span>
+  	<span class="o">}</span>
+ 	 <span class="k">return</span> <span class="n">lowestElement</span><span class="o">;</span>
+  	<span class="o">}</span>
+	</code></pre></figure>
+
+<p>最重点的代码，就应该是 leastHit 这个方法，这段代码就是把</p>
+<p>hitCount 最低的元素找出来，然后删除，给新进的缓存元素留位置。</p>
+<h4>看看LRU缓存算法实现</h4>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java">  	<span class="kd">private</span> <span class="kt">void</span> <span class="nf">moveToFront</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span>
+  	<span class="o">{</span>
+  	<span class="kt">int</span> <span class="n">nextIndex</span><span class="o">,</span> <span class="n">prevIndex</span><span class="o">;</span>
+  	<span class="k">if</span><span class="o">(</span><span class="n">head</span> <span class="o">!=</span> <span class="n">index</span><span class="o">)</span>
+  	<span class="o">{</span>
+  	<span class="n">nextIndex</span> <span class="o">=</span> <span class="n">next</span><span class="o">[</span><span class="n">index</span><span class="o">];</span>
+  	<span class="n">prevIndex</span> <span class="o">=</span> <span class="n">prev</span><span class="o">[</span><span class="n">index</span><span class="o">];</span>
+  	<span class="c1">// Only the head has a prev entry that is an invalid index</span>
+ 	 <span class="c1">// so we don't check.</span>
+  	<span class="n">next</span><span class="o">[</span><span class="n">prevIndex</span><span class="o">]</span> <span class="o">=</span> <span class="n">nextIndex</span><span class="o">;</span>
+  	<span class="c1">// Make sure index is valid. If it isn't, we're at the tail</span>
+  	<span class="c1">// and don't set prev[next].</span>
+  	<span class="k">if</span><span class="o">(</span><span class="n">nextIndex</span> <span class="o">&amp;</span><span class="n">gt</span><span class="o">;=</span> <span class="mi">0</span><span class="o">)</span>
+ 	 <span class="n">prev</span><span class="o">[</span><span class="n">nextIndex</span><span class="o">]</span> <span class="o">=</span> <span class="n">prevIndex</span><span class="o">;</span>
+ 	 <span class="k">else</span>
+  	<span class="n">tail</span> <span class="o">=</span> <span class="n">prevIndex</span><span class="o">;</span>
+  	<span class="n">prev</span><span class="o">[</span><span class="n">index</span><span class="o">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+  	<span class="n">next</span><span class="o">[</span><span class="n">index</span><span class="o">]</span> <span class="o">=</span> <span class="n">head</span><span class="o">;</span>
+  	<span class="n">prev</span><span class="o">[</span><span class="n">head</span><span class="o">]</span> <span class="o">=</span> <span class="n">index</span><span class="o">;</span>
+  	<span class="n">head</span> <span class="o">=</span> <span class="n">index</span><span class="o">;</span>
+  	<span class="o">}</span>
+  	<span class="o">}</span>
+ 	<span class="kd">public</span> <span class="kd">final</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">addElement</span><span class="o">(</span><span class="n">Object</span> <span class="n">key</span><span class="o">,</span> <span class="n">Object</span> 		<span class="n">value</span><span class="o">)</span>
+   	 <span class="o">{</span>
+       <span class="kt">int</span> <span class="n">index</span><span class="o">;</span><span class="n">Object</span> <span class="n">obj</span><span class="o">;</span>
+      <span class="n">obj</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+      <span class="k">if</span><span class="o">(</span><span class="n">obj</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+      <span class="o">{</span>
+      <span class="n">CacheElement</span> <span class="n">entry</span><span class="o">;</span>
+      <span class="c1">// Just replace the value, but move it to the front.</span>
+      <span class="n">entry</span> <span class="o">=</span> <span class="o">(</span><span class="n">CacheElement</span><span class="o">)</span><span class="n">obj</span><span class="o">;</span>
+      <span class="n">entry</span><span class="o">.</span><span class="na">setObjectValue</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+      <span class="n">entry</span><span class="o">.</span><span class="na">setObjectKey</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+      <span class="n">moveToFront</span><span class="o">(</span><span class="n">entry</span><span class="o">.</span><span class="na">getIndex</span><span class="o">());</span>
+      <span class="k">return</span><span class="o">;</span>
+      <span class="o">}</span>
+      <span class="c1">// If we haven't filled the cache yet, place in next available</span>
+      <span class="c1">// spot and move to front.</span>
+      <span class="k">if</span><span class="o">(!</span><span class="n">isFull</span><span class="o">())</span>
+      <span class="o">{</span>
+      <span class="k">if</span><span class="o">(</span><span class="n">_numEntries</span> <span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="mi">0</span><span class="o">)</span>
+      <span class="o">{</span>
+      <span class="n">prev</span><span class="o">[</span><span class="n">_numEntries</span><span class="o">]</span> <span class="o">=</span> <span class="n">tail</span><span class="o">;</span>
+      <span class="n">next</span><span class="o">[</span><span class="n">_numEntries</span><span class="o">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+      <span class="n">moveToFront</span><span class="o">(</span><span class="n">numEntries</span><span class="o">);</span>
+      <span class="o">}</span>
+      <span class="o">++</span><span class="n">numEntries</span><span class="o">;</span>
+      <span class="o">}</span>
+      <span class="k">else</span> <span class="o">{</span> <span class="c1">// We replace the tail of the list.</span>
+      <span class="n">table</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">cache</span><span class="o">[</span><span class="n">tail</span><span class="o">].</span><span class="na">getObjectKey</span><span class="o">());</span>
+      <span class="n">moveToFront</span><span class="o">(</span><span class="n">tail</span><span class="o">);</span>
+      <span class="o">}</span>
+      <span class="n">cache</span><span class="o">[</span><span class="n">head</span><span class="o">].</span><span class="na">setObjectValue</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+      <span class="n">cache</span><span class="o">[</span><span class="n">head</span><span class="o">].</span><span class="na">setObjectKey</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+      <span class="n">table</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">cache</span><span class="o">[</span><span class="n">head</span><span class="o">]);</span>
+      <span class="o">}</span>
+	</code></pre></figure>
+
+<p>这段代码的逻辑如 LRU算法 的描述一样，把再次用到的缓存提取到最前面，而每次删除的都是最后面的元素。</p>
+<h4>结论</h4>
+<p>我们已经看到 LFU缓存算法 和 LRU缓存算法的实现方式，至于如何实现，采用数组还是 LinkedHashMap，都由你决定，不够我一般是小的缓存容量用数组，大的用 LinkedHashMap。</p>
+
+<p3>几个著名Java开源缓存框架介绍</p3>
+<p>1.OSCache</p>
+
+<p>　　OSCache是个一个广泛采用的高性能的J2EE缓存框架，OSCache能用于任何Java应用程序的普通的缓存解决方案。 OSCache有以下特点：缓存任何对象，你可以不受限制的缓存部分jsp页面或HTTP请求，任何java对象都可以缓存。拥有全面的API–OSCache API给你全面的程序来控制所有的OSCache特性。永久缓存–缓存能随意的写入硬盘，因此允许昂贵的创建(expensive-to-create)数据来保持缓存，甚至能让应用重启。支持集群–集群缓存数据能被单个的进行参数配置，不需要修改代码。缓存记录的过期–你可以有最大限度的控制缓存对象的过期，包括可插入式的刷新策略(如果默认性能不需要时)。</p>
+
+<p>2.Java Caching system</p>
+
+<p>　　JSC(Java Caching system)是一个用分布式的缓存系统，是基于服务器的java应用程序。它是通过提供管理各种动态缓存数据来加速动态web应用。 JCS和其他缓存系统一样，也是一个用于高速读取，低速写入的应用程序。动态内容和报表系统能够获得更好的性能。如果一个网站，有重复的网站结构，使用间歇性更新方式的数据库(而不是连续不断的更新数据库)，被重复搜索出相同结果的，就能够通过执行缓存方式改进其性能和伸缩性。</p>
+
+<p>3.EHCache</p>
+
+<p>　　EHCache 是一个纯java的在进程中的缓存，它具有以下特性：快速，简单，为Hibernate2.1充当可插入的缓存，最小的依赖性，全面的文档和测试。</p>
+
+<p>4.JCache</p>
+
+<p>　　JCache是个开源程序，正在努力成为JSR-107开源规范，JSR-107规范已经很多年没改变了。这个版本仍然是构建在最初的功能定义上。</p>
+
+<p>5.ShiftOne</p>
+
+<p>　　ShiftOne Java Object Cache是一个执行一系列严格的对象缓存策略的Java lib，就像一个轻量级的配置缓存工作状态的框架。</p>
+
+<p>6.SwarmCache</p>
+
+<p>　　SwarmCache是一个简单且有效的分布式缓存，它使用IP multicast与同一个局域网的其他主机进行通讯，是特别为集群和数据驱动web应用程序而设计的。SwarmCache能够让典型的读操作大大超过写操作的这类应用提供更好的性能支持。 SwarmCache使用JavaGroups来管理从属关系和分布式缓存的通讯。</p>
+
+<p>7.TreeCache / JBossCache</p>
+
+<p>　　JBossCache是一个复制的事务处理缓存，它允许你缓存企业级应用数据来更好的改善性能。缓存数据被自动复制，让你轻松进行JBoss服务器之间的集群工作。JBossCache能够通过JBoss应用服务或其他J2EE容器来运行一个MBean服务，当然，它也能独立运行。 JBossCache包括两个模块：TreeCache和TreeCacheAOP。 TreeCache –是一个树形结构复制的事务处理缓存。TreeCacheAOP –是一个“面向对象”缓存，它使用AOP来动态管理POJO(Plain Old Java Objects) 注：AOP是OOP的延续，是Aspect Oriented Programming的缩写，意思是面向方面编程。</p>
+
+<p>8.WhirlyCache</p>
+
+<p>　　Whirlycache是一个快速的、可配置的、存在于内存中的对象的缓存。它能够通过缓存对象来加快网站或应用程序的速度，否则就必须通过查询数据库或其他代价较高的处理程序来建立。</p>
+
+		  </article>
+		<hr>
+	<br/>
+        <p>
+          本作品由 <a href="mailto:ouyanglip@gmail.com">Lippi.OuYang</a> 创作，采用
+          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="查看协议详细信息" target="_blank">CC BY-NC-SA 3.0 许可协议</a>
+          进行许可。
+        </p>
+	<div style="margin-top:10px;margin-bottom:10px">
+	  
+	  <span class="next">
+	    上篇：
+	    <a href="/blog/2014/12/c-code-opt.html">
+	      C代码优化小贴士
+	    </a>
+	  </span>
+	   
+	  
+	  <span class="prev">
+	    下篇：
+	    <a href="/blog/2015/03/github-pages-blog.html">
+	      利用github-pages建立个人博客
+	    </a>
+	  </span>
+	  
+	</div>
+	</div>
+	
+        
+	<div post-cate="java">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/hibernate-cache-guide.html" class="post-list-item">
+                    <h2>Hibernate缓存配置笔记</h2>
+                    <span class="date">Jul 24, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-virtual-mechine.html" class="post-list-item">
+                    <h2>Java虚拟机简介</h2>
+                    <span class="date">Apr 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-code-opt-one.html" class="post-list-item">
+                    <h2>优化java代码建议(1)</h2>
+                    <span class="date">Apr 12, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/02/cache.html" class="post-list-item">
+                    <h2>谈谈缓存和基本的缓存算法</h2>
+                    <span class="date">Feb 4, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/12/improve-webServer-performance.html" class="post-list-item">
+                    <h2>谈谈如何提高web服务器并发性能</h2>
+                    <span class="date">Dec 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-inner-class.html" class="post-list-item">
+                    <h2>java中内部类</h2>
+                    <span class="date">Nov 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-concurrent-collections.html" class="post-list-item">
+                    <h2>java同步容器与并发容器</h2>
+                    <span class="date">Nov 8, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/java-multithread.html" class="post-list-item">
+                    <h2>java并发和多线程</h2>
+                    <span class="date">Aug 2, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-UI-Thread.html" class="post-list-item">
+                    <h2>Android UI线程和子线程、Service通信</h2>
+                    <span class="date">Jul 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-networkOnMainThreadException.html" class="post-list-item">
+                    <h2>从android.os.NetworkOnMainThreadException引发的思考</h2>
+                    <span class="date">Jul 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="post-list-item">
+                    <h2>Java编程Tips</h2>
+                    <span class="date">Jun 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/15/in-the-rain.html" class="post-list-item">
+                    <h2>在雨中</h2>
+                    <span class="date">Jun 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-code-opt.html" class="post-list-item">
+                    <h2>C代码优化小贴士</h2>
+                    <span class="date">Dec 27, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/libevent.html" class="post-list-item">
+                    <h2>处理并发之二：libevent的eventbuffer</h2>
+                    <span class="date">Aug 24, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/linux-epoll.html" class="post-list-item">
+                    <h2>处理并发之一：LINUX Epoll机制介绍</h2>
+                    <span class="date">Aug 23, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="programming">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="jekyll">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-syntax.html" class="post-list-item">
+                    <h2>Markdown 语法 (简体中文版)</h2>
+                    <span class="date">Jul 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-basics.html" class="post-list-item">
+                    <h2>markdown 快速入门</h2>
+                    <span class="date">Jul 10, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="other">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/vim-plugins.html" class="post-list-item">
+                    <h2>一些强大的Vim插件</h2>
+                    <span class="date">Mar 20, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="reprints">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/09/android-studio-plugins.html" class="post-list-item">
+                    <h2>提高效率的Android Studio插件</h2>
+                    <span class="date">Sep 9, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/android-opensource.html" class="post-list-item">
+                    <h2>值得推荐的android开源框架</h2>
+                    <span class="date">Oct 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="web">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/04/web-transmission-basis.html" class="post-list-item">
+                    <h2>网络传输基础</h2>
+                    <span class="date">Apr 16, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/web-server.html" class="post-list-item">
+                    <h2>也谈如何构建高性能服务端程序</h2>
+                    <span class="date">Nov 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp-analise.html" class="post-list-item">
+                    <h2>XMPP协议分析-具体分析</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-project.html" class="post-list-item">
+                    <h2>Androidpn 消息推送总结</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-to-use-smack.html" class="post-list-item">
+                    <h2>Smack开发手册</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-introduction.html" class="post-list-item">
+                    <h2>AndroidPN消息推送</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp.html" class="post-list-item">
+                    <h2>XMPP协议分析-原理</h2>
+                    <span class="date">Oct 28, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/jsp-jfreechart.html" class="post-list-item">
+                    <h2>使用Jfreechart生成曲线显示到JSP中</h2>
+                    <span class="date">Oct 22, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-http-works.html" class="post-list-item">
+                    <h2>当我们打开网页时发生了什么</h2>
+                    <span class="date">Oct 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="book">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/11/how-to-evaluate-the-hackers-and-painters.html" class="post-list-item">
+                    <h2>如何评价『黑客与画家』</h2>
+                    <span class="date">Nov 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="algorithm">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/skip-list.html" class="post-list-item">
+                    <h2>skip list跳跃表实现</h2>
+                    <span class="date">Dec 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/graph.html" class="post-list-item">
+                    <h2>计算机算法--图算法介绍</h2>
+                    <span class="date">Nov 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/leveldb.html" class="post-list-item">
+                    <h2>leveldb原理剖析</h2>
+                    <span class="date">Nov 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c/c++">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-open-project.html" class="post-list-item">
+                    <h2>值得推荐的C/C++框架和库</h2>
+                    <span class="date">Dec 13, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/android-links.html" class="post-list-item">
+                    <h2>安卓开发者必备的42个链接</h2>
+                    <span class="date">May 19, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/define-custom-view.html" class="post-list-item">
+                    <h2>Android自定义视图教程</h2>
+                    <span class="date">May 17, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/android-studio-prefrence.html" class="post-list-item">
+                    <h2>Android Studio多渠道打包和代码混淆教程</h2>
+                    <span class="date">Mar 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/05/gradle-dependency-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之依赖管理</h2>
+                    <span class="date">May 5, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/gradle-task-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之任务管理</h2>
+                    <span class="date">Apr 30, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="lambda">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/dagger-dependency-injection.html" class="post-list-item">
+                    <h2>Dagger依赖注入浅析</h2>
+                    <span class="date">Aug 13, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/gradle-tasks-guide.html" class="post-list-item">
+                    <h2>彻底理解Gradle的任务</h2>
+                    <span class="date">Jul 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Latex">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/latex-fonts-settings.html" class="post-list-item">
+                    <h2>Latex中英文环境设置</h2>
+                    <span class="date">Aug 22, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Unix/Linux">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/baidu-spider-forbidden.html" class="post-list-item">
+                    <h2>解决百度爬虫无法抓取github pages</h2>
+                    <span class="date">Feb 18, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/apache-configuration-in-ubuntu.html" class="post-list-item">
+                    <h2>Ubuntu下Apache服务器的配置</h2>
+                    <span class="date">Jan 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/tmux-guide.html" class="post-list-item">
+                    <h2>终端复用软件之tmux简介</h2>
+                    <span class="date">Jan 19, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/08/linux-zsh.html" class="post-list-item">
+                    <h2>Zsh-Linux下最好的Shell简介</h2>
+                    <span class="date">Aug 23, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Git">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/git-guide.html" class="post-list-item">
+                    <h2>Git操作手册|命令速查表</h2>
+                    <span class="date">Feb 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="hi">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/hi.html" class="post-list-item">
+                    <h2>hi</h2>
+                    <span class="date">Feb 22, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	 </div>
+
+</div>
+
+
+<!-- Blog Comments -->
+<div class="media">
+  <!-- UY BEGIN 
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2023801"></script>
+UY END -->
+
+<!-- 多说评论框 start -->
+  <div class="post-comment">
+            <span>Comments</span>
+	<div class="ds-thread" data-thread-key="/blog/2015/02/cache" data-title="谈谈缓存和基本的缓存算法" data-url="LippiOuYang.github.io/blog/2015/02/cache.html">
+	</div>
+ </div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"lippiouyang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+ 
+</div> 
+</div>
+
+        </div>
+
+	 <div id="top" data-toggle="tooltip" data-placement="left" title="回到顶部">
+	      <a href="javascript:;">
+		<div class="arrow"></div>
+		<div class="stick"></div>
+	      </a>
+	    </div>
+
+        <!-- Blog Sidebar Widgets Column -->
+        <div class="col-md-4">
+          <!-- Blog Search Well -->  
+	
+                    <div class="shadow-corner-curl hidden-xs">
+	  <div class="categories-list-header">站内搜索</div>
+<!-- 使用该代码即表示您同意接受 Google 自定义搜索服务条款。 -->
+<!-- 有关服务条款，请访问 http://www.google.com/cse/docs/tos.html?hl=zh-CN -->
+<form name="cse" id="searchbox_demo" action="/search.html">
+  <input type="hidden" name="cref" value="" />
+  <input type="hidden" name="ie" value="utf-8" />
+  <input type="hidden" name="hl" value="zh-CN" />
+  <input name="q" type="text" size="30" />
+  <input type="submit" name="sa" value="搜索" /> 
+</form>
+<script type="text/javascript" src="http://www.google.com/cse/tools/onthefly?form=searchbox_demo&lang=zh-CN"></script>			      
+     
+            
+</div>
+
+
+
+
+
+
+
+
+          <!-- Blog Categories Well -->
+              
+
+    <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        Categories
+      </div>
+      
+      <a href="/index.html" class="categories-list-item" cate="All">
+        All<span class="my-badge"> 61</span>
+      </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="java">
+          java <span class="my-badge">17</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c">
+          c <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="programming">
+          programming <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="jekyll">
+          jekyll <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="other">
+          other <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="reprints">
+          reprints <span class="my-badge">5</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Android">
+          Android <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="web">
+          web <span class="my-badge">9</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="book">
+          book <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="algorithm">
+          algorithm <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c/c++">
+          c/c++ <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="android">
+          android <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Gradle">
+          Gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="lambda">
+          lambda <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="gradle">
+          gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Latex">
+          Latex <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Unix/Linux">
+          Unix/Linux <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Git">
+          Git <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="hi">
+          hi <span class="my-badge">1</span>
+        </a>
+      
+    </div>
+
+
+
+ 
+         
+              <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        热门文章
+      </div>
+
+ <ul class="list-unstyled">
+      	<li><a href="/blog/2015/03/github-pages-blog.html" class="categories-list-item">利用Github-pages建立个人博客</a></li>	
+<li><a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="categories-list-item">一个合格的程序员应该读过哪些书</a></li>
+<li><a href="/blog/2014/12/c-open-project.html" class="categories-list-item">值得推荐的C/C++框架和库</a></li>
+<li><a href="/blog/2014/12/c-code-opt.html" class="categories-list-item">C代码优化小贴士</a></li>	
+<li><a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="categories-list-item">Java编程Tips</a></li>
+<li><a href="/blog/2015/04/gradle-task-management.html" class="categories-list-item">Gradle系列教程之任务管理</a></li>	
+<li><a href="/blog/2015/05/android-links.html" class="categories-list-item">安卓开发者必备的42个链接</a></li>
+<li><a href="/blog/2015/05/gradle-dependency-management.html" class="categories-list-item">Gradle系列教程之依赖管理</a></li>
+<li><a href="/blog/2014/10/android-opensource.html" class="categories-list-item">值得推荐的android开源框架</a></li>	 
+<li><a href="/blog/2015/07/hibernate-cache-guide.html" class="categories-list-item">Hibernate缓存配置笔记</a></li>	
+	 
+     </ul>
+</div>
+ 
+       
+                   <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        相关链接
+      </div>    
+ <ul class="list-unstyled">
+              <li>
+                <a href="https://github.com/" class="categories-list-item">
+                   GitHub 
+                </a>
+              </li>
+<li>
+                <a href="http://www.stackoverflow.com/" class="categories-list-item">
+                   Stack Overflow 
+                </a>
+              </li>
+<li>
+                <a href="http://jekyllrb.com/docs/posts/" class="categories-list-item">
+                  Jekyll文档 
+                </a>
+              </li>
+               
+               <li>
+                <a href="https://news.ycombinator.com/" class="categories-list-item">
+                   Hacker News 
+                </a>
+              </li>        
+              
+              <li>
+                <a href="http://developer.android.com/" class="categories-list-item">
+                   Android Developer 
+                </a>
+              </li>
+              
+              <li>
+                <a href="http://www.ruanyifeng.com/blog/" class="categories-list-item">
+                   Ruanyifeng's Blog 
+                </a>
+              </li>
+
+
+  <li>
+                <a href="http://www.importnew.com/" class="categories-list-item">
+                   ImportNew 
+                </a>
+              </li>
+<li>
+                <a href="http://guides.codepath.com/android" class="categories-list-item">
+                   CodePath Android Cliffnotes 
+                </a>
+              </li>
+<li>
+                <a href="http://androidweekly.net/" class="categories-list-item">
+                   Androidweekly 	
+                </a>
+              </li>
+<li>
+			<a href="http://mvnrepository.com/" class="categories-list-item">
+                   Mvnrepository 
+                </a>
+              </li>
+<li>
+			<a href="http://www.iteye.com/" class="categories-list-item">
+                  Iteye 
+                </a>
+              </li>
+              		
+            </ul>
+
+</div>
+ 
+
+          <!-- Side Widget Well -->
+           
+        </div>
+      </div>
+
+
+
+      <!-- /.row -->
+      <hr>
+      <!-- Footer -->
+      <footer>
+           <p><small>Designed by <a href="https://github.com/EZLippi">Lippi</a> | Free hosted at <a href="https://github.com/EZLippi/EZLippi.github.io">Github</a> | Copyright 2014 - 2016  
+										</p>
+
+	<!--
+<div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <a href="mailto:ouyanglip@gmail.com"><span class="glyphicon glyphicon-envelope"></span> ouyanglip@gmail.com</a>
+        <span class="point"> · </span>
+        
+          
+          <a href="https://github.com/LippiOuYang">
+            <span class="icon">
+              <svg viewBox="0 0 16 16">
+                <path fill="#aaa" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+            Github
+          </a>
+          
+          
+          <span class="point"> · </span>
+          <span><a href="/feed.xml">RSS</a></span>
+          <span class="point"> · </span>
+          <span>Draw my life with code</span>
+          <span class="point"> · </span>
+          <span>&copy; 2014 LippiOuYang</span>
+          <span class="point"> · </span>
+          <span>Designed by <a href="https://github.com/LippiOuYang">Lippi</a></span>
+
+      </div>
+    </div>
+    </div>
+	-->
+ 
+              <div style="display:none;"><script src="http://s95.cnzz.com/z_stat.php?id=1254799848&web_id=1254799848" language="JavaScript"></script></div>
+ 
+
+      </footer>
+    </div>
+    <!-- /.container -->
+  </body>
+
+</html>

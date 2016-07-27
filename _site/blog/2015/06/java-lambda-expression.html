@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta name="baidu-site-verification" content="HvuxptDcq6" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Java Lambda简明教程 - Lippi-浮生志 - Lippi.OuYang(ouyanglip@gmail.com)">
+    <title>
+      Java Lambda简明教程 - Lippi-浮生志
+    </title>
+    <!-- Bootstrap Core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS 
+    <link href="/css/blog.css" rel="stylesheet">-->
+    <!-- index css -->
+    <link href="/css/index.css" rel="stylesheet">
+	<!-- pagments CSS-->
+	<link href="/css/pygments.css" rel="stylesheet">
+        <!-- jQuery Version 1.11.0 -->
+    <script src="/js/jquery-1.11.0.js"> </script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/bootstrap.min.js"></script>
+   <!-- 回到顶部js-->
+    <script src="/js/index.js"></script>
+
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?085fc257cb1e774f7764a2cf527c393d";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+	<script>
+    (function(){
+     var bp = document.createElement('script');
+	 bp.src = '//push.zhanzhang.baidu.com/push.js';
+	 var s = document.getElementsByTagName("script")[0];
+	 s.parentNode.insertBefore(bp, s);
+	 })();
+	</script>
+
+  </head>
+  
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">
+              Toggle navigation
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+          </button>
+          <a class="navbar-brand" href="/index.html">
+            Lippi-浮生志
+          </a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+            <li>
+              <a href="/categories.html">
+                分 类
+              </a>
+            </li>
+            <li>
+              <a href="/tags.html">
+                标 签
+              </a>
+            </li>
+            <li>
+              <a href="/archives.html">
+                归 档
+              </a>
+            </li>
+            <li>
+              <a href="/faqs.html">
+                备 忘
+              </a>
+            </li>
+            <li>
+              <a href="/about.html">
+                关 于
+              </a>
+            </li>
+          </ul> 
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+        <!-- Blog Entries Column -->
+        <div class="col-md-8">
+          <!-- Blog Post -->
+<!-- Title -->
+<div class="row">
+  <div class="post-area post">
+
+ 	<div class="post-list-body">
+        	<div class="all-posts" post-cate="All">
+ 		<header>
+		<h1>
+		  Java Lambda简明教程
+		  <div class="post-date"><a href="https://github.com/LippiOuYang/LippiOuYang.github.io/edit/master/_posts/2015-06-03-java-lambda-expression.md" target="_blank">纠错</a>&nbsp;&nbsp;
+			<span class="glyphicon glyphicon-time"></span>
+			03 Jun 2015
+		  </div>
+		</h1>
+ 		</header>
+		<!-- Author -->
+		<hr>
+		 <article>
+		<p>许多热门的编程语言如今都有一个叫做lambda或者闭包的语言特性，包括比较经典的函数式编程语言Lisp,Scheme,也有稍微年轻的语言比如JavaScript,Python,Ruby,Groovy,Scale,C#,甚至C++也有Lambda表达式。一些语言是运行在java虚拟机上，作为虚拟机最具代表的语言java当然也不想落后。</p>
+
+<p>#究竟什么是Lambda表达式?</p>
+
+<p>Lambda表达式的概念来自于Lambda演算，下面是一个java lambda的简单例子，</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="o">(</span><span class="kt">int</span> <span class="n">x</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span> <span class="k">return</span> <span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">;</span> <span class="o">}</span></code></pre></figure>
+
+<p>简单来看lambda像一个没有名字的方法，它具有一个方法应该有的部分：参数列表<code class="highlighter-rouge">int x</code>，方法body　<code class="highlighter-rouge">return x+1</code>,和方法相比lambda好像缺少了一个返回值类型、异常抛出和名字。返回值类型和异常是通过编译器在方法体中推导出来，在上面这个例子中返回值类型是int,没有抛出异常。真正缺少的就是一个名字，从这个角度来看，lambda表达式是一种匿名方法。</p>
+
+<p>#Lambda表达式和匿名内部类</p>
+
+<p>从上面的分析可以看出lambda和java内部类的特性有点相似，匿名内部类不只是一个方法，而是一个包含一个或多个方法的类，他们的作用都是一样的，都是作为方法的参数传递，我从JDK源码中提取出来<code class="highlighter-rouge">listFiles(FileFilter)</code> 方法：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="n">File</span><span class="o">[]</span> <span class="nf">listFiles</span><span class="o">(</span><span class="n">FileFilter</span> <span class="n">filter</span><span class="o">)</span> <span class="o">{</span>
+	<span class="n">String</span> <span class="n">ss</span><span class="o">[]</span> <span class="o">=</span> <span class="n">list</span><span class="o">();</span>
+	<span class="k">if</span> <span class="o">(</span><span class="n">ss</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+	
+	<span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">File</span><span class="o">&gt;</span> <span class="n">files</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;();</span>
+	<span class="k">for</span> <span class="o">(</span><span class="n">String</span> <span class="n">s</span> <span class="o">:</span> <span class="n">ss</span><span class="o">)</span> <span class="o">{</span>
+		<span class="n">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">s</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
+		<span class="k">if</span> <span class="o">((</span><span class="n">filter</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">||</span> <span class="n">filter</span><span class="o">.</span><span class="na">accept</span><span class="o">(</span><span class="n">f</span><span class="o">))</span>
+		<span class="n">files</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+	<span class="o">}</span>
+	<span class="k">return</span> <span class="n">files</span><span class="o">.</span><span class="na">toArray</span><span class="o">(</span><span class="k">new</span> <span class="n">File</span><span class="o">[</span><span class="n">files</span><span class="o">.</span><span class="na">size</span><span class="o">()]);</span>
+<span class="o">}</span></code></pre></figure>
+
+<p><code class="highlighter-rouge">listFilter</code>方法接收一个功能接口作为参数，在这里是FileFilter接口：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">FileFilter</span> <span class="o">{</span>
+	<span class="kt">boolean</span> <span class="nf">accept</span><span class="o">(</span><span class="n">File</span> <span class="n">pathname</span><span class="o">);</span>
+<span class="o">}</span></code></pre></figure>
+
+<p><code class="highlighter-rouge">fileFilter</code>接收一个<code class="highlighter-rouge">File</code>对象返回一个<code class="highlighter-rouge">boolean</code>值，<code class="highlighter-rouge">listFiles</code>方法把<code class="highlighter-rouge">Filter</code>应用到所有的<code class="highlighter-rouge">File</code>对象接收 那些<code class="highlighter-rouge">accept</code>返回<code class="highlighter-rouge">true</code>的文件。对于<code class="highlighter-rouge">listFiles</code>方法来讲我们必须传递一个函数式接口给他，这是<code class="highlighter-rouge">FileFileter</code>的一个实现，一般我们通过匿名类来完成：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">File</span> <span class="n">myDir</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="s">"／home/user/files"</span><span class="o">);</span>
+<span class="k">if</span> <span class="o">(</span><span class="n">myDir</span><span class="o">.</span><span class="na">isDirectory</span><span class="o">())</span> <span class="o">{</span>
+	<span class="n">File</span><span class="o">[]</span> <span class="n">files</span> <span class="o">=</span> <span class="n">myDir</span><span class="o">.</span><span class="na">listFiles</span><span class="o">(</span>
+	<span class="k">new</span> <span class="nf">FileFilter</span><span class="o">()</span> <span class="o">{</span>
+	 <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">accept</span><span class="o">(</span><span class="n">File</span> <span class="n">f</span><span class="o">)</span> <span class="o">{</span> <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="na">isFile</span><span class="o">();</span> <span class="o">}</span>
+	 <span class="o">}</span>
+	<span class="o">);</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>　我们现在可以用lambda来实现：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">File</span> <span class="n">myDir</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="s">"／home/user/files"</span><span class="o">);</span>
+<span class="k">if</span> <span class="o">(</span><span class="n">myDir</span><span class="o">.</span><span class="na">isDirectory</span><span class="o">())</span> <span class="o">{</span>
+	<span class="n">File</span><span class="o">[]</span> <span class="n">files</span> <span class="o">=</span> <span class="n">myDir</span><span class="o">.</span><span class="na">listFiles</span><span class="o">(</span>
+	<span class="o">(</span><span class="n">File</span> <span class="n">f</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span> <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="na">isFile</span><span class="o">();</span> <span class="o">}</span>
+	<span class="o">);</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>这两种情况我们都是传递了一个函数式接口给方法就像传递对象一样，我们使用代码就像使用数据一样，使用匿名类我们实际上传递了一个对象给方法，使用lambda不再需要创建对象，我们只需要把lambda代码传递给方法。</p>
+
+<p>除了传递lambda之外我们还可以传递一个方法引用，比如：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">File</span><span class="o">[]</span> <span class="n">files</span> <span class="o">=</span> <span class="n">myDir</span><span class="o">.</span><span class="na">listFiles</span><span class="o">(</span> <span class="nl">File:</span><span class="o">:</span><span class="n">isFile</span> <span class="o">);</span></code></pre></figure>
+
+<p>#Lambda表达式的表示</p>
+
+<p>在之前的例子，我们使用lambda表达式定义了一个函数，我们可以把它作为参数传递给一个方法，方法把它当成一个对象来使用，lambda表达式有函数和对象的一些属性，看你从什么角度来看：</p>
+
+<ul>
+  <li>从概念来讲，lambda表达式是一个匿名函数，它有签名和方法体但是没有名字</li>
+  <li>当lambda表达式作为参数传递给方法时，接收方法把它当对象使用，在<code class="highlighter-rouge">listFiles</code>方法内部，lambda表达式是一个对象的引用，在这里lambda表达式是一种常规的对象，比如有地址和类型。</li>
+</ul>
+
+<p>从实际的角度来分析，lambda对象是由编译期和运行时系统来创建的，这就允许编译期进行优化而使用者不需要关心具体细节，编译器从lambda表达式的上下文环境来获取lambda对象的语义类型，但是编译期并不创建那个对象而是直到运行时由虚拟机动态创建，这里说的动态创建是指调用<code class="highlighter-rouge">invokedynamic</code>字节码指令来创建。使用动态创建可以推迟对象的创建到对象第一次被使用时，如果你只是定义了lambda表达式而从未使用，它的类型和对象都不会创建。</p>
+
+<p>#函数式接口</p>
+
+<p>整个魔幻之处就在于类型的推导，这个类型称为目标类型，运行时系统动态创建的类型是目标类型的子类型。之前的那个例子我们看到目标类型是<code class="highlighter-rouge">FileFilter</code>,在例子中我们定义了一个lambda表达式把它传递给listFiles方法，然后listFiles方法把它作为<code class="highlighter-rouge">FileFilter</code>子类的一个对象来使用。这里看起来好像有点神奇，我们并没有声明lambda表达式实现了<code class="highlighter-rouge">FileFilter</code>接口，<code class="highlighter-rouge">listFiles</code>方法也没有表明它很愉快的接收了lambda表达式，它只是需要一个<code class="highlighter-rouge">FileFilter</code>的子类的对象，这是如何工作的？</p>
+
+<p>这里面的魔术在于编译期执行了类型推导，编译器根据lambda表达式的上下文来决定需要什么类型的对象，然后编译器观察lambda表达式是否兼容需要的类型。如果Java是一种函数式编程语言的话lambda表达式最自然的类型就是某种函数式类型，用来描述函数的一种特殊类型。函数式类型仅仅描述了函数的签名比如<code class="highlighter-rouge">(int,int)-&gt;boolean</code>.但是Java不是函数式编程语言因此没有函数式类型，语言的设计者可以选择添加一种新的类型，由于他们不想给Java的类型系统引入太多的改变，因此他们尝试寻找一种办法来集成lambda表达式到语言中而不需要添加函数式类型。</p>
+
+<p>结果他们使用函数式接口来代替，函数式接口是只有一个方法的接口，这样的接口在JDK里有很多，比如经典的Runnable接口，它只有一个方法<code class="highlighter-rouge">void run()</code>,还有很多其他的，比如<code class="highlighter-rouge">Readable,Callable,Iterable,closeable,Flushnable,Formattable,Comparable,Comparator</code>,或者我们前面提到的<code class="highlighter-rouge">FileFilter</code>接口。函数是接口和lambda表达式奕扬都只有一个方法，语言的设计者决定让编译器把lambda表达式转换成匹配的函数式接口。这种转换通常是自动的。比如我们前面提到的<code class="highlighter-rouge">(File f) -&gt; { return f.isFile(); }</code>,编译器知道listFiles方法的签名，因此我们需要的类型就是<code class="highlighter-rouge">FileFilter</code>,<code class="highlighter-rouge">FileFilter</code>是这样的：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">FileFilter</span> <span class="o">{</span> <span class="kt">boolean</span> <span class="nf">accept</span><span class="o">(</span><span class="n">File</span> <span class="n">pathname</span><span class="o">);</span> <span class="o">}</span></code></pre></figure>
+
+<p>FileFilter仅仅需要一个方法因此它是函数式接口类型，我们定义的lambda表达式有一个相匹配的签名，接收一个<code class="highlighter-rouge">File</code>对象，返回一个<code class="highlighter-rouge">boolean</code>值，不抛出检查的异常，因此编译器把lambda表达式转换成函数式接口<code class="highlighter-rouge">FileFilter</code>类型。</p>
+
+<p>假如我们有下面两个函数式接口：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">FileFilter</span> <span class="o">{</span> <span class="kt">boolean</span> <span class="nf">accept</span><span class="o">(</span><span class="n">File</span> <span class="n">pathname</span><span class="o">);</span> <span class="o">}</span>
+<span class="err">　</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Predicate</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span> <span class="kt">boolean</span> <span class="nf">test</span><span class="o">(</span><span class="n">T</span> <span class="n">t</span><span class="o">);</span> <span class="o">}</span></code></pre></figure>
+
+<p>我们的lambda表达式兼容两种函数式接口类型：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">FileFilter</span> <span class="n">filter</span> <span class="o">=</span> <span class="o">(</span><span class="n">File</span> <span class="n">f</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span> <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="na">isFile</span><span class="o">();</span> <span class="o">};</span>
+
+<span class="n">Predicate</span><span class="o">&lt;</span><span class="n">File</span><span class="o">&gt;</span> <span class="n">predicate</span> <span class="o">=</span> <span class="o">(</span><span class="n">File</span> <span class="n">f</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span> <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="na">isFile</span><span class="o">();</span> <span class="o">};</span>
+
+<span class="n">filter</span> <span class="o">=</span> <span class="n">predicate</span><span class="o">;</span><span class="c1">//错误，不兼容的类型</span></code></pre></figure>
+
+<p>当我们试图给两个变量相互赋值时编译器会报错，虽然两个变量都是同一个lambda表达式，原因很简单两个变量是不同的类型。也有可能出现编译器无法判断匹配的函数式接口类型，比如这个例子：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Object</span> <span class="n">ref</span><span class="err">　</span><span class="o">=</span> <span class="o">(</span><span class="n">File</span> <span class="n">f</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span> <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="na">isFile</span><span class="o">();</span> <span class="o">};</span></code></pre></figure>
+
+<p>这个赋值语句的上下文没有提供足够的信息来转换，因此编译器会报错，解决这个问题最简单的方法就是添加一个类型转换：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="err">　</span>	<span class="n">Object</span> <span class="n">ref</span><span class="err">　</span><span class="o">=</span> <span class="o">(</span><span class="n">FileFilter</span><span class="o">)</span> <span class="o">(</span><span class="n">File</span> <span class="n">f</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span> <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="na">isFile</span><span class="o">();</span> <span class="o">};</span></code></pre></figure>
+
+<p>#Lambda表达式和匿名内部类的区别</p>
+
+<p>Lambda表达式出现在我们通常需要匿名内部类的地方，在很多场合他们是可以互换的。但是他们还是有几个区别：</p>
+
+<p>###语法</p>
+
+<p>匿名类一般这样编写：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">File</span><span class="o">[]</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">myDir</span><span class="o">.</span><span class="na">lis</span> <span class="nf">tFiles</span><span class="o">(</span>
+	<span class="k">new</span> <span class="nf">FileFilter</span><span class="o">()</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">accept</span><span class="o">(</span><span class="n">File</span> <span class="n">f</span><span class="o">)</span> <span class="o">{</span> <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="na">isFile</span><span class="o">();</span> <span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">);</span></code></pre></figure>
+
+<p>而Lambda表达式有多种形式：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">File</span><span class="o">[]</span> <span class="n">files</span> <span class="o">=</span> <span class="n">myDir</span><span class="o">.</span><span class="na">listFiles</span><span class="o">(</span> <span class="o">(</span><span class="n">File</span> <span class="n">f</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span><span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="na">isFile</span><span class="o">();}</span> <span class="o">);</span>
+<span class="n">File</span><span class="o">[]</span> <span class="n">files</span> <span class="o">=</span> <span class="n">myDir</span><span class="o">.</span><span class="na">listFiles</span><span class="o">(</span> <span class="n">f</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">.</span><span class="na">isFile</span><span class="o">()</span> <span class="o">);</span>
+<span class="n">F</span> <span class="n">ile</span><span class="o">[]</span> <span class="n">fil</span> <span class="n">e</span> <span class="n">s</span> <span class="o">=</span> <span class="n">myDir</span><span class="o">.</span><span class="na">listFiles</span><span class="o">(</span> <span class="nl">File:</span><span class="o">:</span><span class="n">isFile</span> <span class="o">);</span></code></pre></figure>
+
+<p>###运行时成本</p>
+
+<p>匿名类相对Lambda表达式来讲多了一些成本，使用匿名类或造成新类型的创建、新类型对象的创建。运行时匿名内需要：</p>
+
+<ul>
+  <li>类加载</li>
+  <li>内存分配、对象初始化</li>
+  <li>调用非静态方法</li>
+</ul>
+
+<p>Lambda表达式需要函数式接口的转换和最终的调用，类型推导发生在编译期，不需要运行时消耗，之前提到过，lambda对象的创建是通过字节码指令<code class="highlighter-rouge">invokedynamic</code>来完成的，减少了类型和实例的创建消耗。</p>
+
+<p>###变量绑定</p>
+
+<p>匿名类可以访问外部域的<code class="highlighter-rouge">final</code>变量，如下所示：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kt">void</span> <span class="nf">method</span><span class="o">()</span> <span class="o">{</span>
+	<span class="kd">final</span> <span class="kt">int</span> <span class="n">cnt</span> <span class="o">=</span> <span class="mi">16</span><span class="o">;</span>
+
+	<span class="n">Runnable</span> <span class="n">r</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Runnable</span><span class="o">()</span> <span class="o">{</span>
+		<span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+		<span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"count: "</span> <span class="o">+</span> <span class="n">cnt</span><span class="o">);</span>
+		<span class="o">}</span>
+	<span class="o">};</span>
+	<span class="n">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">r</span><span class="o">);</span>
+	<span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+
+	<span class="n">cnt</span><span class="o">++;</span><span class="c1">// error: cnt is final</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>对于lambda表达式，cnt变量不需要显式声明为final的，一旦变量在lambda中使用编译期会自动把它当成是<code class="highlighter-rouge">final</code>的变量，换句话说在lambda中使用的外部域变量是隐式final的，</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kt">void</span> <span class="nf">method</span><span class="o">()</span> <span class="o">{</span>
+	<span class="kt">int</span> <span class="n">cnt</span> <span class="o">=</span> <span class="mi">16</span><span class="o">;</span>
+
+	<span class="n">Runnable</span> <span class="n">r</span> <span class="o">=</span> <span class="o">()</span> <span class="o">-&gt;</span> <span class="o">{</span> <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"count: "</span> <span class="o">+</span> <span class="n">cnt</span><span class="o">);</span>
+	<span class="o">};</span>
+	<span class="n">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">r</span><span class="o">);</span>
+	<span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+
+	<span class="n">cnt</span><span class="o">++;</span><span class="c1">// error: cnt is implicitly final</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>从java8开始匿名内部类也不需要再显式声明final类，编译器会自动把它当成是final。</p>
+
+<p>##作用域</p>
+
+<p>匿名内部类是一个类，也就是说它自己引入了一个作用域，你可以在里面定义变量，而lambda表达式没有自己的作用域。</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kt">void</span> <span class="nf">method</span><span class="o">()</span> <span class="o">{</span>
+	<span class="kt">int</span> <span class="n">cnt</span> <span class="o">=</span> <span class="mi">16</span><span class="o">;</span>
+	<span class="n">Runnable</span> <span class="n">r</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Runnable</span><span class="o">()</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span> <span class="kt">int</span> <span class="n">cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="c1">// fine</span>
+		<span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"cnt is: "</span> <span class="o">+</span> <span class="n">cnt</span><span class="o">);</span> <span class="o">}</span>
+		<span class="o">};</span>
+<span class="err">　</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>lambda表达式：</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kt">void</span> <span class="nf">method</span><span class="o">()</span> <span class="o">{</span>
+	<span class="kt">int</span> <span class="n">cnt</span> <span class="o">=</span> <span class="mi">16</span><span class="o">;</span>
+	<span class="n">Runnable</span> <span class="n">r</span> <span class="o">=</span> <span class="o">()</span> <span class="o">-&gt;</span> <span class="o">{</span> <span class="kt">int</span> <span class="n">cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="c1">// error: cnt has already been defined</span>
+		<span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"cnt is: "</span> <span class="o">+</span> <span class="n">cnt</span><span class="o">);</span>
+	<span class="o">};</span>
+<span class="err">　</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>不同的作用域规则对于<code class="highlighter-rouge">this</code>和<code class="highlighter-rouge">super</code>关键字有不同的效果，在匿名类中<code class="highlighter-rouge">this</code>表示匿名类对象本身的引用，<code class="highlighter-rouge">super</code>表示匿名类的父类。在lambda表达式<code class="highlighter-rouge">this</code>和<code class="highlighter-rouge">super</code>关键字意思和外部域中<code class="highlighter-rouge">this</code>和<code class="highlighter-rouge">super</code>的意思一样，<code class="highlighter-rouge">this</code>一般是包含它的那个对象，<code class="highlighter-rouge">super</code>表示包含它的类的父类。</p>
+
+
+		  </article>
+		<hr>
+	<br/>
+        <p>
+          本作品由 <a href="mailto:ouyanglip@gmail.com">Lippi.OuYang</a> 创作，采用
+          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="查看协议详细信息" target="_blank">CC BY-NC-SA 3.0 许可协议</a>
+          进行许可。
+        </p>
+	<div style="margin-top:10px;margin-bottom:10px">
+	  
+	  <span class="next">
+	    上篇：
+	    <a href="/blog/2015/05/android-links.html">
+	      安卓开发者必备的42个链接
+	    </a>
+	  </span>
+	   
+	  
+	  <span class="prev">
+	    下篇：
+	    <a href="/blog/2015/07/hibernate-cache-guide.html">
+	      Hibernate缓存配置笔记
+	    </a>
+	  </span>
+	  
+	</div>
+	</div>
+	
+        
+	<div post-cate="java">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/hibernate-cache-guide.html" class="post-list-item">
+                    <h2>Hibernate缓存配置笔记</h2>
+                    <span class="date">Jul 24, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-virtual-mechine.html" class="post-list-item">
+                    <h2>Java虚拟机简介</h2>
+                    <span class="date">Apr 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-code-opt-one.html" class="post-list-item">
+                    <h2>优化java代码建议(1)</h2>
+                    <span class="date">Apr 12, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/02/cache.html" class="post-list-item">
+                    <h2>谈谈缓存和基本的缓存算法</h2>
+                    <span class="date">Feb 4, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/12/improve-webServer-performance.html" class="post-list-item">
+                    <h2>谈谈如何提高web服务器并发性能</h2>
+                    <span class="date">Dec 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-inner-class.html" class="post-list-item">
+                    <h2>java中内部类</h2>
+                    <span class="date">Nov 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-concurrent-collections.html" class="post-list-item">
+                    <h2>java同步容器与并发容器</h2>
+                    <span class="date">Nov 8, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/java-multithread.html" class="post-list-item">
+                    <h2>java并发和多线程</h2>
+                    <span class="date">Aug 2, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-UI-Thread.html" class="post-list-item">
+                    <h2>Android UI线程和子线程、Service通信</h2>
+                    <span class="date">Jul 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-networkOnMainThreadException.html" class="post-list-item">
+                    <h2>从android.os.NetworkOnMainThreadException引发的思考</h2>
+                    <span class="date">Jul 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="post-list-item">
+                    <h2>Java编程Tips</h2>
+                    <span class="date">Jun 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/15/in-the-rain.html" class="post-list-item">
+                    <h2>在雨中</h2>
+                    <span class="date">Jun 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-code-opt.html" class="post-list-item">
+                    <h2>C代码优化小贴士</h2>
+                    <span class="date">Dec 27, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/libevent.html" class="post-list-item">
+                    <h2>处理并发之二：libevent的eventbuffer</h2>
+                    <span class="date">Aug 24, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/linux-epoll.html" class="post-list-item">
+                    <h2>处理并发之一：LINUX Epoll机制介绍</h2>
+                    <span class="date">Aug 23, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="programming">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="jekyll">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-syntax.html" class="post-list-item">
+                    <h2>Markdown 语法 (简体中文版)</h2>
+                    <span class="date">Jul 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-basics.html" class="post-list-item">
+                    <h2>markdown 快速入门</h2>
+                    <span class="date">Jul 10, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="other">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/vim-plugins.html" class="post-list-item">
+                    <h2>一些强大的Vim插件</h2>
+                    <span class="date">Mar 20, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="reprints">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/09/android-studio-plugins.html" class="post-list-item">
+                    <h2>提高效率的Android Studio插件</h2>
+                    <span class="date">Sep 9, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/android-opensource.html" class="post-list-item">
+                    <h2>值得推荐的android开源框架</h2>
+                    <span class="date">Oct 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="web">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/04/web-transmission-basis.html" class="post-list-item">
+                    <h2>网络传输基础</h2>
+                    <span class="date">Apr 16, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/web-server.html" class="post-list-item">
+                    <h2>也谈如何构建高性能服务端程序</h2>
+                    <span class="date">Nov 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp-analise.html" class="post-list-item">
+                    <h2>XMPP协议分析-具体分析</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-project.html" class="post-list-item">
+                    <h2>Androidpn 消息推送总结</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-to-use-smack.html" class="post-list-item">
+                    <h2>Smack开发手册</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-introduction.html" class="post-list-item">
+                    <h2>AndroidPN消息推送</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp.html" class="post-list-item">
+                    <h2>XMPP协议分析-原理</h2>
+                    <span class="date">Oct 28, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/jsp-jfreechart.html" class="post-list-item">
+                    <h2>使用Jfreechart生成曲线显示到JSP中</h2>
+                    <span class="date">Oct 22, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-http-works.html" class="post-list-item">
+                    <h2>当我们打开网页时发生了什么</h2>
+                    <span class="date">Oct 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="book">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/11/how-to-evaluate-the-hackers-and-painters.html" class="post-list-item">
+                    <h2>如何评价『黑客与画家』</h2>
+                    <span class="date">Nov 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="algorithm">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/skip-list.html" class="post-list-item">
+                    <h2>skip list跳跃表实现</h2>
+                    <span class="date">Dec 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/graph.html" class="post-list-item">
+                    <h2>计算机算法--图算法介绍</h2>
+                    <span class="date">Nov 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/leveldb.html" class="post-list-item">
+                    <h2>leveldb原理剖析</h2>
+                    <span class="date">Nov 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c/c++">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-open-project.html" class="post-list-item">
+                    <h2>值得推荐的C/C++框架和库</h2>
+                    <span class="date">Dec 13, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/android-links.html" class="post-list-item">
+                    <h2>安卓开发者必备的42个链接</h2>
+                    <span class="date">May 19, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/define-custom-view.html" class="post-list-item">
+                    <h2>Android自定义视图教程</h2>
+                    <span class="date">May 17, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/android-studio-prefrence.html" class="post-list-item">
+                    <h2>Android Studio多渠道打包和代码混淆教程</h2>
+                    <span class="date">Mar 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/05/gradle-dependency-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之依赖管理</h2>
+                    <span class="date">May 5, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/gradle-task-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之任务管理</h2>
+                    <span class="date">Apr 30, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="lambda">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/dagger-dependency-injection.html" class="post-list-item">
+                    <h2>Dagger依赖注入浅析</h2>
+                    <span class="date">Aug 13, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/gradle-tasks-guide.html" class="post-list-item">
+                    <h2>彻底理解Gradle的任务</h2>
+                    <span class="date">Jul 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Latex">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/latex-fonts-settings.html" class="post-list-item">
+                    <h2>Latex中英文环境设置</h2>
+                    <span class="date">Aug 22, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Unix/Linux">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/baidu-spider-forbidden.html" class="post-list-item">
+                    <h2>解决百度爬虫无法抓取github pages</h2>
+                    <span class="date">Feb 18, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/apache-configuration-in-ubuntu.html" class="post-list-item">
+                    <h2>Ubuntu下Apache服务器的配置</h2>
+                    <span class="date">Jan 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/tmux-guide.html" class="post-list-item">
+                    <h2>终端复用软件之tmux简介</h2>
+                    <span class="date">Jan 19, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/08/linux-zsh.html" class="post-list-item">
+                    <h2>Zsh-Linux下最好的Shell简介</h2>
+                    <span class="date">Aug 23, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Git">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/git-guide.html" class="post-list-item">
+                    <h2>Git操作手册|命令速查表</h2>
+                    <span class="date">Feb 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="hi">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/hi.html" class="post-list-item">
+                    <h2>hi</h2>
+                    <span class="date">Feb 22, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	 </div>
+
+</div>
+
+
+<!-- Blog Comments -->
+<div class="media">
+  <!-- UY BEGIN 
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2023801"></script>
+UY END -->
+
+<!-- 多说评论框 start -->
+  <div class="post-comment">
+            <span>Comments</span>
+	<div class="ds-thread" data-thread-key="/blog/2015/06/java-lambda-expression" data-title="Java Lambda简明教程" data-url="LippiOuYang.github.io/blog/2015/06/java-lambda-expression.html">
+	</div>
+ </div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"lippiouyang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+ 
+</div> 
+</div>
+
+        </div>
+
+	 <div id="top" data-toggle="tooltip" data-placement="left" title="回到顶部">
+	      <a href="javascript:;">
+		<div class="arrow"></div>
+		<div class="stick"></div>
+	      </a>
+	    </div>
+
+        <!-- Blog Sidebar Widgets Column -->
+        <div class="col-md-4">
+          <!-- Blog Search Well -->  
+	
+                    <div class="shadow-corner-curl hidden-xs">
+	  <div class="categories-list-header">站内搜索</div>
+<!-- 使用该代码即表示您同意接受 Google 自定义搜索服务条款。 -->
+<!-- 有关服务条款，请访问 http://www.google.com/cse/docs/tos.html?hl=zh-CN -->
+<form name="cse" id="searchbox_demo" action="/search.html">
+  <input type="hidden" name="cref" value="" />
+  <input type="hidden" name="ie" value="utf-8" />
+  <input type="hidden" name="hl" value="zh-CN" />
+  <input name="q" type="text" size="30" />
+  <input type="submit" name="sa" value="搜索" /> 
+</form>
+<script type="text/javascript" src="http://www.google.com/cse/tools/onthefly?form=searchbox_demo&lang=zh-CN"></script>			      
+     
+            
+</div>
+
+
+
+
+
+
+
+
+          <!-- Blog Categories Well -->
+              
+
+    <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        Categories
+      </div>
+      
+      <a href="/index.html" class="categories-list-item" cate="All">
+        All<span class="my-badge"> 61</span>
+      </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="java">
+          java <span class="my-badge">17</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c">
+          c <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="programming">
+          programming <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="jekyll">
+          jekyll <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="other">
+          other <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="reprints">
+          reprints <span class="my-badge">5</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Android">
+          Android <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="web">
+          web <span class="my-badge">9</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="book">
+          book <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="algorithm">
+          algorithm <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c/c++">
+          c/c++ <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="android">
+          android <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Gradle">
+          Gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="lambda">
+          lambda <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="gradle">
+          gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Latex">
+          Latex <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Unix/Linux">
+          Unix/Linux <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Git">
+          Git <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="hi">
+          hi <span class="my-badge">1</span>
+        </a>
+      
+    </div>
+
+
+
+ 
+         
+              <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        热门文章
+      </div>
+
+ <ul class="list-unstyled">
+      	<li><a href="/blog/2015/03/github-pages-blog.html" class="categories-list-item">利用Github-pages建立个人博客</a></li>	
+<li><a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="categories-list-item">一个合格的程序员应该读过哪些书</a></li>
+<li><a href="/blog/2014/12/c-open-project.html" class="categories-list-item">值得推荐的C/C++框架和库</a></li>
+<li><a href="/blog/2014/12/c-code-opt.html" class="categories-list-item">C代码优化小贴士</a></li>	
+<li><a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="categories-list-item">Java编程Tips</a></li>
+<li><a href="/blog/2015/04/gradle-task-management.html" class="categories-list-item">Gradle系列教程之任务管理</a></li>	
+<li><a href="/blog/2015/05/android-links.html" class="categories-list-item">安卓开发者必备的42个链接</a></li>
+<li><a href="/blog/2015/05/gradle-dependency-management.html" class="categories-list-item">Gradle系列教程之依赖管理</a></li>
+<li><a href="/blog/2014/10/android-opensource.html" class="categories-list-item">值得推荐的android开源框架</a></li>	 
+<li><a href="/blog/2015/07/hibernate-cache-guide.html" class="categories-list-item">Hibernate缓存配置笔记</a></li>	
+	 
+     </ul>
+</div>
+ 
+       
+                   <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        相关链接
+      </div>    
+ <ul class="list-unstyled">
+              <li>
+                <a href="https://github.com/" class="categories-list-item">
+                   GitHub 
+                </a>
+              </li>
+<li>
+                <a href="http://www.stackoverflow.com/" class="categories-list-item">
+                   Stack Overflow 
+                </a>
+              </li>
+<li>
+                <a href="http://jekyllrb.com/docs/posts/" class="categories-list-item">
+                  Jekyll文档 
+                </a>
+              </li>
+               
+               <li>
+                <a href="https://news.ycombinator.com/" class="categories-list-item">
+                   Hacker News 
+                </a>
+              </li>        
+              
+              <li>
+                <a href="http://developer.android.com/" class="categories-list-item">
+                   Android Developer 
+                </a>
+              </li>
+              
+              <li>
+                <a href="http://www.ruanyifeng.com/blog/" class="categories-list-item">
+                   Ruanyifeng's Blog 
+                </a>
+              </li>
+
+
+  <li>
+                <a href="http://www.importnew.com/" class="categories-list-item">
+                   ImportNew 
+                </a>
+              </li>
+<li>
+                <a href="http://guides.codepath.com/android" class="categories-list-item">
+                   CodePath Android Cliffnotes 
+                </a>
+              </li>
+<li>
+                <a href="http://androidweekly.net/" class="categories-list-item">
+                   Androidweekly 	
+                </a>
+              </li>
+<li>
+			<a href="http://mvnrepository.com/" class="categories-list-item">
+                   Mvnrepository 
+                </a>
+              </li>
+<li>
+			<a href="http://www.iteye.com/" class="categories-list-item">
+                  Iteye 
+                </a>
+              </li>
+              		
+            </ul>
+
+</div>
+ 
+
+          <!-- Side Widget Well -->
+           
+        </div>
+      </div>
+
+
+
+      <!-- /.row -->
+      <hr>
+      <!-- Footer -->
+      <footer>
+           <p><small>Designed by <a href="https://github.com/EZLippi">Lippi</a> | Free hosted at <a href="https://github.com/EZLippi/EZLippi.github.io">Github</a> | Copyright 2014 - 2016  
+										</p>
+
+	<!--
+<div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <a href="mailto:ouyanglip@gmail.com"><span class="glyphicon glyphicon-envelope"></span> ouyanglip@gmail.com</a>
+        <span class="point"> · </span>
+        
+          
+          <a href="https://github.com/LippiOuYang">
+            <span class="icon">
+              <svg viewBox="0 0 16 16">
+                <path fill="#aaa" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+            Github
+          </a>
+          
+          
+          <span class="point"> · </span>
+          <span><a href="/feed.xml">RSS</a></span>
+          <span class="point"> · </span>
+          <span>Draw my life with code</span>
+          <span class="point"> · </span>
+          <span>&copy; 2014 LippiOuYang</span>
+          <span class="point"> · </span>
+          <span>Designed by <a href="https://github.com/LippiOuYang">Lippi</a></span>
+
+      </div>
+    </div>
+    </div>
+	-->
+ 
+              <div style="display:none;"><script src="http://s95.cnzz.com/z_stat.php?id=1254799848&web_id=1254799848" language="JavaScript"></script></div>
+ 
+
+      </footer>
+    </div>
+    <!-- /.container -->
+  </body>
+
+</html>

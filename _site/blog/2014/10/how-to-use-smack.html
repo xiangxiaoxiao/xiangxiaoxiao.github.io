@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta name="baidu-site-verification" content="HvuxptDcq6" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Smack开发手册 - Lippi-浮生志 - Lippi.OuYang(ouyanglip@gmail.com)">
+    <title>
+      Smack开发手册 - Lippi-浮生志
+    </title>
+    <!-- Bootstrap Core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS 
+    <link href="/css/blog.css" rel="stylesheet">-->
+    <!-- index css -->
+    <link href="/css/index.css" rel="stylesheet">
+	<!-- pagments CSS-->
+	<link href="/css/pygments.css" rel="stylesheet">
+        <!-- jQuery Version 1.11.0 -->
+    <script src="/js/jquery-1.11.0.js"> </script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/bootstrap.min.js"></script>
+   <!-- 回到顶部js-->
+    <script src="/js/index.js"></script>
+
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?085fc257cb1e774f7764a2cf527c393d";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+	<script>
+    (function(){
+     var bp = document.createElement('script');
+	 bp.src = '//push.zhanzhang.baidu.com/push.js';
+	 var s = document.getElementsByTagName("script")[0];
+	 s.parentNode.insertBefore(bp, s);
+	 })();
+	</script>
+
+  </head>
+  
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">
+              Toggle navigation
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+          </button>
+          <a class="navbar-brand" href="/index.html">
+            Lippi-浮生志
+          </a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+            <li>
+              <a href="/categories.html">
+                分 类
+              </a>
+            </li>
+            <li>
+              <a href="/tags.html">
+                标 签
+              </a>
+            </li>
+            <li>
+              <a href="/archives.html">
+                归 档
+              </a>
+            </li>
+            <li>
+              <a href="/faqs.html">
+                备 忘
+              </a>
+            </li>
+            <li>
+              <a href="/about.html">
+                关 于
+              </a>
+            </li>
+          </ul> 
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+        <!-- Blog Entries Column -->
+        <div class="col-md-8">
+          <!-- Blog Post -->
+<!-- Title -->
+<div class="row">
+  <div class="post-area post">
+
+ 	<div class="post-list-body">
+        	<div class="all-posts" post-cate="All">
+ 		<header>
+		<h1>
+		  Smack开发手册
+		  <div class="post-date"><a href="https://github.com/LippiOuYang/LippiOuYang.github.io/edit/master/_posts/2014-10-30-how to use smack.md" target="_blank">纠错</a>&nbsp;&nbsp;
+			<span class="glyphicon glyphicon-time"></span>
+			30 Oct 2014
+		  </div>
+		</h1>
+ 		</header>
+		<!-- Author -->
+		<hr>
+		 <article>
+		<p>这篇文章翻译自Smack的官方文档，<a href="http://www.igniterealtime.org/builds/smack/docs/latest/documentation/">http://www.igniterealtime.org/builds/smack/docs/latest/documentation/</a>，转载请注明出处。</p>
+
+<p>Smack是一个为使用XMPP服务器聊天和发送即时消息交流而提供的库。</p>
+
+<h2 id="smack">Smack的主要优势：</h2>
+
+<ol>
+  <li>
+    <p>使用简单且拥有强大的API。向用户发送一条文本消息只需用一下三行代码即可完成</p>
+
+    <p>XMPPConnection connection = new XMPPConnection(“jabber.org”);
+ connection.login(“mtucker”, “password”);
+ connection.createChat(“jsmith@jivesoftware.com”).sendMessage(“Howdy!;</p>
+  </li>
+  <li>不像其它库那样，强制你在信息报级（packet level）编码。Smack提供智能的、更高级别的结构，例如：Chat和GroupChat类，这写能让你的程序效率更高。
+    <ul>
+      <li>你不需要熟悉XMPP  XML格式，甚至不熟XML。</li>
+    </ul>
+  </li>
+  <li>
+    <p>提供简单的机器到机器的通讯。Smack允许你对每一条消息设置任何数字的属性，包括Java对象的属性。</p>
+  </li>
+  <li>Apache许可的开放源码，你可将其用于商业的和非商业的应用。</li>
+</ol>
+
+<h2 id="xmpp">关于XMPP</h2>
+<p>XMPP (eXtensible Messaging and Presence Protocol)是一个开放的，</p>
+
+<p>如何使用本文档
+本文档假定你已经熟悉XMPP即时消息的主要特征。我们推荐你在阅读该文档时打开Javadoc API作为参考。</p>
+
+<p><strong>开始Smack</strong></p>
+
+<p>本文档将向你介绍Smack API，并大概介绍几个重要的类和概念。
+必备的条件
+你只需要有JDK 1.2或之后的版本1和已经内嵌在smack..jar文件中的XML分析器，不需要第三部分库。
+1JDK 1.2 and 1.3的用户若想使用SSL连接必须在他的类路径下有JSSE库。</p>
+
+<p><strong>建立一个连接</strong></p>
+
+<p>XMPPConnection类是为XMPP服务器建立连接的类。若要创建SSL连接，需使用SSLXMPPConnection类，以下是创建连接的例子。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>// Create a connection to the jabber.org server.
+XMPPConnection conn1 = new XMPPConnection("jabber.org");
+ 
+// Create a connection to the jabber.org server on a specific port.
+XMPPConnection conn2 = new XMPPConnection("jabber.org", 5222);
+ 
+// Create an SSL connection to jabber.org.
+XMPPConnection connection = new SSLXMPPConnection("jabber.org");
+</code></pre>
+</div>
+
+<p>如果创建了一个连接，你应该使用<code class="highlighter-rouge">XMPPConnection.login(String username, String password)</code>方法（参数为用户名和密码）进行登陆。一旦登陆成功，你就可以通过创建一个新的Chat 或GroupChat对象与其它用户聊天。</p>
+
+<hr />
+
+<h2 id="working-with-the-roster">使用花名册（Working with the Roster）</h2>
+
+<ul>
+  <li>
+    <p>花名册让你很清楚的知道其它可用的用户。用户可以被分成像“朋友”、“合作者”这样的组，从而知道其它的用户在线还是离线。</p>
+  </li>
+  <li>
+    <p>可以使用XMPPConnection.getRoster()方法检索花名册。你可以用花名册（roster）类查找花名册的所有条目，它们所属的组以及每个条目当前呈现的状态。</p>
+  </li>
+</ul>
+
+<p><strong>读、写信息包（Reading and Writing Packets）</strong></p>
+
+<ul>
+  <li>
+    <p>从客户端发送到XMPP的每一条消息称为一个信息包，并作为XML发送。The org.jivesoftware.smack.packet包含封装了三个XMPP允许的、不同的基本包类型(message, presence, and IQ)的类。像Chat和GroupChat这样的类提供更高级别的结构，它可以自动的创建和发送信息包，当然你也可以直接创建和发送信息包。以下代码是一个将你的当前状态改为“隐身“，从而不被别人看到的例子：</p>
+
+    <p>// Create a new presence. Pass in false to indicate we’re unavailable.
+ Presence presence = new Presence(Presence.Type.UNAVAILABLE);
+ presence.setStatus(“Gone fishing”);
+ // Send the packet (assume we have a XMPPConnection instance called “con”).
+ con.sendPacket(presence);</p>
+  </li>
+</ul>
+
+<p>Smack提供以下两种方法阅读收到的信息包：PacketListener和PacketCollector。它们都使用PacketFilter的实例来决定应该处理哪个信息包。信息包监听器（packet listener）用于事件类型的设计，而信息包收集器（packet collector）有一个信息包的结果队列，你可以对其实施polling和blocking操作。所以，信息包监听器在你收到任何一个信息包，且你想对其进行操作时是有用的，而信息包收集器在你想等待某个特殊的信息包时是有用的。信息包收集器和监听器可以通过XMPPConnection的实例来创建。</p>
+
+<hr />
+
+<h1 id="messaging-basics">Messaging Basics</h1>
+<p>## Messaging using Chat and GroupChat ##
+互相发送消息是即时通讯的核心，以下是两个在收发消息是用的类：</p>
+
+<ol>
+  <li>org.jivesoftware.smack.Chat – 用于两个人之间发送消息</li>
+  <li>org.jivesoftware.smack.GroupChat –用于加入聊天室，很多人之间相互发送消息。</li>
+</ol>
+
+<p>Chat和GroupChat类都用org.jivesoftware.smack.packet .Message信息包类发送消息。在某些情况下，也许你希望绕过更高级别的Chat和GroupChat类直接发送和接受消息。
+聊天（Chat）
+聊天时在两个用户间创建了一个新的线程（使用一个线程ID）。以下程序片示例了如何如何与一个用户进行开始聊天并发送一段文本消息：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>// Assume we've created an XMPPConnection name "connection".
+Chat newChat = connection.createChat("jsmith@jivesoftware.com");
+newChat.sendMessage("Howdy!");
+</code></pre>
+</div>
+
+<p>Chat.sendMessage(String)方法可以很方便的创建一个消息对象，方法体使用字符串类型的参数，然后发送消息。如果想在发送消息前对消息设置额外的只，可以使用Chat.createMessage() and Chat.sendMessage(Message)方法，如下例所示：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>// Assume we've created an XMPPConnection name "connection".
+Chat newChat = connection.createChat("jsmith@jivesoftware.com");
+Message newMessage = newChat.createMessage();
+newMessage.setBody("Howdy!");
+message.setProperty("favoriteColor", "red");
+newChat.sendMessage(newMessage);
+</code></pre>
+</div>
+
+<p>使用Chat对象可以轻松的收听其它聊天者的回复。以下程序片是parrot-bot，它映射会其它用户类型的所有事情：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>// Assume we've created an XMPPConnection name "connection".
+Chat newChat = connection.createChat("jsmith@jivesoftware.com");
+newMessage.setBody("Hi, I'm an annoying parrot-bot! Type something back to me.");
+while (true) {
+// Wait for the next message the user types to us.
+Message message = newChat.nextMessage();
+// Send back the same text the other user sent us.
+newChat.sendMessage(message.getBody());
+}
+</code></pre>
+</div>
+
+<p>以上代码使用Chat.nextMessage()方法获得下一条消息，它必需一直等待直到收到下一条消息。也有其它的方法可以等待特定的时间来接受下一条消息，或者你也可以增加一个监听器，它可以在每次收到消息时通知你。</p>
+
+<p><strong>群聊（GroupChat）</strong></p>
+
+<p>群聊在通过一个服务器连接到聊天室，你可以向一组人发送消息或接收他们的消息。在你能接收和发送消息前，你必须使用一个昵称登陆到聊天室。以下程序段可以连接到一个聊天室并发送消息：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>// Assume we've created an XMPPConnection name "connection".
+GroupChat newGroupChat = connection.createGroupChat("test@jivesoftware.com");
+// Join the group chat using the nickname "jsmith".
+newGroupChat.join("jsmith");
+// Send a message to all the other people in the chat room.
+newGroupChat.sendMessage("Howdy!");
+</code></pre>
+</div>
+
+<p>群聊时收发消息和私聊时工作原理大体一致。同样，也有方法可以获得聊天室里其它用户的列表。</p>
+
+<hr />
+
+<h2 id="roster-and--presence">Roster and  Presence</h2>
+<p>花名册让你很清楚的知道其它可用的用户。用户可以被分成像“朋友”、“合作者”这样的组。其它的即使通讯系统将花名册作为好友列表、联系列表等。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>   **当你成功登陆服务器后，可以使用XMPPConnection.getRoster()获得Roster类的实例。**
+</code></pre>
+</div>
+
+<p><strong>花名册条目（Roster Entries）</strong></p>
+
+<p>花名册里的每一个用户都以一条花名册条目的形式呈现，包括以下几部分：</p>
+
+<ol>
+  <li>一个XMPP地址(例如：jsmith@example.com).</li>
+  <li>
+    <p>分配给你的用户名 (例如： “Joe”).
+该条目在花名册中所属组的列表。如果该条目不属于任何一个组，将被称为“尚未分类的条目。
+以下程序段可以打印出花名册中的所有条目：</p>
+
+    <p>Roster roster = con.getRoster();
+ for (Iterator i=roster.getEntries(); i.hasNext(); ) {
+ System.out.println(i.next());
+ }</p>
+  </li>
+</ol>
+
+<p>也有获得个人条目、尚未分类条目的列表、一个或者所有组的方法。</p>
+
+<p><strong>呈现（Presence）</strong></p>
+
+<p>花名册中的每一个条目都有相关的呈现方式。Roster.getPresence(String user)方法将通过用户的状态或当用户不在线或不同意将其在线状态显示出来时使用空对象（null）返回一个Presence对象。</p>
+
+<p>注意：一般情况下，用户是否同意显示其状态依赖于用户所在的花名册，但这不是在所有情况下都成立的。</p>
+
+<p>用户也有一个在线或离线的状态，如果用户在线，他们的显示信息中将会有一些扩展的信息，例如他当前正在做什么，是否希望被打扰等等，详细内容可以参看Presence类。</p>
+
+<p><strong>Listening for Roster and Presence Changes</strong></p>
+
+<p>Roster类的典型用途是用树状形式显示组和每一个条目以及它的当前状态。如下图所示是 Exodus XMPP客户端的花名册。</p>
+
+<p>显示的信息很可能会经常改变，也有可能是花名册的条目被改变甚至被删除。为了监视花名册的改变和显示的信息，应该使用一个花名册监听器（RosterListener）。以下代码使用Roster（它可以打印出花名册中的任何变化）注册了一个RosterListener。标准的客户端应该使用相似的代码更新花名册的用户信息（roster UI）以正确显示变化的信息。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>final Roster roster = con.getRoster();
+roster.addRosterListener(new RosterListener() {
+public void rosterModified() {
+// Ignore event for this example.
+}
+ 
+public void presenceChanged(String user) {
+// If the presence is unavailable then "null" will be printed,
+// which is fine for this example.
+System.out.println("Presence changed: " + roster.getPresence(user));
+}
+});
+</code></pre>
+</div>
+
+<p><strong>向花名册中添加条目（Adding Entries to the Roster）</strong></p>
+
+<p>花名册和显示使用基于许可的模型，这要求用户在加入别人的花名册前必须得到允许。这样，确保只有被允许的人才可以看到自己所显示的信息，从而保护了用户的隐私。因此，在你想添加一个新的条目，且对方没有接受你的请求前，该条目将处于等待状态。</p>
+
+<p>如果另一个用户请求同意显示，从而你他们可以将你加入他们的花名册，你必须接受或拒绝请求。Smack通过以下三种方式之一操作同意显示请求：</p>
+
+<ol>
+  <li>自动接受所有的同意显示请求。</li>
+  <li>自动拒绝所有的同意显示请求。</li>
+  <li>手动处理同意显示请求。</li>
+</ol>
+
+<p>可以使用Roster.setSubscriptionMode(int subscriptionMode)方法设置模式。简单的客户通常使用一个自动接受或拒绝同意显示请求的模式，而用更多特征的用户应该使用手动处理同意显示请求的模式，并让终端用户接受或拒绝每一个请求。如果使用手动模式，应该声明一个信息包监听器（PacketListener）来监听有Presence.Type.SUBSCRIBE类型的显示信息包。</p>
+
+<p><strong>处理收到的信息包(Processing Incoming Packets)</strong>
+Smack提供一个使用以下两个结构的灵活框架来处理收到的信息包：</p>
+
+<p>org.jivesoftware.smack.PacketCollector – 一个允许你同步的等待新的信息包的类</p>
+
+<p>org.jivesoftware.smack.PacketListener – 一个异步的通知你收到信息包的接口</p>
+
+<p>信息包监听器（packet listener）用于事件类型的设计，而信息包收集器（packet collector）有一个信息包的结果队列，你可以对其实施polling和blocking操作。所以，信息包监听器在你收到任何一个信息包，且你想对其进行操作时是有用的，而信息包收集器在你想等待某个特殊的信息包时是有用的。信息包收集器和监听器可以通过
+XMPPConnection的实例来创建。</p>
+
+<p>由org.jivesoftware.smack.filter.PacketFilter接口来决定哪个特殊的信息包将被转交给信息包收集器（PacketCollector）或信息包监听器（PacketListener）。可以在org.jivesoftware.smack.filter包中找到许多预先定义的过滤器。
+以下代码阐释了如何注册一个信息包收集器（packet collector）和信息包监听器（packet listener）：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>// Create a packet filter to listen for new messages from a particular
+// user. We use an AndFilter to combine two other filters.
+PacketFilter filter = new AndFilter(new PacketTypeFilter(Message.class),
+new FromContainsFilter("mary@jivesoftware.com"));
+// Assume we've created an XMPPConnection name "connection".
+ 
+// First, register a packet collector using the filter we created.
+PacketCollector myCollector = connection.createPacketCollector(filter);
+// Normally, you'd do something with the collector, like wait for new packets.
+ 
+// Next, create a packet listener. We use an anonymous inner class for brevity.
+PacketListener myListener = new PacketListener() {
+public void processPacket(Packet packet) {
+// Do something with the incoming packet here.
+}
+};
+// Register the listener.
+connection.addPacketListener(myListener, filter);
+</code></pre>
+</div>
+
+<p><strong>标准信息包过滤器（Standard Packet Filters）</strong></p>
+
+<p>Smack包含一套丰富的信息包过滤器，你也可以通过信息包过滤器接口（PacketFilter interface）编写程序来创建自己的过滤器。缺省的过滤器集包括：</p>
+
+<ul>
+  <li>PacketTypeFilter – 某个特殊的类类型的信息包过滤器</li>
+  <li>PacketIDFilter – 拥有特殊的信息包ID（packet ID）的过滤器</li>
+  <li>ThreadFilter – 拥有特殊线程ID（thread ID）的信息包的过滤器</li>
+  <li>ToContainsFilter –发送到某个特殊地址的信息包的过滤器</li>
+  <li>FromContainsFilter –发送到某个特殊地址的信息包的过滤器</li>
+  <li>PacketExtensionFilter – 拥有特殊的信息包扩展的信息包的过滤器</li>
+  <li>AndFilter –对两个过滤器实施逻辑与操作的过滤器</li>
+  <li>OrFilter –对两个过滤器实施逻辑或操作的过滤器</li>
+  <li>NotFilter –对一个过滤器实施逻辑非操作的过滤器</li>
+</ul>
+
+<p>Provider Architecture: Packet Extensions and Custom IQ’s
+Smack提供的体系是堵塞自定义的XML信息包扩展和IQ包分析器的系统（The Smack provider architecture is a system for plugging in custom XML parsing of packet extensions and IQ packets）。标准的Smack扩展（Smack Extensions）是使用提供者的体系结构搭建的。存在以下两种类型的提供者：</p>
+
+<ul>
+  <li>
+    <p>IQProvider –将IQ请求（ IQ requests）解析成Java对象（Java objects）</p>
+  </li>
+  <li>
+    <p>PacketExtension – 将附属在信息包上的XML子文档解析成信息包扩展实例（PacketExtension instances）</p>
+  </li>
+</ul>
+
+<p><strong>IQProvider</strong></p>
+
+<p>默认情况下，Smack致知道如何处理只有类似以下几个名字空间的子信息包的IQ信息包（IQ packets）：</p>
+
+<ul>
+  <li>jabber:iq:auth</li>
+  <li>jabber:iq:roster</li>
+  <li>jabber:iq:register</li>
+</ul>
+
+<p>因为许多IQ类型是XMPP及其扩展部分的一部分，所以提供一个可插入的IQ分析机制。IQ Providers被程序自动的注册或通过创建在你的JAR 文件的META-INF目录下创建一个mack.providers文件。该文件是一个包含一个或多个iqProvider条目（iqProvider entries）的XML文档，如下例所示：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0"?&gt;</span>
+<span class="nt">&lt;smackProviders&gt;</span>
+ <span class="nt">&lt;iqProvider&gt;</span>
+ <span class="nt">&lt;elementName&gt;</span>query<span class="nt">&lt;/elementName&gt;</span>
+ <span class="nt">&lt;namespace&gt;</span>jabber:iq:time<span class="nt">&lt;/namespace&gt;</span>
+ <span class="nt">&lt;className&gt;</span>org.jivesoftware.smack.packet.Time<span class="nt">&lt;/className&gt;</span>
+ <span class="nt">&lt;/iqProvider&gt;</span>
+<span class="nt">&lt;/smackProviders&gt;</span>
+</code></pre>
+</div>
+
+<p>每一个IQ provider都和一个元素名（element name）和名字空间（ namespace）相联系。在上面的例子中，元素名是query，名字空间是abber:iq:time。如果有多重提供者条目（multiple provider entries）尝试注册并控制相同的名字空间，那么从类路径（classpath）载入的第一个条目将有优先权。</p>
+
+<p>IQ provider类可以实现IQProvide接口，或者继承IQ类。在前面的例子中，每一个IQProvider负责解析原始的XML流从而创建一个IQ实例。在下面的例子中，bean introspection将被用于尝试自动使用在IQ packet XML中发现的值设置IQ实例的属性。一个XMPP时间信息包如下所示：
+    <iq type="result" to="joe@example.com" from="mary@example.com" id="time_1">
+    <query xmlns="jabber:iq:time">
+    <utc>20020910T17:58:35</utc>
+    <tz>MDT</tz>
+    <display>Tue Sep 10 12:58:35 2002</display>
+    </query>
+    </iq></p>
+
+<p>为了让这个信息包自动的映射成上面的providers file中所列的时间对象（Time object），它必须有以下几个方法：setUtc(String), setTz(String), 和 setDisplay(String)。自动检查（introspection）的服务将试着自动的将字符串值转化成a boolean, int, long, float, double,或 Class 类型。转化成何种类型由IQ实例的需要来决定。</p>
+
+<p><strong>PacketExtensionProvider</strong></p>
+
+<p>信息包插件提供者（Packet extension providers）为信息包提供一个可插入的系统，这些信息包是一个IQ, message和presence packets的自定义名字空间的子元素。每一个插件提供者（extension provider）使用一个元素名（element name）和名字空间（namespace）在smack.providers文件中注册，如下例所示：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0"?&gt;</span>
+<span class="nt">&lt;smackProviders&gt;</span>
+<span class="nt">&lt;extensionProvider&gt;</span>
+<span class="nt">&lt;elementName&gt;</span>x<span class="nt">&lt;/elementName&gt;</span>
+<span class="nt">&lt;namespace&gt;</span>jabber:iq:event<span class="nt">&lt;/namespace&gt;</span>
+<span class="nt">&lt;className&gt;</span>org.jivesoftware.smack.packet.MessageEvent<span class="nt">&lt;/className&gt;</span>
+<span class="nt">&lt;/extensionProvider&gt;</span>
+<span class="nt">&lt;/smackProviders&gt;</span>
+</code></pre>
+</div>
+
+<p>如果有多重提供者条目（multiple provider entries）尝试注册并控制相同的名字空间，那么从类路径（classpath）载入的第一个条目将有优先权。</p>
+
+<p>一旦在一个信息包中发现信息包插件，解析器将传递到正确的提供者。每一个提供者可以实现PacketExtensionProvider接口或者是一个标准的Java Bean。在前面的例子中，每一个插件提供者（extension provider）负责解析原始的XML流去构造一个实例。在下面的例子中，bean introspection将被用于尝试自动使用在信息包插件子元素（packet extension sub-element）中的值设置类的属性。</p>
+
+<p>当一个插件提供者（extension provider）没有用元素名（element name）和名字空间（namespace）对注册是，Smack将存储所有在缺省信息包插件（DefaultPacketExtension）对象中的最高级别元素（top-level elements），并匹配到信息包上。</p>
+
+<p><strong>信息包属性（Packet Properties）</strong></p>
+
+<p>Smack提供简单的机制来将任意的属性附加到信息包上。每一个属性有个字符串类型的名字和一个值，这个值或者是Java原始数据类型（int, long, float, double, boolean）的，或者是任何可序列化的对象（Serializable object）（当一个java对象实现了Serializable接口时，它就是可序列化的）。</p>
+
+<p><strong>使用API（Using the API）</strong></p>
+
+<p>所有主要对象都有属性支持，例如消息对象（Message objects）。以下代码阐释了如何设置属性：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Message message = chat.createMessage();
+// Add a Color object as a property.
+message.setProperty("favoriteColor", new Color(0, 0, 255));
+// Add an int as a property.
+message.setProperty("favoriteNumber", 4);
+chat.sendMessage(message);
+</code></pre>
+</div>
+
+<p>获得这些相同的属性要用到以下的代码：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Message message = chat.nextMessage();
+// Get a Color object property.
+Color favoriteColor = (Color)message.getProperty("favoriteColor");
+// Get an int property. Note that properties are always returned as
+// Objects, so we must cast the value to an Integer, then convert
+// it to an int.
+int favoriteNumber = ((Integer)message.getProperty("favoriteNumber")).intValue();
+</code></pre>
+</div>
+
+<p><strong>将对象作为属性（Objects as Properties）</strong></p>
+
+<p>将对象作为属性值是改变数据的一个非常有力和简单的方法。但是，你应该记住以下几点：</p>
+
+<ul>
+  <li>信息包插件（Packet extensions）是向XMPP增加额外数据的更权威的方式。使用属性在某种情况下也许会比较方便，但是，Smack将会控制XML。</li>
+  <li>当你将Java对象（Java object）作为属性发送时，只有在客户机运行的Java能够解释数据。所以，可以考虑使用一系列的原始值来传递数据。</li>
+  <li>作为属性值发送的对象必须实现序列化接口（Serialiable）。</li>
+  <li>除此之外，发送者和接受者都必须由相同版本的类，否则在反序列化（de-serializing the object）对象时将发生序列化异常。</li>
+  <li>序列化的对象将会非常大，将会占用很多的服务器资源和带宽。</li>
+</ul>
+
+<p><strong>XML格式（XML Format）</strong></p>
+
+<p>当前的用于发送属性的XML格式不是标准的，所以可能不会得到使用Smack的客户的认可。XML如下所示（为了更清晰添加了注释）：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&lt;!-- All properties are in a x block. --&gt;
+&lt;properties xmlns="http://www.jivesoftware.com/xmlns/xmpp/properties"&gt;
+&lt;!-- First, a property named "prop1" that's an integer. --&gt;
+&lt;property&gt;
+&lt;name&gt;prop1&lt;/name&gt;
+&lt;value type="integer"&gt;123&lt;/value&gt;
+&lt;property&gt;
+&lt;!-- Next, a Java object that's been serialized and then converted
+ from binary data to base-64 encoded text. --&gt; 
+&lt;property&gt;
+&lt;name&gt;blah2&lt;/name&gt;
+&lt;value type="java-object"&gt;adf612fna9nab&lt;/value&gt;
+&lt;property&gt;
+&lt;/properties&gt;
+</code></pre>
+</div>
+
+<p>当前支持的数据类型有：integer, long, float, double, boolean, string, 和java-object。</p>
+
+<p><strong>使用Smack调试（Debugging with Smack）</strong></p>
+
+<p>Smack包含两个内置的调试控制台，他们允许你在服务器和客户机建跟踪XML的踪迹。简单的调试器（lite debugger）是smack.jar的一部分，加强的调试器（enhanced debugger）包含在（smackx-debug.jar）中。</p>
+
+<p>可以用两种不同的方法激活调试模式：</p>
+
+<p>1．在创建连接前加入以下一行代码：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>XMPPConnection.DEBUG_ENABLED = true;
+</code></pre>
+</div>
+
+<p>2．将Java的系统属性smack.debugEnabled设置为true。这一系统属性可通过下一命令行设置：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>java -Dsmack.debugEnabled=true SomeApp 在你的应用程序中，如果你想明确的禁用调试模式，包括使用命令行参数，则在打开新的连接前在你的应用程序中添加以下一行代码：
+
+XMPPConnection.DEBUG_ENABLED = false;
+</code></pre>
+</div>
+
+<p>Smack使用一下的逻辑来决定使用哪个调制控制台：</p>
+
+<ol>
+  <li>它将首先尝试使用Java系统属性smack.debuggerClass 所指定的调试类（debugger class）。如果你需要开发自己的调试器 I，可以实现SmackDebugger 接口然后使用下面的命令行设置系统属性：</li>
+</ol>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>java -Dsmack.debuggerClass=my.company.com.MyDebugger SomeApp
+</code></pre>
+</div>
+
+<ol>
+  <li>
+    <p>如果第一步失败了，Smack就会尝试使用增强的调试器（enhanced debugger）。 文件 smackx-debug.jar 包含，因此你要把jar文件放到类路径（classpath）下。如果空间确定你只是想要配置smack.jar文件，这种情况下增强的调试器（enhanced debugger）将不可用。</p>
+  </li>
+  <li>
+    <p>最后一种是前面两种都失败后使用简单的调试器（ite debugger）。在你的内存很小的时候，简单的调试器（ite debugger）是一个很好的选择。</p>
+  </li>
+</ol>
+
+<p><strong>增强的调试器（enhanced debugger）</strong></p>
+
+<p>当调试模式可用时，将出现一个包含每一个创建的连接的标签调试窗口，该窗口包含以下信息：</p>
+
+<ul>
+  <li>连接标签（Connection tabs） -每一个标签显示连接相关的调试信息</li>
+  <li>Smack信息标签（Smack info tab） -显示关于Smack的信息 (例如： Smack的版本（Smack version）, 安装的组件（installed components）,等等)。</li>
+  <li>连接标签包含以下信息:</li>
+  <li>所有的信息包（All Packets） -显示由Smack解析的发送和收到的信息包的信息。</li>
+  <li>未经处理的发送信息包（Raw Sent Packets） -未经处理的XML traffic（raw XML traffic）由Smack生成并发送至服务器 。</li>
+  <li>未经处理的接收信息包（Raw Received Packets） –未经处理的XML traffic（raw XML traffic）由服务器发送给客户机。</li>
+  <li>Ad-hoc 消息（Ad-hoc message） -允许发送各种类型的ad-hoc信息包（ad-hoc packets）。</li>
+</ul>
+
+<p><strong>信息—显示连接状态和统计信息。</strong></p>
+
+<p>简单的调试器（Lite Debugger ）
+当调试模式可用时，每创建一个连接将出现调试窗口，该窗口包含以下信息：</p>
+
+<p>客户端的流量（Client Traffic） (红色的文本) –未经处理的XML traffic（raw XML traffic）由Smack生成并发送至服务器 。</p>
+
+<p>服务器端的流量（Server Traffic）(蓝色的文本) –未经处理的XML traffic（raw XML traffic）由服务器发送给客户机。</p>
+
+<p>解释的信息包（Interpreted Packets）(绿色的文本) – 显示来自服务器的由Smack解析的XML信息包（XML packets）</p>
+
+		  </article>
+		<hr>
+	<br/>
+        <p>
+          本作品由 <a href="mailto:ouyanglip@gmail.com">Lippi.OuYang</a> 创作，采用
+          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="查看协议详细信息" target="_blank">CC BY-NC-SA 3.0 许可协议</a>
+          进行许可。
+        </p>
+	<div style="margin-top:10px;margin-bottom:10px">
+	  
+	  <span class="next">
+	    上篇：
+	    <a href="/blog/2014/10/androidDP-introduction.html">
+	      AndroidPN消息推送
+	    </a>
+	  </span>
+	   
+	  
+	  <span class="prev">
+	    下篇：
+	    <a href="/blog/2014/10/androidDP-project.html">
+	      Androidpn 消息推送总结
+	    </a>
+	  </span>
+	  
+	</div>
+	</div>
+	
+        
+	<div post-cate="java">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/hibernate-cache-guide.html" class="post-list-item">
+                    <h2>Hibernate缓存配置笔记</h2>
+                    <span class="date">Jul 24, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-virtual-mechine.html" class="post-list-item">
+                    <h2>Java虚拟机简介</h2>
+                    <span class="date">Apr 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-code-opt-one.html" class="post-list-item">
+                    <h2>优化java代码建议(1)</h2>
+                    <span class="date">Apr 12, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/02/cache.html" class="post-list-item">
+                    <h2>谈谈缓存和基本的缓存算法</h2>
+                    <span class="date">Feb 4, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/12/improve-webServer-performance.html" class="post-list-item">
+                    <h2>谈谈如何提高web服务器并发性能</h2>
+                    <span class="date">Dec 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-inner-class.html" class="post-list-item">
+                    <h2>java中内部类</h2>
+                    <span class="date">Nov 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-concurrent-collections.html" class="post-list-item">
+                    <h2>java同步容器与并发容器</h2>
+                    <span class="date">Nov 8, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/java-multithread.html" class="post-list-item">
+                    <h2>java并发和多线程</h2>
+                    <span class="date">Aug 2, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-UI-Thread.html" class="post-list-item">
+                    <h2>Android UI线程和子线程、Service通信</h2>
+                    <span class="date">Jul 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-networkOnMainThreadException.html" class="post-list-item">
+                    <h2>从android.os.NetworkOnMainThreadException引发的思考</h2>
+                    <span class="date">Jul 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="post-list-item">
+                    <h2>Java编程Tips</h2>
+                    <span class="date">Jun 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/15/in-the-rain.html" class="post-list-item">
+                    <h2>在雨中</h2>
+                    <span class="date">Jun 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-code-opt.html" class="post-list-item">
+                    <h2>C代码优化小贴士</h2>
+                    <span class="date">Dec 27, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/libevent.html" class="post-list-item">
+                    <h2>处理并发之二：libevent的eventbuffer</h2>
+                    <span class="date">Aug 24, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/linux-epoll.html" class="post-list-item">
+                    <h2>处理并发之一：LINUX Epoll机制介绍</h2>
+                    <span class="date">Aug 23, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="programming">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="jekyll">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-syntax.html" class="post-list-item">
+                    <h2>Markdown 语法 (简体中文版)</h2>
+                    <span class="date">Jul 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-basics.html" class="post-list-item">
+                    <h2>markdown 快速入门</h2>
+                    <span class="date">Jul 10, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="other">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/vim-plugins.html" class="post-list-item">
+                    <h2>一些强大的Vim插件</h2>
+                    <span class="date">Mar 20, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="reprints">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/09/android-studio-plugins.html" class="post-list-item">
+                    <h2>提高效率的Android Studio插件</h2>
+                    <span class="date">Sep 9, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/android-opensource.html" class="post-list-item">
+                    <h2>值得推荐的android开源框架</h2>
+                    <span class="date">Oct 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="web">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/04/web-transmission-basis.html" class="post-list-item">
+                    <h2>网络传输基础</h2>
+                    <span class="date">Apr 16, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/web-server.html" class="post-list-item">
+                    <h2>也谈如何构建高性能服务端程序</h2>
+                    <span class="date">Nov 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp-analise.html" class="post-list-item">
+                    <h2>XMPP协议分析-具体分析</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-project.html" class="post-list-item">
+                    <h2>Androidpn 消息推送总结</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-to-use-smack.html" class="post-list-item">
+                    <h2>Smack开发手册</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-introduction.html" class="post-list-item">
+                    <h2>AndroidPN消息推送</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp.html" class="post-list-item">
+                    <h2>XMPP协议分析-原理</h2>
+                    <span class="date">Oct 28, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/jsp-jfreechart.html" class="post-list-item">
+                    <h2>使用Jfreechart生成曲线显示到JSP中</h2>
+                    <span class="date">Oct 22, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-http-works.html" class="post-list-item">
+                    <h2>当我们打开网页时发生了什么</h2>
+                    <span class="date">Oct 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="book">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/11/how-to-evaluate-the-hackers-and-painters.html" class="post-list-item">
+                    <h2>如何评价『黑客与画家』</h2>
+                    <span class="date">Nov 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="algorithm">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/skip-list.html" class="post-list-item">
+                    <h2>skip list跳跃表实现</h2>
+                    <span class="date">Dec 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/graph.html" class="post-list-item">
+                    <h2>计算机算法--图算法介绍</h2>
+                    <span class="date">Nov 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/leveldb.html" class="post-list-item">
+                    <h2>leveldb原理剖析</h2>
+                    <span class="date">Nov 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c/c++">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-open-project.html" class="post-list-item">
+                    <h2>值得推荐的C/C++框架和库</h2>
+                    <span class="date">Dec 13, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/android-links.html" class="post-list-item">
+                    <h2>安卓开发者必备的42个链接</h2>
+                    <span class="date">May 19, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/define-custom-view.html" class="post-list-item">
+                    <h2>Android自定义视图教程</h2>
+                    <span class="date">May 17, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/android-studio-prefrence.html" class="post-list-item">
+                    <h2>Android Studio多渠道打包和代码混淆教程</h2>
+                    <span class="date">Mar 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/05/gradle-dependency-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之依赖管理</h2>
+                    <span class="date">May 5, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/gradle-task-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之任务管理</h2>
+                    <span class="date">Apr 30, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="lambda">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/dagger-dependency-injection.html" class="post-list-item">
+                    <h2>Dagger依赖注入浅析</h2>
+                    <span class="date">Aug 13, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/gradle-tasks-guide.html" class="post-list-item">
+                    <h2>彻底理解Gradle的任务</h2>
+                    <span class="date">Jul 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Latex">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/latex-fonts-settings.html" class="post-list-item">
+                    <h2>Latex中英文环境设置</h2>
+                    <span class="date">Aug 22, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Unix/Linux">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/baidu-spider-forbidden.html" class="post-list-item">
+                    <h2>解决百度爬虫无法抓取github pages</h2>
+                    <span class="date">Feb 18, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/apache-configuration-in-ubuntu.html" class="post-list-item">
+                    <h2>Ubuntu下Apache服务器的配置</h2>
+                    <span class="date">Jan 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/tmux-guide.html" class="post-list-item">
+                    <h2>终端复用软件之tmux简介</h2>
+                    <span class="date">Jan 19, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/08/linux-zsh.html" class="post-list-item">
+                    <h2>Zsh-Linux下最好的Shell简介</h2>
+                    <span class="date">Aug 23, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Git">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/git-guide.html" class="post-list-item">
+                    <h2>Git操作手册|命令速查表</h2>
+                    <span class="date">Feb 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="hi">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/hi.html" class="post-list-item">
+                    <h2>hi</h2>
+                    <span class="date">Feb 22, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	 </div>
+
+</div>
+
+
+<!-- Blog Comments -->
+<div class="media">
+  <!-- UY BEGIN 
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2023801"></script>
+UY END -->
+
+<!-- 多说评论框 start -->
+  <div class="post-comment">
+            <span>Comments</span>
+	<div class="ds-thread" data-thread-key="/blog/2014/10/how to use smack" data-title="Smack开发手册" data-url="LippiOuYang.github.io/blog/2014/10/how-to-use-smack.html">
+	</div>
+ </div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"lippiouyang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+ 
+</div> 
+</div>
+
+        </div>
+
+	 <div id="top" data-toggle="tooltip" data-placement="left" title="回到顶部">
+	      <a href="javascript:;">
+		<div class="arrow"></div>
+		<div class="stick"></div>
+	      </a>
+	    </div>
+
+        <!-- Blog Sidebar Widgets Column -->
+        <div class="col-md-4">
+          <!-- Blog Search Well -->  
+	
+                    <div class="shadow-corner-curl hidden-xs">
+	  <div class="categories-list-header">站内搜索</div>
+<!-- 使用该代码即表示您同意接受 Google 自定义搜索服务条款。 -->
+<!-- 有关服务条款，请访问 http://www.google.com/cse/docs/tos.html?hl=zh-CN -->
+<form name="cse" id="searchbox_demo" action="/search.html">
+  <input type="hidden" name="cref" value="" />
+  <input type="hidden" name="ie" value="utf-8" />
+  <input type="hidden" name="hl" value="zh-CN" />
+  <input name="q" type="text" size="30" />
+  <input type="submit" name="sa" value="搜索" /> 
+</form>
+<script type="text/javascript" src="http://www.google.com/cse/tools/onthefly?form=searchbox_demo&lang=zh-CN"></script>			      
+     
+            
+</div>
+
+
+
+
+
+
+
+
+          <!-- Blog Categories Well -->
+              
+
+    <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        Categories
+      </div>
+      
+      <a href="/index.html" class="categories-list-item" cate="All">
+        All<span class="my-badge"> 61</span>
+      </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="java">
+          java <span class="my-badge">17</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c">
+          c <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="programming">
+          programming <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="jekyll">
+          jekyll <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="other">
+          other <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="reprints">
+          reprints <span class="my-badge">5</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Android">
+          Android <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="web">
+          web <span class="my-badge">9</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="book">
+          book <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="algorithm">
+          algorithm <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c/c++">
+          c/c++ <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="android">
+          android <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Gradle">
+          Gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="lambda">
+          lambda <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="gradle">
+          gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Latex">
+          Latex <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Unix/Linux">
+          Unix/Linux <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Git">
+          Git <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="hi">
+          hi <span class="my-badge">1</span>
+        </a>
+      
+    </div>
+
+
+
+ 
+         
+              <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        热门文章
+      </div>
+
+ <ul class="list-unstyled">
+      	<li><a href="/blog/2015/03/github-pages-blog.html" class="categories-list-item">利用Github-pages建立个人博客</a></li>	
+<li><a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="categories-list-item">一个合格的程序员应该读过哪些书</a></li>
+<li><a href="/blog/2014/12/c-open-project.html" class="categories-list-item">值得推荐的C/C++框架和库</a></li>
+<li><a href="/blog/2014/12/c-code-opt.html" class="categories-list-item">C代码优化小贴士</a></li>	
+<li><a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="categories-list-item">Java编程Tips</a></li>
+<li><a href="/blog/2015/04/gradle-task-management.html" class="categories-list-item">Gradle系列教程之任务管理</a></li>	
+<li><a href="/blog/2015/05/android-links.html" class="categories-list-item">安卓开发者必备的42个链接</a></li>
+<li><a href="/blog/2015/05/gradle-dependency-management.html" class="categories-list-item">Gradle系列教程之依赖管理</a></li>
+<li><a href="/blog/2014/10/android-opensource.html" class="categories-list-item">值得推荐的android开源框架</a></li>	 
+<li><a href="/blog/2015/07/hibernate-cache-guide.html" class="categories-list-item">Hibernate缓存配置笔记</a></li>	
+	 
+     </ul>
+</div>
+ 
+       
+                   <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        相关链接
+      </div>    
+ <ul class="list-unstyled">
+              <li>
+                <a href="https://github.com/" class="categories-list-item">
+                   GitHub 
+                </a>
+              </li>
+<li>
+                <a href="http://www.stackoverflow.com/" class="categories-list-item">
+                   Stack Overflow 
+                </a>
+              </li>
+<li>
+                <a href="http://jekyllrb.com/docs/posts/" class="categories-list-item">
+                  Jekyll文档 
+                </a>
+              </li>
+               
+               <li>
+                <a href="https://news.ycombinator.com/" class="categories-list-item">
+                   Hacker News 
+                </a>
+              </li>        
+              
+              <li>
+                <a href="http://developer.android.com/" class="categories-list-item">
+                   Android Developer 
+                </a>
+              </li>
+              
+              <li>
+                <a href="http://www.ruanyifeng.com/blog/" class="categories-list-item">
+                   Ruanyifeng's Blog 
+                </a>
+              </li>
+
+
+  <li>
+                <a href="http://www.importnew.com/" class="categories-list-item">
+                   ImportNew 
+                </a>
+              </li>
+<li>
+                <a href="http://guides.codepath.com/android" class="categories-list-item">
+                   CodePath Android Cliffnotes 
+                </a>
+              </li>
+<li>
+                <a href="http://androidweekly.net/" class="categories-list-item">
+                   Androidweekly 	
+                </a>
+              </li>
+<li>
+			<a href="http://mvnrepository.com/" class="categories-list-item">
+                   Mvnrepository 
+                </a>
+              </li>
+<li>
+			<a href="http://www.iteye.com/" class="categories-list-item">
+                  Iteye 
+                </a>
+              </li>
+              		
+            </ul>
+
+</div>
+ 
+
+          <!-- Side Widget Well -->
+           
+        </div>
+      </div>
+
+
+
+      <!-- /.row -->
+      <hr>
+      <!-- Footer -->
+      <footer>
+           <p><small>Designed by <a href="https://github.com/EZLippi">Lippi</a> | Free hosted at <a href="https://github.com/EZLippi/EZLippi.github.io">Github</a> | Copyright 2014 - 2016  
+										</p>
+
+	<!--
+<div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <a href="mailto:ouyanglip@gmail.com"><span class="glyphicon glyphicon-envelope"></span> ouyanglip@gmail.com</a>
+        <span class="point"> · </span>
+        
+          
+          <a href="https://github.com/LippiOuYang">
+            <span class="icon">
+              <svg viewBox="0 0 16 16">
+                <path fill="#aaa" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+            Github
+          </a>
+          
+          
+          <span class="point"> · </span>
+          <span><a href="/feed.xml">RSS</a></span>
+          <span class="point"> · </span>
+          <span>Draw my life with code</span>
+          <span class="point"> · </span>
+          <span>&copy; 2014 LippiOuYang</span>
+          <span class="point"> · </span>
+          <span>Designed by <a href="https://github.com/LippiOuYang">Lippi</a></span>
+
+      </div>
+    </div>
+    </div>
+	-->
+ 
+              <div style="display:none;"><script src="http://s95.cnzz.com/z_stat.php?id=1254799848&web_id=1254799848" language="JavaScript"></script></div>
+ 
+
+      </footer>
+    </div>
+    <!-- /.container -->
+  </body>
+
+</html>

@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta name="baidu-site-verification" content="HvuxptDcq6" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="处理并发之一：LINUX Epoll机制介绍 - Lippi-浮生志 - Lippi.OuYang(ouyanglip@gmail.com)">
+    <title>
+      处理并发之一：LINUX Epoll机制介绍 - Lippi-浮生志
+    </title>
+    <!-- Bootstrap Core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS 
+    <link href="/css/blog.css" rel="stylesheet">-->
+    <!-- index css -->
+    <link href="/css/index.css" rel="stylesheet">
+	<!-- pagments CSS-->
+	<link href="/css/pygments.css" rel="stylesheet">
+        <!-- jQuery Version 1.11.0 -->
+    <script src="/js/jquery-1.11.0.js"> </script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/bootstrap.min.js"></script>
+   <!-- 回到顶部js-->
+    <script src="/js/index.js"></script>
+
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?085fc257cb1e774f7764a2cf527c393d";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+	<script>
+    (function(){
+     var bp = document.createElement('script');
+	 bp.src = '//push.zhanzhang.baidu.com/push.js';
+	 var s = document.getElementsByTagName("script")[0];
+	 s.parentNode.insertBefore(bp, s);
+	 })();
+	</script>
+
+  </head>
+  
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">
+              Toggle navigation
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+          </button>
+          <a class="navbar-brand" href="/index.html">
+            Lippi-浮生志
+          </a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+            <li>
+              <a href="/categories.html">
+                分 类
+              </a>
+            </li>
+            <li>
+              <a href="/tags.html">
+                标 签
+              </a>
+            </li>
+            <li>
+              <a href="/archives.html">
+                归 档
+              </a>
+            </li>
+            <li>
+              <a href="/faqs.html">
+                备 忘
+              </a>
+            </li>
+            <li>
+              <a href="/about.html">
+                关 于
+              </a>
+            </li>
+          </ul> 
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+        <!-- Blog Entries Column -->
+        <div class="col-md-8">
+          <!-- Blog Post -->
+<!-- Title -->
+<div class="row">
+  <div class="post-area post">
+
+ 	<div class="post-list-body">
+        	<div class="all-posts" post-cate="All">
+ 		<header>
+		<h1>
+		  处理并发之一：LINUX Epoll机制介绍
+		  <div class="post-date"><a href="https://github.com/LippiOuYang/LippiOuYang.github.io/edit/master/_posts/2014-08-23-linux-epoll.md" target="_blank">纠错</a>&nbsp;&nbsp;
+			<span class="glyphicon glyphicon-time"></span>
+			23 Aug 2014
+		  </div>
+		</h1>
+ 		</header>
+		<!-- Author -->
+		<hr>
+		 <article>
+		<p>Epoll可是当前在Linux下开发大规模并发网络程序的热门人选，Epoll 在Linux2.6内核中正式引入，和select相似，其实都I/O多路复用技术而已，并没有什么神秘的。</p>
+
+<p>其实在Linux下设计并发网络程序，向来不缺少方法，比如典型的Apache模型（Process Per Connection，简称PPC），TPC（Thread Per Connection）模型，以及select模型和poll模型，那为何还要再引入Epoll这个东东呢？那还是有得说说的…</p>
+
+<p>##2. 常用模型的缺点</p>
+
+<p>如果不摆出来其他模型的缺点，怎么能对比出Epoll的优点呢。</p>
+
+<p>###2.1 PPC/TPC模型</p>
+
+<p>这两种模型思想类似，就是让每一个到来的连接一边自己做事去，别再来烦我。只是PPC是为它开了一个进程，而TPC开了一个线程。可是别烦我是有代价的，它要时间和空间啊，连接多了之后，那么多的进程/线程切换，这开销就上来了；因此这类模型能接受的最大连接数都不会高，一般在几百个左右。</p>
+
+<p>###2.2 select模型</p>
+
+<ol>
+  <li>
+    <p>最大并发数限制，因为一个进程所打开的FD（文件描述符）是有限制的，由FD_SETSIZE设置，默认值是1024/2048，因此Select模型的最大并发数就被相应限制了。自己改改这个FD_SETSIZE？想法虽好，可是先看看下面吧…</p>
+  </li>
+  <li>
+    <p>效率问题，select每次调用都会线性扫描全部的FD集合，这样效率就会呈现线性下降，把FD_SETSIZE改大的后果就是，大家都慢慢来，什么？都超时了？？！！</p>
+  </li>
+  <li>
+    <p>内核/用户空间 内存拷贝问题，如何让内核把FD消息通知给用户空间呢？在这个问题上select采取了内存拷贝方法。</p>
+  </li>
+</ol>
+
+<p>###2.3 poll模型</p>
+
+<p>基本上效率和select是相同的，select缺点的2和3它都没有改掉。</p>
+
+<p>##3.Epoll的提升</p>
+
+<p>把其他模型逐个批判了一下，再来看看Epoll的改进之处吧，其实把select的缺点反过来那就是Epoll的优点了。</p>
+
+<p>3.1. Epoll没有最大并发连接的限制，上限是最大可以打开文件的数目，这个数字一般远大于2048, 一般来说这个数目和系统内存关系很大，具体数目可以cat /proc/sys/fs/file-max察看。</p>
+
+<p>3.2. 效率提升，Epoll最大的优点就在于它只管你“活跃”的连接，而跟连接总数无关，因此在实际的网络环境中，Epoll的效率就会远远高于select和poll。</p>
+
+<p>3.3. 内存拷贝，Epoll在这点上使用了“共享内存”，这个内存拷贝也省略了。</p>
+
+<p>##4. Epoll为什么高效</p>
+
+<p>Epoll的高效和其数据结构的设计是密不可分的，这个下面就会提到。</p>
+
+<p>首先回忆一下select模型，当有I/O事件到来时，select通知应用程序有事件到了快去处理，而应用程序必须轮询所有的FD集合，测试每个FD是否有事件发生，并处理事件；代码像下面这样：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>int res = select(maxfd+1, &amp;readfds, NULL, NULL, 120);
+if(res &gt; 0)
+
+{
+    for(int i = 0; i &lt; MAX_CONNECTION; i++)
+    {
+        if(FD_ISSET(allConnection[i],&amp;readfds))
+        {
+            handleEvent(allConnection[i]);
+        }
+    }
+}
+// if(res == 0) handle timeout, res &lt; 0 handle error
+</code></pre>
+</div>
+
+<p>Epoll不仅会告诉应用程序有I/0事件到来，还会告诉应用程序相关的信息，这些信息是应用程序填充的，因此根据这些信息应用程序就能直接定位到事件，而不必遍历整个FD集合。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>intres = epoll_wait(epfd, events, 20, 120);
+
+for(int i = 0; i &lt; res;i++)
+{
+    handleEvent(events[n]);
+}
+</code></pre>
+</div>
+
+<p>##5. Epoll关键数据结构</p>
+
+<p>前面提到Epoll速度快和其数据结构密不可分，其关键数据结构就是：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>struct epoll_event {
+
+    __uint32_t events;      // Epoll events
+
+    epoll_data_t data;      // User datavariable
+
+};
+
+typedef union epoll_data {
+
+    void *ptr;
+
+   int fd;
+
+    __uint32_t u32;
+
+    __uint64_t u64;
+
+} epoll_data_t;
+</code></pre>
+</div>
+
+<p>结构体epoll_event 被用于注册所感兴趣的事件和回传所发生待处理的事件. 
+其中epoll_data 联合体用来保存触发事件的某个文件描述符相关的数据. 
+例如一个client连接到服务器，服务器通过调用accept函数可以得到于这个client对应的socket文件描述符，可以把这文件描述符赋给epoll_data的fd字段以便后面的读写操作在这个文件描述符上进行。epoll_event 结构体的events字段是表示感兴趣的事件和被触发的事件可能的取值为：</p>
+
+<ul>
+  <li>EPOLLIN ：表示对应的文件描述符可以读；</li>
+  <li>EPOLLOUT：表示对应的文件描述符可以写；</li>
+  <li>EPOLLPRI：表示对应的文件描述符有紧急的数据可读</li>
+  <li>EPOLLERR：表示对应的文件描述符发生错误；</li>
+  <li>EPOLLHUP：表示对应的文件描述符被挂断；</li>
+  <li>EPOLLET：表示对应的文件描述符有事件发生；</li>
+</ul>
+
+<p><strong>ET和LT模式</strong>
+LT(level triggered)是缺省的工作方式，并且同时支持block和no-block socket.在这种做法中，内核告诉你一个文件描述符是否就绪了，然后你可以对这个就绪的fd进行IO操作。如果你不作任何操作，内核还是会继续通知你的，所以，这种模式编程出错误可能性要小一点。传统的select/poll都是这种模型的代表。</p>
+
+<p>ET (edge-triggered)是高速工作方式，只支持no-block socket。在这种模式下，当描述符从未就绪变为就绪时，内核通过epoll告诉你。然后它会假设你知道文件描述符已经就绪，并且不会再为那个文件描述符发送更多的就绪通知，直到你做了某些操作导致那个文件描述符不再为就绪状态了（比如，你在发送，接收或者接收请求，或者发送接收的数据少于一定量时导致了一个EWOULDBLOCK 错误）。但是请注意，如果一直不对这个fd作IO操作（从而导致它再次变成未就绪），内核不会发送更多的通知(only once)，不过在TCP协议中，ET模式的加速效用仍需要更多的benchmark确认。
+ET和LT的区别在于LT事件不会丢弃，而是只要读buffer里面有数据可以让用户读，则不断的通知你。而ET则只在事件发生之时通知。可以简单理解为LT是水平触发，而ET则为边缘触发。
+ET模式仅当状态发生变化的时候才获得通知,这里所谓的状态的变化并不包括缓冲区中还有未处理的数据,也就是说,如果要采用ET模式,需要一直read/write直到出错为止,很多人反映为什么采用ET模式只接收了一部分数据就再也得不到通知了,大多因为这样;而LT模式是只要有数据没有处理就会一直通知下去的.</p>
+
+<p>##6. 使用Epoll</p>
+
+<p>既然Epoll相比select这么好，那么用起来如何呢？会不会很繁琐啊…先看看下面的三个函数吧，就知道Epoll的易用了。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>int epoll_create(int size);
+</code></pre>
+</div>
+
+<p>生成一个Epoll专用的文件描述符，其实是申请一个内核空间，用来存放你想关注的socket fd上是否发生以及发生了什么事件。size就是你在这个Epoll fd上能关注的最大socket fd数，大小自定，只要内存足够。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+</code></pre>
+</div>
+
+<p>epoll的事件注册函数，它不同与select()是在监听事件时告诉内核要监听什么类型的事件，而是在这里先注册要监听的事件类型。第一个参数是epoll_create()的返回值，第二个参数表示动作，用三个宏来表示：</p>
+
+<ul>
+  <li>EPOLL_CTL_ADD：注册新的fd到epfd中；</li>
+  <li>EPOLL_CTL_MOD：修改已经注册的fd的监听事件；</li>
+  <li>EPOLL_CTL_DEL：从epfd中删除一个fd；</li>
+</ul>
+
+<p>第三个参数是需要监听的fd，第四个参数是告诉内核需要监听什么事</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>int epoll_wait(int epfd,struct epoll_event * events,int maxevents,int timeout);
+</code></pre>
+</div>
+
+<p>等待I/O事件的发生；参数说明：</p>
+
+<ul>
+  <li>epfd:由epoll_create() 生成的Epoll专用的文件描述符；</li>
+  <li>epoll_event:用于回传代处理事件的数组；</li>
+  <li>maxevents:每次能处理的事件数；</li>
+  <li>timeout:等待I/O事件发生的超时值；</li>
+  <li>返回发生事件数。</li>
+</ul>
+
+<hr />
+
+<hr />
+
+<p>##测试程序
+首先对服务端和客户端做下说明：
+我想实现的是客户端和服务端并发的程序，客户端通过配置并发数，说明有多少个用户去连接服务端。
+客户端会发送消息：”Client: i send message Hello Server!”，其中i表示哪一个客户端；收到消息：”Recv Server Msg Content:%s\n”。
+例如：
+发送：Client: 1 send message “Hello Server!”
+接收：Recv Derver Msg Content:Hello, client fd: 6
+服务端收到后给客户端回复消息：”Hello, client fd: i”，其中i表示服务端接收的fd,用户区别是哪一个客户端。接收客户端消息：”Terminal Received Msg Content:%s\n”
+例如：
+发送：Hello, client fd: 6
+接收：Terminal Received Msg Content:Client: 1 send message “Hello Server!”
+备注：这里在接收到消息后，直接打印出消息，如果需要对消息进行处理（如果消息处理比较占用时间，不能立即返回，可以将该消息放入一个队列中，然后开启一个线程从队列中取消息进行处理，这样的话不会因为消息处理而阻塞epoll）。libenent好像对这种有2中处理方式，一个就是回调，要求回调函数，不占用太多的时间，基本能立即返回，另一种好像也是一个队列实现的，这个还需要研究。
+服务端代码说明：
+服务端在绑定监听后，开启了一个线程，用于负责接收客户端连接，加入到epoll中，这样只要accept到客户端的连接，就将其add EPOLLIN到epoll中，然后进入循环调用epoll_wait，监听到读事件，接收数据，并将事件修改为EPOLLOUT；反之监听到写事件，发送数据，并将事件修改为EPOLLIN。
+<strong>服务器代码：</strong></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>//cepollserver.h  
+#ifndef  C_EPOLL_SERVER_H  
+#define  C_EPOLL_SERVER_H  
+  
+#include &lt;sys/epoll.h&gt;  
+#include &lt;sys/socket.h&gt;  
+#include &lt;netinet/in.h&gt;  
+#include &lt;fcntl.h&gt;  
+#include &lt;arpa/inet.h&gt;  
+#include &lt;stdio.h&gt;  
+#include &lt;stdlib.h&gt;  
+#include &lt;iostream&gt;  
+#include &lt;pthread.h&gt;  
+  
+#define _MAX_SOCKFD_COUNT 65535  
+  
+class CEpollServer  
+{  
+        public:  
+                CEpollServer();  
+                ~CEpollServer();  
+  
+                bool InitServer(const char* chIp, int iPort);  
+                void Listen();  
+                static void ListenThread( void* lpVoid );  
+                void Run();  
+  
+        private:  
+                int        m_iEpollFd;  
+                int        m_isock;  
+                pthread_t       m_ListenThreadId;// 监听线程句柄  
+  
+};  
+  
+#endif  
+
+   #include "cepollserver.h"  
+  
+using namespace std;  
+  
+CEpollServer::CEpollServer()  
+{  
+}  
+  
+CEpollServer::~CEpollServer()  
+{  
+    close(m_isock);  
+}  
+  
+bool CEpollServer::InitServer(const char* pIp, int iPort)  
+{  
+    m_iEpollFd = epoll_create(_MAX_SOCKFD_COUNT);  
+  
+    //设置非阻塞模式  
+    int opts = O_NONBLOCK;  
+    if(fcntl(m_iEpollFd,F_SETFL,opts)&lt;0)  
+    {  
+        printf("设置非阻塞模式失败!\n");  
+        return false;  
+    }  
+  
+    m_isock = socket(AF_INET,SOCK_STREAM,0);  
+    if ( 0 &gt; m_isock )  
+    {  
+        printf("socket error!\n");  
+        return false;  
+　　}  
+　　  
+　　sockaddr_in listen_addr;  
+　　    listen_addr.sin_family=AF_INET;  
+　　    listen_addr.sin_port=htons ( iPort );  
+　　    listen_addr.sin_addr.s_addr=htonl(INADDR_ANY);  
+　　    listen_addr.sin_addr.s_addr=inet_addr(pIp);  
+　　  
+　　    int ireuseadd_on = 1;//支持端口复用  
+　　    setsockopt(m_isock, SOL_SOCKET, SO_REUSEADDR, &amp;ireuseadd_on, sizeof(ireuseadd_on) );  
+　　  
+　　    if ( bind ( m_isock, ( sockaddr * ) &amp;listen_addr,sizeof ( listen_addr ) ) !=0 )  
+　　    {  
+　　        printf("bind error\n");  
+　　        return false;  
+　　    }  
+　　  
+　　    if ( listen ( m_isock, 20) &lt;0 )  
+　　    {  
+　　        printf("listen error!\n");  
+　　        return false;  
+　　    }  
+　　    else  
+　　    {  
+　　        printf("服务端监听中...\n");  
+　　    }  
+　　  
+　　    // 监听线程，此线程负责接收客户端连接，加入到epoll中  
+　　    if ( pthread_create( &amp;m_ListenThreadId, 0, ( void * ( * ) ( void * ) ) ListenThread, this ) != 0 )  
+　　    {  
+　　        printf("Server 监听线程创建失败!!!");  
+　　        return false;  
+　　    }  
+　　}  
+　　// 监听线程  
+　　void CEpollServer::ListenThread( void* lpVoid )  
+　　{  
+　　    CEpollServer *pTerminalServer = (CEpollServer*)lpVoid;  
+　　    sockaddr_in remote_addr;  
+　　    int len = sizeof (remote_addr);  
+　　    while ( true )  
+　　    {  
+　　        int client_socket = accept (pTerminalServer-&gt;m_isock, ( sockaddr * ) &amp;remote_addr,(socklen_t*)&amp;len );  
+　　        if ( client_socket &lt; 0 )  
+　　        {  
+　　            printf("Server Accept失败!, client_socket: %d\n", client_socket);  
+　　            continue;  
+　　        }  
+　　        else  
+　　        {  
+　　            struct epoll_event    ev;  
+　　            ev.events = EPOLLIN | EPOLLERR | EPOLLHUP;  
+　　            ev.data.fd = client_socket;     //记录socket句柄  
+　　            epoll_ctl(pTerminalServer-&gt;m_iEpollFd, EPOLL_CTL_ADD, client_socket, &amp;ev);  
+　　        }  
+　　    }  
+　　}  
+　　  
+　　void CEpollServer::Run()  
+　　{  
+　　    while ( true )  
+　　    {  
+　　        struct epoll_event    events[_MAX_SOCKFD_COUNT];  
+　　        int nfds = epoll_wait( m_iEpollFd, events,  _MAX_SOCKFD_COUNT, -1 );  
+　　        for (int i = 0; i &lt; nfds; i++)  
+　　        {  
+　　            int client_socket = events[i].data.fd;  
+　　            char buffer[1024];//每次收发的字节数小于1024字节  
+　　            memset(buffer, 0, 1024);  
+　　            if (events[i].events &amp; EPOLLIN)//监听到读事件，接收数据  
+　　            {  
+　　                int rev_size = recv(events[i].data.fd,buffer, 1024,0);  
+　　                if( rev_size &lt;= 0 )  
+　　                {  
+　　                    cout &lt;&lt; "recv error: recv size: " &lt;&lt; rev_size &lt;&lt; endl;  
+　　                    struct epoll_event event_del;  
+　　                    event_del.data.fd = events[i].data.fd;  
+　　                    event_del.events = 0;  
+　　                    epoll_ctl(m_iEpollFd, EPOLL_CTL_DEL, event_del.data.fd, &amp;event_del);  
+　　                }  
+　　                else  
+　　                {  
+　　                    printf("Terminal Received Msg Content:%s\n",buffer);  
+　　                    struct epoll_event    ev;  
+　　                    ev.events = EPOLLOUT | EPOLLERR | EPOLLHUP;  
+　　                    ev.data.fd = client_socket;     //记录socket句柄  
+　　                    epoll_ctl(m_iEpollFd, EPOLL_CTL_MOD, client_socket, &amp;ev);  
+　　                }  
+　　            }  
+　　else if(events[i].events &amp; EPOLLOUT)//监听到写事件，发送数据  
+　　            {  
+　　                char sendbuff[1024];  
+　　                sprintf(sendbuff, "Hello, client fd: %d\n", client_socket);  
+　　                int sendsize = send(client_socket, sendbuff, strlen(sendbuff)+1, MSG_NOSIGNAL);  
+　　                if(sendsize &lt;= 0)  
+　　                {  
+　　                    struct epoll_event event_del;  
+　　                    event_del.data.fd = events[i].data.fd;  
+　　                    event_del.events = 0;  
+　　                    epoll_ctl(m_iEpollFd, EPOLL_CTL_DEL, event_del.data.fd, &amp;event_del);  
+　　                }  
+　　                else  
+　　                {  
+　　                    printf("Server reply msg ok! buffer: %s\n", sendbuff);  
+　　                    struct epoll_event    ev;  
+　　                    ev.events = EPOLLIN | EPOLLERR | EPOLLHUP;  
+　　                    ev.data.fd = client_socket;     //记录socket句柄  
+　　                    epoll_ctl(m_iEpollFd, EPOLL_CTL_MOD, client_socket, &amp;ev);  
+　　                }  
+　　            }  
+　　            else  
+　　            {  
+　　                cout &lt;&lt; "EPOLL ERROR\n" &lt;&lt;endl;  
+　　                epoll_ctl(m_iEpollFd, EPOLL_CTL_DEL, events[i].data.fd, &amp;events[i]);  
+　　            }  
+　　        }  
+　　    }  
+　　}  
+</code></pre>
+</div>
+
+<p><strong>客户端代码：</strong>
+说明：测试是两个并发进行测试，每一个客户端都是一个长连接。代码中在连接服务器（ConnectToServer）时将用户ID和socketid关联起来。用户ID和socketid是一一对应的关系。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>    #ifndef _DEFINE_EPOLLCLIENT_H_  
+    #define _DEFINE_EPOLLCLIENT_H_  
+    #define _MAX_SOCKFD_COUNT 65535  
+      
+    #include&lt;iostream&gt;  
+    #include &lt;sys/epoll.h&gt;  
+    #include &lt;sys/socket.h&gt;  
+    #include &lt;netinet/in.h&gt;  
+    #include &lt;fcntl.h&gt;  
+    #include &lt;arpa/inet.h&gt;  
+    #include &lt;errno.h&gt;  
+    #include &lt;sys/ioctl.h&gt;  
+    #include &lt;sys/time.h&gt;  
+    #include &lt;string&gt;  
+      
+    using namespace std;  
+      
+    /** 
+     * @brief 用户状态 
+     */  
+    typedef enum _EPOLL_USER_STATUS_EM  
+    {  
+            FREE = 0,  
+            CONNECT_OK = 1,//连接成功  
+            SEND_OK = 2,//发送成功  
+            RECV_OK = 3,//接收成功  
+    }EPOLL_USER_STATUS_EM;  
+      
+    /*@brief 
+     *@CEpollClient class 用户状态结构体 
+     */  
+    struct UserStatus  
+    {  
+            EPOLL_USER_STATUS_EM iUserStatus;//用户状态  
+            int iSockFd;//用户状态关联的socketfd  
+            char cSendbuff[1024];//发送的数据内容  
+            int iBuffLen;//发送数据内容的长度  
+            unsigned int uEpollEvents;//Epoll events  
+    };  
+      
+    class CEpollClient  
+    {  
+            public:  
+      
+                    /** 
+                     * @brief 
+                     * 函数名:CEpollClient 
+                     * 描述:构造函数 
+                     * @param [in] iUserCount  
+                     * @param [in] pIP IP地址 
+                     * @param [in] iPort 端口号 
+                     * @return 无返回 
+                     */  
+                    CEpollClient(int iUserCount, const char* pIP, int iPort);  
+      
+    /** 
+                     * @brief 
+                     * 函数名:CEpollClient 
+                     * 描述:析构函数 
+                     * @return 无返回 
+                     */  
+                    ~CEpollClient();  
+      
+                    /** 
+                     * @brief 
+                     * 函数名:RunFun 
+                     * 描述:对外提供的接口，运行epoll类 
+                     * @return 无返回值 
+                     */  
+                    int RunFun();  
+      
+            private:  
+      
+                    /** 
+                     * @brief 
+                     * 函数名:ConnectToServer 
+                     * 描述:连接到服务器 
+                     * @param [in] iUserId 用户ID 
+                     * @param [in] pServerIp 连接的服务器IP 
+                     * @param [in] uServerPort 连接的服务器端口号 
+                     * @return 成功返回socketfd,失败返回的socketfd为-1 
+                     */  
+                    int ConnectToServer(int iUserId,const char *pServerIp,unsigned short uServerPort);  
+      
+    /** 
+                     * @brief 
+                     * 函数名:SendToServerData 
+                     * 描述:给服务器发送用户(iUserId)的数据 
+                     * @param [in] iUserId 用户ID 
+                     * @return 成功返回发送数据长度 
+                     */  
+                    int SendToServerData(int iUserId);  
+      
+                    /** 
+                     * @brief 
+                     * 函数名:RecvFromServer 
+                     * 描述:接收用户回复消息 
+                     * @param [in] iUserId 用户ID 
+                     * @param [in] pRecvBuff 接收的数据内容 
+                     * @param [in] iBuffLen 接收的数据长度 
+                     * @return 成功返回接收的数据长度，失败返回长度为-1 
+                     */  
+                    int RecvFromServer(int iUserid,char *pRecvBuff,int iBuffLen);  
+      
+                    /** 
+                     * @brief 
+                     * 函数名:CloseUser 
+                     * 描述:关闭用户 
+                     * @param [in] iUserId 用户ID 
+                     * @return 成功返回true 
+                     */  
+                    bool CloseUser(int iUserId);  
+      
+    /** 
+                     * @brief 
+                     * 函数名:DelEpoll 
+                     * 描述:删除epoll事件 
+                     * @param [in] iSockFd socket FD 
+                     * @return 成功返回true 
+                     */  
+                    bool DelEpoll(int iSockFd);  
+            private:  
+      
+                    int    m_iUserCount;//用户数量；  
+                    struct UserStatus *m_pAllUserStatus;//用户状态数组  
+                    int    m_iEpollFd;//需要创建epollfd  
+                    int    m_iSockFd_UserId[_MAX_SOCKFD_COUNT];//将用户ID和socketid关联起来  
+                    int    m_iPort;//端口号  
+                    char   m_ip[100];//IP地址  
+    };  
+      
+    #endif  
+    #include "cepollclient.h"  
+  
+CEpollClient::CEpollClient(int iUserCount, const char* pIP, int iPort)  
+{  
+    strcpy(m_ip, pIP);  
+    m_iPort = iPort;  
+    m_iUserCount = iUserCount;  
+    m_iEpollFd = epoll_create(_MAX_SOCKFD_COUNT);  
+    m_pAllUserStatus = (struct UserStatus*)malloc(iUserCount*sizeof(struct UserStatus));  
+    for(int iuserid=0; iuserid&lt;iUserCount ; iuserid++)  
+    {  
+        m_pAllUserStatus[iuserid].iUserStatus = FREE;  
+        sprintf(m_pAllUserStatus[iuserid].cSendbuff, "Client: %d send message \"Hello Server!\"\r\n", iuserid);  
+        m_pAllUserStatus[iuserid].iBuffLen = strlen(m_pAllUserStatus[iuserid].cSendbuff) + 1;  
+        m_pAllUserStatus[iuserid].iSockFd = -1;  
+    }  
+    memset(m_iSockFd_UserId, 0xFF, sizeof(m_iSockFd_UserId));  
+}  
+  
+CEpollClient::~CEpollClient()  
+{  
+    free(m_pAllUserStatus);  
+}  
+int CEpollClient::ConnectToServer(int iUserId,const char *pServerIp,unsigned short uServerPort)  
+{  
+    if( (m_pAllUserStatus[iUserId].iSockFd = socket(AF_INET,SOCK_STREAM,0) ) &lt; 0 )  
+    {  
+        cout &lt;&lt;"[CEpollClient error]: init socket fail, reason is:"&lt;&lt;strerror(errno)&lt;&lt;",errno is:"&lt;&lt;errno&lt;&lt;endl;  
+        m_pAllUserStatus[iUserId].iSockFd = -1;  
+        return  m_pAllUserStatus[iUserId].iSockFd;  
+    }  
+  
+    struct sockaddr_in addr;  
+    bzero(&amp;addr, sizeof(addr));  
+    addr.sin_family = AF_INET;  
+    addr.sin_port = htons(uServerPort);  
+    addr.sin_addr.s_addr = inet_addr(pServerIp);  
+  
+    int ireuseadd_on = 1;//支持端口复用  
+    setsockopt(m_pAllUserStatus[iUserId].iSockFd, SOL_SOCKET, SO_REUSEADDR, &amp;ireuseadd_on, sizeof(ireuseadd_on));  
+  
+    unsigned long ul = 1;  
+    ioctl(m_pAllUserStatus[iUserId].iSockFd, FIONBIO, &amp;ul); //设置为非阻塞模式  
+  
+    connect(m_pAllUserStatus[iUserId].iSockFd, (const sockaddr*)&amp;addr, sizeof(addr));  
+    m_pAllUserStatus[iUserId].iUserStatus = CONNECT_OK;  
+    m_pAllUserStatus[iUserId].iSockFd = m_pAllUserStatus[iUserId].iSockFd;  
+  
+    return m_pAllUserStatus[iUserId].iSockFd;  
+}  
+int CEpollClient::SendToServerData(int iUserId)  
+{  
+    sleep(1);//此处控制发送频率，避免狂打日志，正常使用中需要去掉  
+    int isendsize = -1;  
+    if( CONNECT_OK == m_pAllUserStatus[iUserId].iUserStatus || RECV_OK == m_pAllUserStatus[iUserId].iUserStatus)  
+    {  
+        isendsize = send(m_pAllUserStatus[iUserId].iSockFd, m_pAllUserStatus[iUserId].cSendbuff, m_pAllUserStatus[iUserId  
+].iBuffLen, MSG_NOSIGNAL);  
+        if(isendsize &lt; 0)  
+        {  
+            cout &lt;&lt;"[CEpollClient error]: SendToServerData, send fail, reason is:"&lt;&lt;strerror(errno)&lt;&lt;",errno is:"&lt;&lt;errno&lt;  
+&lt;endl;  
+        }  
+        else  
+        {  
+            printf("[CEpollClient info]: iUserId: %d Send Msg Content:%s\n", iUserId, m_pAllUserStatus[iUserId].cSendbuff  
+);  
+            m_pAllUserStatus[iUserId].iUserStatus = SEND_OK;  
+        }  
+    }  
+    return isendsize;  
+}  
+int CEpollClient::RecvFromServer(int iUserId,char *pRecvBuff,int iBuffLen)  
+{  
+    int irecvsize = -1;  
+    if(SEND_OK == m_pAllUserStatus[iUserId].iUserStatus)  
+    {  
+        irecvsize = recv(m_pAllUserStatus[iUserId].iSockFd, pRecvBuff, iBuffLen, 0);  
+        if(0 &gt; irecvsize)  
+        {  
+            cout &lt;&lt;"[CEpollClient error]: iUserId: " &lt;&lt; iUserId &lt;&lt; "RecvFromServer, recv fail, reason is:"&lt;&lt;strerror(errn  
+o)&lt;&lt;",errno is:"&lt;&lt;errno&lt;&lt;endl;  
+        }  
+        else if(0 == irecvsize)  
+        {  
+            cout &lt;&lt;"[warning:] iUserId: "&lt;&lt; iUserId &lt;&lt; "RecvFromServer, STB收到数据为0，表示对方断开连接,irecvsize:"&lt;&lt;ire  
+cvsize&lt;&lt;",iSockFd:"&lt;&lt; m_pAllUserStatus[iUserId].iSockFd &lt;&lt; endl;  
+        }  
+        else  
+        {  
+            printf("Recv Server Msg Content:%s\n", pRecvBuff);  
+            m_pAllUserStatus[iUserId].iUserStatus = RECV_OK;  
+        }  
+    }  
+    return irecvsize;  
+}  
+  
+bool CEpollClient::CloseUser(int iUserId)  
+{  
+    close(m_pAllUserStatus[iUserId].iSockFd);  
+    m_pAllUserStatus[iUserId].iUserStatus = FREE;  
+    m_pAllUserStatus[iUserId].iSockFd = -1;  
+    return true;  
+}  
+      
+int CEpollClient::RunFun()  
+{  
+    int isocketfd = -1;  
+    for(int iuserid=0; iuserid&lt;m_iUserCount; iuserid++)  
+    {  
+        struct epoll_event event;  
+        isocketfd = ConnectToServer(iuserid, m_ip, m_iPort);  
+        if(isocketfd &lt; 0)  
+            cout &lt;&lt;"[CEpollClient error]: RunFun, connect fail" &lt;&lt;endl;  
+        m_iSockFd_UserId[isocketfd] = iuserid;//将用户ID和socketid关联起来  
+  
+        event.data.fd = isocketfd;  
+        event.events = EPOLLIN|EPOLLOUT|EPOLLERR|EPOLLHUP;  
+  
+        m_pAllUserStatus[iuserid].uEpollEvents = event.events;  
+        epoll_ctl(m_iEpollFd, EPOLL_CTL_ADD, event.data.fd, &amp;event);  
+　　}  
+　　while(1)  
+　　    {  
+　　        struct epoll_event events[_MAX_SOCKFD_COUNT];  
+　　        char buffer[1024];  
+　　        memset(buffer,0,1024);  
+　　        int nfds = epoll_wait(m_iEpollFd, events, _MAX_SOCKFD_COUNT, 100 );//等待epoll事件的产生  
+　　        for (int ifd=0; ifd&lt;nfds; ifd++)//处理所发生的所有事件  
+　　        {  
+　　            struct epoll_event event_nfds;  
+　　            int iclientsockfd = events[ifd].data.fd;  
+　　            cout &lt;&lt; "events[ifd].data.fd: " &lt;&lt; events[ifd].data.fd &lt;&lt; endl;  
+　　            int iuserid = m_iSockFd_UserId[iclientsockfd];//根据socketfd得到用户ID  
+　　            if( events[ifd].events &amp; EPOLLOUT )  
+　　            {  
+　　                int iret = SendToServerData(iuserid);  
+　　                if( 0 &lt; iret )  
+　　                {  
+　　                    event_nfds.events = EPOLLIN|EPOLLERR|EPOLLHUP;  
+　　                    event_nfds.data.fd = iclientsockfd;  
+　　                    epoll_ctl(m_iEpollFd, EPOLL_CTL_MOD, event_nfds.data.fd, &amp;event_nfds);  
+　　                }  
+　　                else  
+　　                {  
+　　                    cout &lt;&lt;"[CEpollClient error:] EpollWait, SendToServerData fail, send iret:"&lt;&lt;iret&lt;&lt;",iuserid:"&lt;&lt;iuser  
+　　id&lt;&lt;",fd:"&lt;&lt;events[ifd].data.fd&lt;&lt;endl;  
+　　                    DelEpoll(events[ifd].data.fd);  
+　　                    CloseUser(iuserid);  
+　　                }  
+　　            }  
+　　else if( events[ifd].events &amp; EPOLLIN )//监听到读事件，接收数据  
+　　            {  
+　　                int ilen = RecvFromServer(iuserid, buffer, 1024);  
+　　                if(0 &gt; ilen)  
+　　                {  
+　　                    cout &lt;&lt;"[CEpollClient error]: RunFun, recv fail, reason is:"&lt;&lt;strerror(errno)&lt;&lt;",errno is:"&lt;&lt;errno&lt;&lt;e  
+　　ndl;  
+　　                    DelEpoll(events[ifd].data.fd);  
+　　                    CloseUser(iuserid);  
+　　                }  
+　　                else if(0 == ilen)  
+　　                {  
+　　                    cout &lt;&lt;"[CEpollClient warning:] server disconnect,ilen:"&lt;&lt;ilen&lt;&lt;",iuserid:"&lt;&lt;iuserid&lt;&lt;",fd:"&lt;&lt;events[  
+　　ifd].data.fd&lt;&lt;endl;  
+　　                    DelEpoll(events[ifd].data.fd);  
+　　                    CloseUser(iuserid);  
+　　                }  
+　　                else  
+　　                {  
+　　                    m_iSockFd_UserId[iclientsockfd] = iuserid;//将socketfd和用户ID关联起来  
+　　                    event_nfds.data.fd = iclientsockfd;  
+　　                    event_nfds.events = EPOLLOUT|EPOLLERR|EPOLLHUP;  
+　　                    epoll_ctl(m_iEpollFd, EPOLL_CTL_MOD, event_nfds.data.fd, &amp;event_nfds);  
+　　                }  
+　　            }  
+　　            else  
+　　            {  
+　　                cout &lt;&lt;"[CEpollClient error:] other epoll error"&lt;&lt;endl;  
+　　                DelEpoll(events[ifd].data.fd);  
+　　                CloseUser(iuserid);  
+　　            }  
+　　        }  
+　　}  
+　　}  
+　　  
+　　bool CEpollClient::DelEpoll(int iSockFd)  
+　　{  
+　　    bool bret = false;  
+　　    struct epoll_event event_del;  
+　　    if(0 &lt; iSockFd)  
+　　    {  
+　　        event_del.data.fd = iSockFd;  
+　　        event_del.events = 0;  
+　　        if( 0 == epoll_ctl(m_iEpollFd, EPOLL_CTL_DEL, event_del.data.fd, &amp;event_del) )  
+　　        {  
+　　            bret = true;  
+　　        }  
+　　        else  
+　　        {  
+　　            cout &lt;&lt;"[SimulateStb error:] DelEpoll,epoll_ctl error,iSockFd:"&lt;&lt;iSockFd&lt;&lt;endl;  
+　　        }  
+　　        m_iSockFd_UserId[iSockFd] = -1;  
+　　    }  
+　　    else  
+　　    {  
+　　        bret = true;  
+　　  
+　　    }  
+　　    return bret;  
+　　}  
+　　 服务器主程序：
+
+#include &lt;iostream&gt;  
+#include "cepollserver.h"  
+  
+using namespace std;  
+  
+int main()  
+{  
+        CEpollServer  theApp;  
+        theApp.InitServer("127.0.0.1", 8000);  
+        theApp.Run();  
+  
+        return 0;  
+}  
+</code></pre>
+</div>
+
+<p>客户端主程序：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>    　#include "cepollclient.h"  
+  
+int main(int argc, char *argv[])  
+{  
+        CEpollClient *pCEpollClient = new CEpollClient(2, "127.0.0.1", 8000);  
+        if(NULL == pCEpollClient)  
+        {  
+                cout&lt;&lt;"[epollclient error]:main init"&lt;&lt;"Init CEpollClient fail"&lt;&lt;endl;  
+        }  
+  
+        pCEpollClient-&gt;RunFun();  
+  
+        if(NULL != pCEpollClient)  
+        {  
+                delete pCEpollClient;  
+                pCEpollClient = NULL;  
+        }  
+  
+        return 0;  
+}  
+</code></pre>
+</div>
+
+		  </article>
+		<hr>
+	<br/>
+        <p>
+          本作品由 <a href="mailto:ouyanglip@gmail.com">Lippi.OuYang</a> 创作，采用
+          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="查看协议详细信息" target="_blank">CC BY-NC-SA 3.0 许可协议</a>
+          进行许可。
+        </p>
+	<div style="margin-top:10px;margin-bottom:10px">
+	  
+	  <span class="next">
+	    上篇：
+	    <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html">
+	      java编程的78条黄金法则
+	    </a>
+	  </span>
+	   
+	  
+	  <span class="prev">
+	    下篇：
+	    <a href="/blog/2014/08/libevent.html">
+	      处理并发之二：libevent的eventbuffer
+	    </a>
+	  </span>
+	  
+	</div>
+	</div>
+	
+        
+	<div post-cate="java">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/hibernate-cache-guide.html" class="post-list-item">
+                    <h2>Hibernate缓存配置笔记</h2>
+                    <span class="date">Jul 24, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-virtual-mechine.html" class="post-list-item">
+                    <h2>Java虚拟机简介</h2>
+                    <span class="date">Apr 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-code-opt-one.html" class="post-list-item">
+                    <h2>优化java代码建议(1)</h2>
+                    <span class="date">Apr 12, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/02/cache.html" class="post-list-item">
+                    <h2>谈谈缓存和基本的缓存算法</h2>
+                    <span class="date">Feb 4, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/12/improve-webServer-performance.html" class="post-list-item">
+                    <h2>谈谈如何提高web服务器并发性能</h2>
+                    <span class="date">Dec 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-inner-class.html" class="post-list-item">
+                    <h2>java中内部类</h2>
+                    <span class="date">Nov 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-concurrent-collections.html" class="post-list-item">
+                    <h2>java同步容器与并发容器</h2>
+                    <span class="date">Nov 8, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/java-multithread.html" class="post-list-item">
+                    <h2>java并发和多线程</h2>
+                    <span class="date">Aug 2, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-UI-Thread.html" class="post-list-item">
+                    <h2>Android UI线程和子线程、Service通信</h2>
+                    <span class="date">Jul 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-networkOnMainThreadException.html" class="post-list-item">
+                    <h2>从android.os.NetworkOnMainThreadException引发的思考</h2>
+                    <span class="date">Jul 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="post-list-item">
+                    <h2>Java编程Tips</h2>
+                    <span class="date">Jun 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/15/in-the-rain.html" class="post-list-item">
+                    <h2>在雨中</h2>
+                    <span class="date">Jun 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-code-opt.html" class="post-list-item">
+                    <h2>C代码优化小贴士</h2>
+                    <span class="date">Dec 27, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/libevent.html" class="post-list-item">
+                    <h2>处理并发之二：libevent的eventbuffer</h2>
+                    <span class="date">Aug 24, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/linux-epoll.html" class="post-list-item">
+                    <h2>处理并发之一：LINUX Epoll机制介绍</h2>
+                    <span class="date">Aug 23, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="programming">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="jekyll">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-syntax.html" class="post-list-item">
+                    <h2>Markdown 语法 (简体中文版)</h2>
+                    <span class="date">Jul 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-basics.html" class="post-list-item">
+                    <h2>markdown 快速入门</h2>
+                    <span class="date">Jul 10, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="other">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/vim-plugins.html" class="post-list-item">
+                    <h2>一些强大的Vim插件</h2>
+                    <span class="date">Mar 20, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="reprints">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/09/android-studio-plugins.html" class="post-list-item">
+                    <h2>提高效率的Android Studio插件</h2>
+                    <span class="date">Sep 9, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/android-opensource.html" class="post-list-item">
+                    <h2>值得推荐的android开源框架</h2>
+                    <span class="date">Oct 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="web">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/04/web-transmission-basis.html" class="post-list-item">
+                    <h2>网络传输基础</h2>
+                    <span class="date">Apr 16, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/web-server.html" class="post-list-item">
+                    <h2>也谈如何构建高性能服务端程序</h2>
+                    <span class="date">Nov 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp-analise.html" class="post-list-item">
+                    <h2>XMPP协议分析-具体分析</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-project.html" class="post-list-item">
+                    <h2>Androidpn 消息推送总结</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-to-use-smack.html" class="post-list-item">
+                    <h2>Smack开发手册</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-introduction.html" class="post-list-item">
+                    <h2>AndroidPN消息推送</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp.html" class="post-list-item">
+                    <h2>XMPP协议分析-原理</h2>
+                    <span class="date">Oct 28, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/jsp-jfreechart.html" class="post-list-item">
+                    <h2>使用Jfreechart生成曲线显示到JSP中</h2>
+                    <span class="date">Oct 22, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-http-works.html" class="post-list-item">
+                    <h2>当我们打开网页时发生了什么</h2>
+                    <span class="date">Oct 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="book">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/11/how-to-evaluate-the-hackers-and-painters.html" class="post-list-item">
+                    <h2>如何评价『黑客与画家』</h2>
+                    <span class="date">Nov 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="algorithm">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/skip-list.html" class="post-list-item">
+                    <h2>skip list跳跃表实现</h2>
+                    <span class="date">Dec 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/graph.html" class="post-list-item">
+                    <h2>计算机算法--图算法介绍</h2>
+                    <span class="date">Nov 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/leveldb.html" class="post-list-item">
+                    <h2>leveldb原理剖析</h2>
+                    <span class="date">Nov 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c/c++">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-open-project.html" class="post-list-item">
+                    <h2>值得推荐的C/C++框架和库</h2>
+                    <span class="date">Dec 13, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/android-links.html" class="post-list-item">
+                    <h2>安卓开发者必备的42个链接</h2>
+                    <span class="date">May 19, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/define-custom-view.html" class="post-list-item">
+                    <h2>Android自定义视图教程</h2>
+                    <span class="date">May 17, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/android-studio-prefrence.html" class="post-list-item">
+                    <h2>Android Studio多渠道打包和代码混淆教程</h2>
+                    <span class="date">Mar 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/05/gradle-dependency-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之依赖管理</h2>
+                    <span class="date">May 5, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/gradle-task-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之任务管理</h2>
+                    <span class="date">Apr 30, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="lambda">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/dagger-dependency-injection.html" class="post-list-item">
+                    <h2>Dagger依赖注入浅析</h2>
+                    <span class="date">Aug 13, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/gradle-tasks-guide.html" class="post-list-item">
+                    <h2>彻底理解Gradle的任务</h2>
+                    <span class="date">Jul 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Latex">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/latex-fonts-settings.html" class="post-list-item">
+                    <h2>Latex中英文环境设置</h2>
+                    <span class="date">Aug 22, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Unix/Linux">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/baidu-spider-forbidden.html" class="post-list-item">
+                    <h2>解决百度爬虫无法抓取github pages</h2>
+                    <span class="date">Feb 18, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/apache-configuration-in-ubuntu.html" class="post-list-item">
+                    <h2>Ubuntu下Apache服务器的配置</h2>
+                    <span class="date">Jan 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/tmux-guide.html" class="post-list-item">
+                    <h2>终端复用软件之tmux简介</h2>
+                    <span class="date">Jan 19, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/08/linux-zsh.html" class="post-list-item">
+                    <h2>Zsh-Linux下最好的Shell简介</h2>
+                    <span class="date">Aug 23, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Git">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/git-guide.html" class="post-list-item">
+                    <h2>Git操作手册|命令速查表</h2>
+                    <span class="date">Feb 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="hi">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/hi.html" class="post-list-item">
+                    <h2>hi</h2>
+                    <span class="date">Feb 22, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	 </div>
+
+</div>
+
+
+<!-- Blog Comments -->
+<div class="media">
+  <!-- UY BEGIN 
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2023801"></script>
+UY END -->
+
+<!-- 多说评论框 start -->
+  <div class="post-comment">
+            <span>Comments</span>
+	<div class="ds-thread" data-thread-key="/blog/2014/08/linux-epoll" data-title="处理并发之一：LINUX Epoll机制介绍" data-url="LippiOuYang.github.io/blog/2014/08/linux-epoll.html">
+	</div>
+ </div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"lippiouyang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+ 
+</div> 
+</div>
+
+        </div>
+
+	 <div id="top" data-toggle="tooltip" data-placement="left" title="回到顶部">
+	      <a href="javascript:;">
+		<div class="arrow"></div>
+		<div class="stick"></div>
+	      </a>
+	    </div>
+
+        <!-- Blog Sidebar Widgets Column -->
+        <div class="col-md-4">
+          <!-- Blog Search Well -->  
+	
+                    <div class="shadow-corner-curl hidden-xs">
+	  <div class="categories-list-header">站内搜索</div>
+<!-- 使用该代码即表示您同意接受 Google 自定义搜索服务条款。 -->
+<!-- 有关服务条款，请访问 http://www.google.com/cse/docs/tos.html?hl=zh-CN -->
+<form name="cse" id="searchbox_demo" action="/search.html">
+  <input type="hidden" name="cref" value="" />
+  <input type="hidden" name="ie" value="utf-8" />
+  <input type="hidden" name="hl" value="zh-CN" />
+  <input name="q" type="text" size="30" />
+  <input type="submit" name="sa" value="搜索" /> 
+</form>
+<script type="text/javascript" src="http://www.google.com/cse/tools/onthefly?form=searchbox_demo&lang=zh-CN"></script>			      
+     
+            
+</div>
+
+
+
+
+
+
+
+
+          <!-- Blog Categories Well -->
+              
+
+    <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        Categories
+      </div>
+      
+      <a href="/index.html" class="categories-list-item" cate="All">
+        All<span class="my-badge"> 61</span>
+      </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="java">
+          java <span class="my-badge">17</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c">
+          c <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="programming">
+          programming <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="jekyll">
+          jekyll <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="other">
+          other <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="reprints">
+          reprints <span class="my-badge">5</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Android">
+          Android <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="web">
+          web <span class="my-badge">9</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="book">
+          book <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="algorithm">
+          algorithm <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c/c++">
+          c/c++ <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="android">
+          android <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Gradle">
+          Gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="lambda">
+          lambda <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="gradle">
+          gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Latex">
+          Latex <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Unix/Linux">
+          Unix/Linux <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Git">
+          Git <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="hi">
+          hi <span class="my-badge">1</span>
+        </a>
+      
+    </div>
+
+
+
+ 
+         
+              <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        热门文章
+      </div>
+
+ <ul class="list-unstyled">
+      	<li><a href="/blog/2015/03/github-pages-blog.html" class="categories-list-item">利用Github-pages建立个人博客</a></li>	
+<li><a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="categories-list-item">一个合格的程序员应该读过哪些书</a></li>
+<li><a href="/blog/2014/12/c-open-project.html" class="categories-list-item">值得推荐的C/C++框架和库</a></li>
+<li><a href="/blog/2014/12/c-code-opt.html" class="categories-list-item">C代码优化小贴士</a></li>	
+<li><a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="categories-list-item">Java编程Tips</a></li>
+<li><a href="/blog/2015/04/gradle-task-management.html" class="categories-list-item">Gradle系列教程之任务管理</a></li>	
+<li><a href="/blog/2015/05/android-links.html" class="categories-list-item">安卓开发者必备的42个链接</a></li>
+<li><a href="/blog/2015/05/gradle-dependency-management.html" class="categories-list-item">Gradle系列教程之依赖管理</a></li>
+<li><a href="/blog/2014/10/android-opensource.html" class="categories-list-item">值得推荐的android开源框架</a></li>	 
+<li><a href="/blog/2015/07/hibernate-cache-guide.html" class="categories-list-item">Hibernate缓存配置笔记</a></li>	
+	 
+     </ul>
+</div>
+ 
+       
+                   <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        相关链接
+      </div>    
+ <ul class="list-unstyled">
+              <li>
+                <a href="https://github.com/" class="categories-list-item">
+                   GitHub 
+                </a>
+              </li>
+<li>
+                <a href="http://www.stackoverflow.com/" class="categories-list-item">
+                   Stack Overflow 
+                </a>
+              </li>
+<li>
+                <a href="http://jekyllrb.com/docs/posts/" class="categories-list-item">
+                  Jekyll文档 
+                </a>
+              </li>
+               
+               <li>
+                <a href="https://news.ycombinator.com/" class="categories-list-item">
+                   Hacker News 
+                </a>
+              </li>        
+              
+              <li>
+                <a href="http://developer.android.com/" class="categories-list-item">
+                   Android Developer 
+                </a>
+              </li>
+              
+              <li>
+                <a href="http://www.ruanyifeng.com/blog/" class="categories-list-item">
+                   Ruanyifeng's Blog 
+                </a>
+              </li>
+
+
+  <li>
+                <a href="http://www.importnew.com/" class="categories-list-item">
+                   ImportNew 
+                </a>
+              </li>
+<li>
+                <a href="http://guides.codepath.com/android" class="categories-list-item">
+                   CodePath Android Cliffnotes 
+                </a>
+              </li>
+<li>
+                <a href="http://androidweekly.net/" class="categories-list-item">
+                   Androidweekly 	
+                </a>
+              </li>
+<li>
+			<a href="http://mvnrepository.com/" class="categories-list-item">
+                   Mvnrepository 
+                </a>
+              </li>
+<li>
+			<a href="http://www.iteye.com/" class="categories-list-item">
+                  Iteye 
+                </a>
+              </li>
+              		
+            </ul>
+
+</div>
+ 
+
+          <!-- Side Widget Well -->
+           
+        </div>
+      </div>
+
+
+
+      <!-- /.row -->
+      <hr>
+      <!-- Footer -->
+      <footer>
+           <p><small>Designed by <a href="https://github.com/EZLippi">Lippi</a> | Free hosted at <a href="https://github.com/EZLippi/EZLippi.github.io">Github</a> | Copyright 2014 - 2016  
+										</p>
+
+	<!--
+<div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <a href="mailto:ouyanglip@gmail.com"><span class="glyphicon glyphicon-envelope"></span> ouyanglip@gmail.com</a>
+        <span class="point"> · </span>
+        
+          
+          <a href="https://github.com/LippiOuYang">
+            <span class="icon">
+              <svg viewBox="0 0 16 16">
+                <path fill="#aaa" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+            Github
+          </a>
+          
+          
+          <span class="point"> · </span>
+          <span><a href="/feed.xml">RSS</a></span>
+          <span class="point"> · </span>
+          <span>Draw my life with code</span>
+          <span class="point"> · </span>
+          <span>&copy; 2014 LippiOuYang</span>
+          <span class="point"> · </span>
+          <span>Designed by <a href="https://github.com/LippiOuYang">Lippi</a></span>
+
+      </div>
+    </div>
+    </div>
+	-->
+ 
+              <div style="display:none;"><script src="http://s95.cnzz.com/z_stat.php?id=1254799848&web_id=1254799848" language="JavaScript"></script></div>
+ 
+
+      </footer>
+    </div>
+    <!-- /.container -->
+  </body>
+
+</html>

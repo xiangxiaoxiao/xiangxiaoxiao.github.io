@@ -1,0 +1,2350 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta name="baidu-site-verification" content="HvuxptDcq6" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="计算机算法--图算法介绍 - Lippi-浮生志 - Lippi.OuYang(ouyanglip@gmail.com)">
+    <title>
+      计算机算法--图算法介绍 - Lippi-浮生志
+    </title>
+    <!-- Bootstrap Core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS 
+    <link href="/css/blog.css" rel="stylesheet">-->
+    <!-- index css -->
+    <link href="/css/index.css" rel="stylesheet">
+	<!-- pagments CSS-->
+	<link href="/css/pygments.css" rel="stylesheet">
+        <!-- jQuery Version 1.11.0 -->
+    <script src="/js/jquery-1.11.0.js"> </script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/bootstrap.min.js"></script>
+   <!-- 回到顶部js-->
+    <script src="/js/index.js"></script>
+
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?085fc257cb1e774f7764a2cf527c393d";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+	<script>
+    (function(){
+     var bp = document.createElement('script');
+	 bp.src = '//push.zhanzhang.baidu.com/push.js';
+	 var s = document.getElementsByTagName("script")[0];
+	 s.parentNode.insertBefore(bp, s);
+	 })();
+	</script>
+
+  </head>
+  
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">
+              Toggle navigation
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+          </button>
+          <a class="navbar-brand" href="/index.html">
+            Lippi-浮生志
+          </a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+            <li>
+              <a href="/categories.html">
+                分 类
+              </a>
+            </li>
+            <li>
+              <a href="/tags.html">
+                标 签
+              </a>
+            </li>
+            <li>
+              <a href="/archives.html">
+                归 档
+              </a>
+            </li>
+            <li>
+              <a href="/faqs.html">
+                备 忘
+              </a>
+            </li>
+            <li>
+              <a href="/about.html">
+                关 于
+              </a>
+            </li>
+          </ul> 
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+        <!-- Blog Entries Column -->
+        <div class="col-md-8">
+          <!-- Blog Post -->
+<!-- Title -->
+<div class="row">
+  <div class="post-area post">
+
+ 	<div class="post-list-body">
+        	<div class="all-posts" post-cate="All">
+ 		<header>
+		<h1>
+		  计算机算法--图算法介绍
+		  <div class="post-date"><a href="https://github.com/LippiOuYang/LippiOuYang.github.io/edit/master/_posts/2014-11-29-graph.md" target="_blank">纠错</a>&nbsp;&nbsp;
+			<span class="glyphicon glyphicon-time"></span>
+			29 Nov 2014
+		  </div>
+		</h1>
+ 		</header>
+		<!-- Author -->
+		<hr>
+		 <article>
+		<p>##图的定义：</p>
+
+<p>图（graph）由顶点（vertex）和边（edge）的集合组成，每一条边就是一个点对（v,w)。</p>
+
+<p>图的种类：地图，电路图，调度图，事物，网络，程序结构</p>
+
+<p>图的属性：有V个顶点的图最多有V*（V-1）/2条边
+<img src="/images/images/githubpages/graph/graph1.jpg" alt="" />
+<img src="/images/images/githubpages/graph/graph2.jpg" alt="" /></p>
+
+<p>###邻接矩阵：</p>
+
+<p>邻接矩阵是一个元素为bool值的V<em>V矩阵，若图中存在一条连接顶点V和W的边，折矩阵adj[v][w]=1,否则为0。占用的空间为V</em>V，当图是稠密时，邻接矩阵是比较合适的表达方法。
+<img src="/images/images/githubpages/graph/graph3.jpg" alt="" /></p>
+
+<p>###邻接表的表示</p>
+
+<p>对于非稠密的图，使用邻接矩阵有点浪费存储空间，可以使用邻接表，我们维护一个链表向量，给定一个顶点时，可以立即访问其链表,占用的空间为O(V+E)。
+<img src="/images/images/githubpages/graph/graph4.jpg" alt="" /></p>
+
+<hr />
+
+<hr />
+
+<p>##深度优先搜索</p>
+
+<p>###深度优先搜索介绍</p>
+
+<p>图的深度优先搜索(Depth First Search)，和树的先序遍历比较类似。</p>
+
+<p>它的思想：假设初始状态是图中所有顶点均未被访问，则从某个顶点v出发，首先访问该顶点，然后依次从它的各个未被访问的邻接点出发深度优先搜索遍历图，直至图中所有和v有路径相通的顶点都被访问到。 若此时尚有其他顶点未被访问到，则另选一个未被访问的顶点作起始点，重复上述过程，直至图中所有顶点都被访问到为止。</p>
+
+<p>显然，深度优先搜索是一个递归的过程。</p>
+
+<p>###深度优先搜索图解</p>
+
+<p>####无向图的深度优先搜索</p>
+
+<p>下面以”无向图”为例，来对深度优先搜索进行演示。
+<img src="/images/images/githubpages/graph/graph5.jpg" alt="" />
+对上面的图G1进行深度优先遍历，从顶点A开始。
+<img src="/images/images/githubpages/graph/graph6.jpg" alt="" /></p>
+
+<ul>
+  <li>第1步：访问A。</li>
+  <li>
+    <p>第2步：访问(A的邻接点)C。</p>
+
+    <p>在第1步访问A之后，接下来应该访问的是A的邻接点，即”C,D,F”中的一个。但在本文的实现中，顶点ABCDEFG是按照顺序存储，C在”D和F”的前面，因此，先访问C。</p>
+  </li>
+  <li>
+    <p>第3步：访问(C的邻接点)B。</p>
+
+    <p>在第2步访问C之后，接下来应该访问C的邻接点，即”B和D”中一个(A已经被访问过，就不算在内)。而由于B在D之前，先访问B。</p>
+  </li>
+  <li>
+    <p>第4步：访问(C的邻接点)D。</p>
+
+    <p>在第3步访问了C的邻接点B之后，B没有未被访问的邻接点；因此，返回到访问C的另一个邻接点D。</p>
+  </li>
+  <li>
+    <p>第5步：访问(A的邻接点)F。</p>
+
+    <p>前面已经访问了A，并且访问完了”A的邻接点B的所有邻接点(包括递归的邻接点在内)”；因此，此时返回到访问A的另一个邻接点F。</p>
+  </li>
+  <li>
+    <p>第6步：访问(F的邻接点)G。</p>
+  </li>
+  <li>第7步：访问(G的邻接点)E。</li>
+</ul>
+
+<p>因此访问顺序是：A -&gt; C -&gt; B -&gt; D -&gt; F -&gt; G -&gt; E</p>
+
+<p>####有向图的深度优先搜索</p>
+
+<p>下面以”有向图”为例，来对深度优先搜索进行演示。
+<img src="/images/images/githubpages/graph/graph7.jpg" alt="" />
+对上面的图G2进行深度优先遍历，从顶点A开始。
+<img src="/images/images/githubpages/graph/graph8.jpg" alt="" /></p>
+
+<ul>
+  <li>第1步：访问A。</li>
+  <li>
+    <p>第2步：访问B。</p>
+
+    <p>在访问了A之后，接下来应该访问的是A的出边的另一个顶点，即顶点B。</p>
+  </li>
+  <li>
+    <p>第3步：访问C。</p>
+
+    <p>在访问了B之后，接下来应该访问的是B的出边的另一个顶点，即顶点C,E,F。在本文实现的图中，顶点ABCDEFG按照顺序存储，因此先访问C。</p>
+  </li>
+  <li>
+    <p>第4步：访问E。</p>
+
+    <p>接下来访问C的出边的另一个顶点，即顶点E。</p>
+  </li>
+  <li>
+    <p>第5步：访问D。</p>
+
+    <p>接下来访问E的出边的另一个顶点，即顶点B,D。顶点B已经被访问过，因此访问顶点D。</p>
+  </li>
+  <li>
+    <p>第6步：访问F。</p>
+
+    <p>接下应该回溯”访问A的出边的另一个顶点F”。</p>
+  </li>
+  <li>第7步：访问G。</li>
+</ul>
+
+<p>因此访问顺序是：A -&gt; B -&gt; C -&gt; E -&gt; D -&gt; F -&gt; G</p>
+
+<hr />
+
+<hr />
+
+<p>##广度优先搜索</p>
+
+<p>###广度优先搜索介绍</p>
+
+<p>广度优先搜索算法(Breadth First Search)，又称为”宽度优先搜索”或”横向优先搜索”，简称BFS。</p>
+
+<p>它的思想是：从图中某顶点v出发，在访问了v之后依次访问v的各个未曾访问过的邻接点，然后分别从这些邻接点出发依次访问它们的邻接点，并使得“先被访问的顶点的邻接点先于后被访问的顶点的邻接点被访问，直至图中所有已被访问的顶点的邻接点都被访问到。如果此时图中尚有顶点未被访问，则需要另选一个未曾被访问过的顶点作为新的起始点，重复上述过程，直至图中所有顶点都被访问到为止。</p>
+
+<p>换句话说，广度优先搜索遍历图的过程是以v为起点，由近至远，依次访问和v有路径相通且路径长度为1,2…的顶点。</p>
+
+<h3 id="section">广度优先搜索图解</h3>
+
+<p>####无向图的广度优先搜索</p>
+
+<p>下面以”无向图”为例，来对广度优先搜索进行演示。还是以上面的图G1为例进行说明。
+<img src="/images/images/githubpages/graph/graph9.jpg" alt="" /></p>
+
+<ul>
+  <li>第1步：访问A。</li>
+  <li>
+    <p>第2步：依次访问C,D,F。</p>
+
+    <p>在访问了A之后，接下来访问A的邻接点。前面已经说过，在本文实现中，顶点ABCDEFG按照顺序存储的，C在”D和F”的前面，因此，先访问C。再访问完C之后，再依次访问D,F。</p>
+  </li>
+  <li>
+    <p>第3步：依次访问B,G。</p>
+
+    <p>在第2步访问完C,D,F之后，再依次访问它们的邻接点。首先访问C的邻接点B，再访问F的邻接点G。</p>
+  </li>
+  <li>
+    <p>第4步：访问E。</p>
+
+    <p>在第3步访问完B,G之后，再依次访问它们的邻接点。只有G有邻接点E，因此访问G的邻接点E。</p>
+  </li>
+</ul>
+
+<p>因此访问顺序是：A -&gt; C -&gt; D -&gt; F -&gt; B -&gt; G -&gt; E</p>
+
+<p>####有向图的广度优先搜索</p>
+
+<p>下面以”有向图”为例，来对广度优先搜索进行演示。还是以上面的图G2为例进行说明。
+<img src="/images/images/githubpages/graph/graph10.jpg" alt="" /></p>
+
+<ul>
+  <li>
+    <p>第1步：访问A。</p>
+  </li>
+  <li>第2步：访问B。</li>
+  <li>
+    <p>第3步：依次访问C,E,F。</p>
+
+    <p>在访问了B之后，接下来访问B的出边的另一个顶点，即C,E,F。前面已经说过，在本文实现中，顶点ABCDEFG按照顺序存储的，因此会先访问C，再依次访问E,F。</p>
+  </li>
+  <li>
+    <p>第4步：依次访问D,G。</p>
+
+    <p>在访问完C,E,F之后，再依次访问它们的出边的另一个顶点。还是按照C,E,F的顺序访问，C的已经全部访问过了，那么就只剩下E,F；先访问E的邻接点D，再访问F的邻接点G。</p>
+  </li>
+</ul>
+
+<p>因此访问顺序是：A -&gt; B -&gt; C -&gt; E -&gt; F -&gt; D -&gt; G</p>
+
+<p>##搜索算法的源码</p>
+
+<p>1.邻接矩阵表示的”无向图</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>    /**
+    * C++: 邻接矩阵表示的"无向图(Matrix Undirected Graph)"
+    *
+    * @author LippiOuYang
+    * @date 2013/04/19
+    */
+        
+        #include &lt;iomanip&gt;
+        #include &lt;iostream&gt;
+        #include &lt;vector&gt;
+        using namespace std;
+        
+    #define MAX 100
+    class MatrixUDG {
+	private:
+        char mVexs[MAX];    // 顶点集合
+        int mVexNum;             // 顶点数
+        int mEdgNum;             // 边数
+        int mMatrix[MAX][MAX];   // 邻接矩阵
+
+    public:
+        // 创建图(自己输入数据)
+		MatrixUDG();
+        // 创建图(用已提供的矩阵)
+        MatrixUDG(char vexs[], int vlen, char edges[][2], int elen);
+		~MatrixUDG();
+
+        // 深度优先搜索遍历图
+        void DFS();
+        // 广度优先搜索（类似于树的层次遍历）
+        void BFS();
+        // 打印矩阵队列图
+        void print();
+
+	private:
+        // 读取一个输入字符
+        char readChar();
+        // 返回ch在mMatrix矩阵中的位置
+        int getPosition(char ch);
+        // 返回顶点v的第一个邻接顶点的索引，失败则返回-1
+        int firstVertex(int v);
+        // 返回顶点v相对于w的下一个邻接顶点的索引，失败则返回-1
+        int nextVertex(int v, int w);
+        // 深度优先搜索遍历图的递归实现
+        void DFS(int i, int *visited);
+
+};
+
+/* 
+ * 创建图(自己输入数据)
+ */
+MatrixUDG::MatrixUDG()
+{
+    char c1, c2;
+    int i, p1, p2;
+    
+    // 输入"顶点数"和"边数"
+    cout &lt;&lt; "input vertex number: ";
+    cin &gt;&gt; mVexNum;
+    cout &lt;&lt; "input edge number: ";
+    cin &gt;&gt; mEdgNum;
+    if ( mVexNum &lt; 1 || mEdgNum &lt; 1 || (mEdgNum &gt; (mVexNum * (mVexNum-1))))
+    {
+        cout &lt;&lt; "input error: invalid parameters!" &lt;&lt; endl;
+        return ;
+    }
+    
+    // 初始化"顶点"
+    for (i = 0; i &lt; mVexNum; i++)
+    {
+        cout &lt;&lt; "vertex(" &lt;&lt; i &lt;&lt; "): ";
+        mVexs[i] = readChar();
+    }
+
+    // 初始化"边"
+    for (i = 0; i &lt; mEdgNum; i++)
+    {
+        // 读取边的起始顶点和结束顶点
+        cout &lt;&lt; "edge(" &lt;&lt; i &lt;&lt; "): ";
+        c1 = readChar();
+        c2 = readChar();
+
+        p1 = getPosition(c1);
+        p2 = getPosition(c2);
+        if (p1==-1 || p2==-1)
+        {
+            cout &lt;&lt; "input error: invalid edge!" &lt;&lt; endl;
+            return ;
+        }
+
+        mMatrix[p1][p2] = 1;
+        mMatrix[p2][p1] = 1;
+    }
+}
+
+/*
+ * 创建图(用已提供的矩阵)
+ *
+ * 参数说明：
+ *     vexs  -- 顶点数组
+ *     vlen  -- 顶点数组的长度
+ *     edges -- 边数组
+ *     elen  -- 边数组的长度
+ */
+MatrixUDG::MatrixUDG(char vexs[], int vlen, char edges[][2], int elen)
+{
+    int i, p1, p2;
+    
+    // 初始化"顶点数"和"边数"
+    mVexNum = vlen;
+    mEdgNum = elen;
+    // 初始化"顶点"
+    for (i = 0; i &lt; mVexNum; i++)
+        mVexs[i] = vexs[i];
+
+    // 初始化"边"
+    for (i = 0; i &lt; mEdgNum; i++)
+    {
+        // 读取边的起始顶点和结束顶点
+        p1 = getPosition(edges[i][0]);
+        p2 = getPosition(edges[i][1]);
+
+        mMatrix[p1][p2] = 1;
+        mMatrix[p2][p1] = 1;
+    }
+}
+
+/* 
+ * 析构函数
+ */
+MatrixUDG::~MatrixUDG() 
+{
+}
+
+/*
+ * 返回ch在mMatrix矩阵中的位置
+ */
+int MatrixUDG::getPosition(char ch)
+{
+    int i;
+    for(i=0; i&lt;mVexNum; i++)
+        if(mVexs[i]==ch)
+            return i;
+    return -1;
+}
+
+/*
+ * 读取一个输入字符
+ */
+char MatrixUDG::readChar()
+{
+    char ch;
+
+    do {
+        cin &gt;&gt; ch;
+    } while(!((ch&gt;='a'&amp;&amp;ch&lt;='z') || (ch&gt;='A'&amp;&amp;ch&lt;='Z')));
+
+    return ch;
+}
+
+
+/*
+ * 返回顶点v的第一个邻接顶点的索引，失败则返回-1
+ */
+int MatrixUDG::firstVertex(int v)
+{
+    int i;
+
+    if (v&lt;0 || v&gt;(mVexNum-1))
+        return -1;
+
+    for (i = 0; i &lt; mVexNum; i++)
+        if (mMatrix[v][i] == 1)
+            return i;
+
+    return -1;
+}
+
+/*
+ * 返回顶点v相对于w的下一个邻接顶点的索引，失败则返回-1
+ */
+int MatrixUDG::nextVertex(int v, int w)
+{
+    int i;
+
+    if (v&lt;0 || v&gt;(mVexNum-1) || w&lt;0 || w&gt;(mVexNum-1))
+        return -1;
+
+    for (i = w + 1; i &lt; mVexNum; i++)
+        if (mMatrix[v][i] == 1)
+            return i;
+
+    return -1;
+}
+
+/*
+ * 深度优先搜索遍历图的递归实现
+ */
+void MatrixUDG::DFS(int i, int *visited)
+{
+    int w;
+
+    visited[i] = 1;
+    cout &lt;&lt; mVexs[i] &lt;&lt; " ";
+    // 遍历该顶点的所有邻接顶点。若是没有访问过，那么继续往下走
+    for (w = firstVertex(i); w &gt;= 0; w = nextVertex(i, w))
+    {
+        if (!visited[w])
+            DFS(w, visited);
+    }
+       
+}
+
+/*
+ * 深度优先搜索遍历图
+ */
+void MatrixUDG::DFS()
+{
+    int i;
+    int visited[MAX];       // 顶点访问标记
+
+    // 初始化所有顶点都没有被访问
+    for (i = 0; i &lt; mVexNum; i++)
+        visited[i] = 0;
+
+    cout &lt;&lt; "DFS: ";
+    for (i = 0; i &lt; mVexNum; i++)
+    {
+        //printf("\n== LOOP(%d)\n", i);
+        if (!visited[i])
+            DFS(i, visited);
+    }
+    cout &lt;&lt; endl;
+}
+
+/*
+ * 广度优先搜索（类似于树的层次遍历）
+ */
+void MatrixUDG::BFS()
+{
+    int head = 0;
+    int rear = 0;
+    int queue[MAX];     // 辅组队列
+    int visited[MAX];   // 顶点访问标记
+    int i, j, k;
+
+    for (i = 0; i &lt; mVexNum; i++)
+        visited[i] = 0;
+
+    cout &lt;&lt; "BFS: ";
+    for (i = 0; i &lt; mVexNum; i++)
+    {
+        if (!visited[i])
+        {
+            visited[i] = 1;
+            cout &lt;&lt; mVexs[i] &lt;&lt; " ";
+            queue[rear++] = i;  // 入队列
+        }
+        while (head != rear) 
+        {
+            j = queue[head++];  // 出队列
+            for (k = firstVertex(j); k &gt;= 0; k = nextVertex(j, k)) //k是为访问的邻接顶点
+            {
+                if (!visited[k])
+                {
+                    visited[k] = 1;
+                    cout &lt;&lt; mVexs[k] &lt;&lt; " ";
+                    queue[rear++] = k;
+                }
+            }
+        }
+    }
+    cout &lt;&lt; endl;
+}
+
+/*
+ * 打印矩阵队列图
+ */
+void MatrixUDG::print()
+{
+    int i,j;
+
+    cout &lt;&lt; "Martix Graph:" &lt;&lt; endl;
+    for (i = 0; i &lt; mVexNum; i++)
+    {
+        for (j = 0; j &lt; mVexNum; j++)
+            cout &lt;&lt; mMatrix[i][j] &lt;&lt; " ";
+        cout &lt;&lt; endl;
+    }
+}
+
+
+int main()
+{
+    char vexs[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G'};
+    char edges[][2] = {
+        {'A', 'C'}, 
+        {'A', 'D'}, 
+        {'A', 'F'}, 
+        {'B', 'C'}, 
+        {'C', 'D'}, 
+        {'E', 'G'}, 
+        {'F', 'G'}};
+    int vlen = sizeof(vexs)/sizeof(vexs[0]);
+    int elen = sizeof(edges)/sizeof(edges[0]);
+    MatrixUDG* pG;
+
+    // 自定义"图"(输入矩阵队列)
+    //pG = new MatrixUDG();
+    // 采用已有的"图"
+    pG = new MatrixUDG(vexs, vlen, edges, elen);
+
+    pG-&gt;print();   // 打印图
+    pG-&gt;DFS();     // 深度优先遍历
+    pG-&gt;BFS();     // 广度优先遍历
+
+    return 0;
+} 2.邻接表表示的"无向图
+
+/**
+ * C++: 邻接表表示的"无向图(List Undirected Graph)"
+ *
+ * @author LippiOuYang
+ * @date 2013/04/19
+ */
+
+    #include &lt;iomanip&gt;
+    #include &lt;iostream&gt;
+    #include &lt;vector&gt;
+    using namespace std;
+
+#define MAX 100
+// 邻接表
+class ListUDG
+{
+    private: // 内部类
+        // 邻接表中表对应的链表的顶点
+        class ENode
+        {
+            public:
+                int ivex;           // 该边所指向的顶点的位置
+                ENode *nextEdge;    // 指向下一条弧的指针
+        };
+
+        // 邻接表中表的顶点
+        class VNode
+        {
+            public:
+                char data;          // 顶点信息
+                ENode *firstEdge;   // 指向第一条依附该顶点的弧
+        };
+
+	private: // 私有成员
+        int mVexNum;             // 图的顶点的数目
+        int mEdgNum;             // 图的边的数目
+        VNode mVexs[MAX];
+
+    public:
+        // 创建邻接表对应的图(自己输入)
+		ListUDG();
+        // 创建邻接表对应的图(用已提供的数据)
+        ListUDG(char vexs[], int vlen, char edges[][2], int elen);
+		~ListUDG();
+
+        // 深度优先搜索遍历图
+        void DFS();
+        // 广度优先搜索（类似于树的层次遍历）
+        void BFS();
+        // 打印邻接表图
+        void print();
+
+	private:
+        // 读取一个输入字符
+        char readChar();
+        // 返回ch的位置
+        int getPosition(char ch);
+        // 深度优先搜索遍历图的递归实现
+        void DFS(int i, int *visited);
+        // 将node节点链接到list的最后
+        void linkLast(ENode *list, ENode *node);
+};
+
+/*
+ * 创建邻接表对应的图(自己输入)
+ */
+ListUDG::ListUDG()
+{
+    char c1, c2;
+    int v, e;
+    int i, p1, p2;
+    ENode *node1, *node2;
+
+    // 输入"顶点数"和"边数"
+    cout &lt;&lt; "input vertex number: ";
+    cin &gt;&gt; mVexNum;
+    cout &lt;&lt; "input edge number: ";
+    cin &gt;&gt; mEdgNum;
+    if ( mVexNum &lt; 1 || mEdgNum &lt; 1 || (mEdgNum &gt; (mVexNum * (mVexNum-1))))
+    {
+        cout &lt;&lt; "input error: invalid parameters!" &lt;&lt; endl;
+        return ;
+    }
+ 
+    // 初始化"邻接表"的顶点
+    for(i=0; i&lt;mVexNum; i++)
+    {
+        cout &lt;&lt; "vertex(" &lt;&lt; i &lt;&lt; "): ";
+        mVexs[i].data = readChar();
+        mVexs[i].firstEdge = NULL;
+    }
+
+    // 初始化"邻接表"的边
+    for(i=0; i&lt;mEdgNum; i++)
+    {
+        // 读取边的起始顶点和结束顶点
+        cout &lt;&lt; "edge(" &lt;&lt; i &lt;&lt; "): ";
+        c1 = readChar();
+        c2 = readChar();
+
+        p1 = getPosition(c1);
+        p2 = getPosition(c2);
+        // 初始化node1
+        node1 = new ENode();
+        node1-&gt;ivex = p2;
+        // 将node1链接到"p1所在链表的末尾"
+        if(mVexs[p1].firstEdge == NULL)
+          mVexs[p1].firstEdge = node1;
+        else
+            linkLast(mVexs[p1].firstEdge, node1);
+        // 初始化node2
+        node2 = new ENode();
+        node2-&gt;ivex = p1;
+        // 将node2链接到"p2所在链表的末尾"
+        if(mVexs[p2].firstEdge == NULL)
+          mVexs[p2].firstEdge = node2;
+        else
+            linkLast(mVexs[p2].firstEdge, node2);
+    }
+}
+
+/*
+ * 创建邻接表对应的图(用已提供的数据)
+ */
+ListUDG::ListUDG(char vexs[], int vlen, char edges[][2], int elen)
+{
+    char c1, c2;
+    int i, p1, p2;
+    ENode *node1, *node2;
+
+    // 初始化"顶点数"和"边数"
+    mVexNum = vlen;
+    mEdgNum = elen;
+    // 初始化"邻接表"的顶点
+    for(i=0; i&lt;mVexNum; i++)
+    {
+        mVexs[i].data = vexs[i];
+        mVexs[i].firstEdge = NULL;
+    }
+
+    // 初始化"邻接表"的边
+    for(i=0; i&lt;mEdgNum; i++)
+    {
+        // 读取边的起始顶点和结束顶点
+        c1 = edges[i][0];
+        c2 = edges[i][1];
+
+        p1 = getPosition(c1);
+        p2 = getPosition(c2);
+        // 初始化node1
+        node1 = new ENode();
+        node1-&gt;ivex = p2;
+        // 将node1链接到"p1所在链表的末尾"
+        if(mVexs[p1].firstEdge == NULL)
+          mVexs[p1].firstEdge = node1;
+        else
+            linkLast(mVexs[p1].firstEdge, node1);
+        // 初始化node2
+        node2 = new ENode();
+        node2-&gt;ivex = p1;
+        // 将node2链接到"p2所在链表的末尾"
+        if(mVexs[p2].firstEdge == NULL)
+          mVexs[p2].firstEdge = node2;
+        else
+            linkLast(mVexs[p2].firstEdge, node2);
+    }
+}
+
+/* 
+ * 析构函数
+ */
+ListUDG::~ListUDG() 
+{
+}
+
+/*
+ * 将node节点链接到list的最后
+ */
+void ListUDG::linkLast(ENode *list, ENode *node)
+{
+    ENode *p = list;
+
+    while(p-&gt;nextEdge)
+        p = p-&gt;nextEdge;
+    p-&gt;nextEdge = node;
+}
+
+/*
+ * 返回ch的位置
+ */
+int ListUDG::getPosition(char ch)
+{
+    int i;
+    for(i=0; i&lt;mVexNum; i++)
+        if(mVexs[i].data==ch)
+            return i;
+    return -1;
+}
+
+/*
+ * 读取一个输入字符
+ */
+char ListUDG::readChar()
+{
+    char ch;
+
+    do {
+        cin &gt;&gt; ch;
+    } while(!((ch&gt;='a'&amp;&amp;ch&lt;='z') || (ch&gt;='A'&amp;&amp;ch&lt;='Z')));
+
+    return ch;
+}
+
+
+/*
+ * 深度优先搜索遍历图的递归实现
+ */
+void ListUDG::DFS(int i, int *visited)
+{
+    ENode *node;
+
+    visited[i] = 1;
+    cout &lt;&lt; mVexs[i].data &lt;&lt; " ";
+    node = mVexs[i].firstEdge;
+    while (node != NULL)
+    {
+        if (!visited[node-&gt;ivex])
+            DFS(node-&gt;ivex, visited);
+        node = node-&gt;nextEdge;
+    }
+}
+
+/*
+ * 深度优先搜索遍历图
+ */
+void ListUDG::DFS()
+{
+    int i;
+    int visited[MAX];       // 顶点访问标记
+
+    // 初始化所有顶点都没有被访问
+    for (i = 0; i &lt; mVexNum; i++)
+        visited[i] = 0;
+
+    cout &lt;&lt; "DFS: ";
+    for (i = 0; i &lt; mVexNum; i++)
+    {
+        if (!visited[i])
+            DFS(i, visited);
+    }
+    cout &lt;&lt; endl;
+}
+
+/*
+ * 广度优先搜索（类似于树的层次遍历）
+ */
+void ListUDG::BFS()
+{
+    int head = 0;
+    int rear = 0;
+    int queue[MAX];     // 辅组队列
+    int visited[MAX];   // 顶点访问标记
+    int i, j, k;
+    ENode *node;
+
+    for (i = 0; i &lt; mVexNum; i++)
+        visited[i] = 0;
+
+    cout &lt;&lt; "BFS: ";
+    for (i = 0; i &lt; mVexNum; i++)
+    {
+        if (!visited[i])
+        {
+            visited[i] = 1;
+            cout &lt;&lt; mVexs[i].data &lt;&lt; " ";
+            queue[rear++] = i;  // 入队列
+        }
+        while (head != rear) 
+        {
+            j = queue[head++];  // 出队列
+            node = mVexs[j].firstEdge;
+            while (node != NULL)
+            {
+                k = node-&gt;ivex;
+                if (!visited[k])
+                {
+                    visited[k] = 1;
+                    cout &lt;&lt; mVexs[k].data &lt;&lt; " ";
+                    queue[rear++] = k;
+                }
+                node = node-&gt;nextEdge;
+            }
+        }
+    }
+    cout &lt;&lt; endl;
+}
+
+/*
+ * 打印邻接表图
+ */
+void ListUDG::print()
+{
+    int i,j;
+    ENode *node;
+
+    cout &lt;&lt; "List Graph:" &lt;&lt; endl;
+    for (i = 0; i &lt; mVexNum; i++)
+    {
+        cout &lt;&lt; i &lt;&lt; "(" &lt;&lt; mVexs[i].data &lt;&lt; "): ";
+        node = mVexs[i].firstEdge;
+        while (node != NULL)
+        {
+            cout &lt;&lt; node-&gt;ivex &lt;&lt; "(" &lt;&lt; mVexs[node-&gt;ivex].data &lt;&lt; ") ";
+            node = node-&gt;nextEdge;
+        }
+        cout &lt;&lt; endl;
+    }
+}
+
+int main()
+{
+    char vexs[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G'};
+    char edges[][2] = {
+        {'A', 'C'}, 
+        {'A', 'D'}, 
+        {'A', 'F'}, 
+        {'B', 'C'}, 
+        {'C', 'D'}, 
+        {'E', 'G'}, 
+        {'F', 'G'}};
+    int vlen = sizeof(vexs)/sizeof(vexs[0]);
+    int elen = sizeof(edges)/sizeof(edges[0]);
+    ListUDG* pG;
+
+    // 自定义"图"(输入矩阵队列)
+    //pG = new ListUDG();
+    // 采用已有的"图"
+    pG = new ListUDG(vexs, vlen, edges, elen);
+
+    pG-&gt;print();   // 打印图
+    pG-&gt;DFS();     // 深度优先遍历
+    pG-&gt;BFS();     // 广度优先遍历
+
+    return 0;
+}
+</code></pre>
+</div>
+
+<hr />
+
+<p>##迪杰斯特拉算法</p>
+
+<p>迪杰斯特拉(Dijkstra)算法是典型最短路径算法，用于计算一个节点到其他节点的最短路径。 
+它的主要特点是以起始点为中心向外层层扩展(广度优先搜索思想)，直到扩展到终点为止。</p>
+
+<p>###基本思想</p>
+
+<p>通过Dijkstra计算图G中的最短路径时，需要指定起点s(即从顶点s开始计算)。</p>
+
+<p>此外，引进两个集合S和U。S的作用是记录已求出最短路径的顶点(以及相应的最短路径长度)，而U则是记录还未求出最短路径的顶点(以及该顶点到起点s的距离)。</p>
+
+<p>初始时，S中只有起点s；U中是除s之外的顶点，并且U中顶点的路径是”起点s到该顶点的路径”。然后，从U中找出路径最短的顶点，并将其加入到S中；接着，更新U中的顶点和顶点对应的路径。 然后，再从U中找出路径最短的顶点，并将其加入到S中；接着，更新U中的顶点和顶点对应的路径。 … 重复该操作，直到遍历完所有顶点。</p>
+
+<p>###操作步骤</p>
+
+<ul>
+  <li>(1)
+初始时，S只包含起点s；U包含除s外的其他顶点，且U中顶点的距离为”起点s到该顶点的距离”[例如，U中顶点v的距离为(s,v)的长度，然后s和v不相邻，则v的距离为∞]。</li>
+  <li>(2) 从U中选出”距离最短的顶点k”，并将顶点k加入到S中；同时，从U中移除顶点k。</li>
+  <li>(3)
+更新U中各个顶点到起点s的距离。之所以更新U中顶点的距离，是由于上一步中确定了k是求出最短路径的顶点，从而可以利用k来更新其它顶点的距离；例如，(s,v)的距离可能大于(s,k)+(k,v)的距离。</li>
+  <li>(4) 重复步骤(2)和(3)，直到遍历完所有顶点。</li>
+</ul>
+
+<p>单纯的看上面的理论可能比较难以理解，下面通过实例来对该算法进行说明。</p>
+
+<p>5.3迪杰斯特拉算法图解
+<img src="/images/images/githubpages/graph/graph11.jpg" alt="" />
+以上图G4为例，来对迪杰斯特拉进行算法演示(以第4个顶点D为起点)。
+<img src="/images/images/githubpages/graph/graph12.jpg" alt="" /></p>
+
+<ul>
+  <li>
+    <p>初始状态：S是已计算出最短路径的顶点集合，U是未计算除最短路径的顶点的集合！</p>
+  </li>
+  <li>
+    <p>第1步：将顶点D加入到S中。</p>
+
+    <p>此时，S={D(0)}, U={A(∞),B(∞),C(3),E(4),F(∞),G(∞)}。     注:C(3)表示C到起点D的距离是3。</p>
+  </li>
+  <li>
+    <p>第2步：将顶点C加入到S中。</p>
+
+    <p>上一步操作之后，U中顶点C到起点D的距离最短；因此，将C加入到S中，同时更新U中顶点的距离。以顶点F为例，之前F到D的距离为∞；但是将C加入到S之后，F到D的距离为9=(F,C)+(C,D)。 
+ 此时，S={D(0),C(3)}, U={A(∞),B(23),E(4),F(9),G(∞)}。</p>
+  </li>
+  <li>
+    <p>第3步：将顶点E加入到S中。</p>
+
+    <p>上一步操作之后，U中顶点E到起点D的距离最短；因此，将E加入到S中，同时更新U中顶点的距离。还是以顶点F为例，之前F到D的距离为9；但是将E加入到S之后，F到D的距离为6=(F,E)+(E,D)。 
+ 此时，S={D(0),C(3),E(4)}, U={A(∞),B(23),F(6),G(12)}。</p>
+  </li>
+  <li>
+    <p>第4步：将顶点F加入到S中。</p>
+
+    <p>此时，S={D(0),C(3),E(4),F(6)}, U={A(22),B(13),G(12)}。</p>
+  </li>
+  <li>
+    <p>第5步：将顶点G加入到S中。</p>
+
+    <p>此时，S={D(0),C(3),E(4),F(6),G(12)}, U={A(22),B(13)}。</p>
+  </li>
+  <li>
+    <p>第6步：将顶点B加入到S中。</p>
+
+    <p>此时，S={D(0),C(3),E(4),F(6),G(12),B(13)}, U={A(22)}。</p>
+  </li>
+  <li>
+    <p>第7步：将顶点A加入到S中。</p>
+
+    <p>此时，S={D(0),C(3),E(4),F(6),G(12),B(13),A(22)}。</p>
+  </li>
+</ul>
+
+<p>此时，起点D到各个顶点的最短距离就计算出来了：A(22) B(13) C(3) D(0) E(4) F(6) G(12)。</p>
+
+<hr />
+
+<h2 id="section-1">###代码</h2>
+
+<p>本文以”邻接矩阵”为例对迪杰斯特拉算法进行说明，
+####基本定义</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>// 邻接矩阵
+typedef struct _graph
+{
+    char vexs[MAX];       // 顶点集合
+    int vexnum;           // 顶点数
+    int edgnum;           // 边数
+    int matrix[MAX][MAX]; // 邻接矩阵
+}Graph, *PGraph;
+
+// 边的结构体
+typedef struct _EdgeData
+{
+    char start; // 边的起点
+    char end;   // 边的终点
+    int weight; // 边的权重
+}EData;
+</code></pre>
+</div>
+
+<p>Graph是邻接矩阵对应的结构体。 
+vexs用于保存顶点，vexnum是顶点数，edgnum是边数；matrix则是用于保存矩阵信息的二维数组。例如，matrix[i][j]=1，则表示”顶点i(即vexs[i])”和”顶点j(即vexs[j])”是邻接点；matrix[i][j]=0，则表示它们不是邻接点。 
+EData是邻接矩阵边对应的结构体。</p>
+
+<p>####迪杰斯特拉算法</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>/*
+ * Dijkstra最短路径。
+ * 即，统计图(G)中"顶点vs"到其它各个顶点的最短路径。
+ *
+ * 参数说明：
+ *        G -- 图
+ *       vs -- 起始顶点(start vertex)。即计算"顶点vs"到其它顶点的最短路径。
+ *     prev -- 前驱顶点数组。即，prev[i]的值是"顶点vs"到"顶点i"的最短路径所经历的全部顶点中，位于"顶点i"之前的那个顶点。
+ *     dist -- 长度数组。即，dist[i]是"顶点vs"到"顶点i"的最短路径的长度。
+ */
+
+    void dijkstra(Graph G, int vs, int prev[], int dist[])
+    {
+        int i,j,k;
+        int min;
+        int tmp;
+    int flag[MAX];      // flag[i]=1表示"顶点vs"到"顶点i"的最短路径已成功获取。
+
+    // 初始化
+    for (i = 0; i &lt; G.vexnum; i++)
+    {
+        flag[i] = 0;              // 顶点i的最短路径还没获取到。
+ 
+
+           prev[i] = 0;              // 顶点i的前驱顶点为0。
+            dist[i] = G.matrix[vs][i];// 顶点i的最短路径为"顶点vs"到"顶点i"的权。
+        }
+    
+        // 对"顶点vs"自身进行
+
+    初始化
+    flag[vs] = 1;
+    dist[vs] = 0;
+
+    // 遍历G.vexnum-1次；每次找出一个顶点的最短路径。
+    for (i = 1; i &lt; G.vexnum; i++)
+    {
+    // 寻找当前最小的路径；
+    // 即，在未获取最短路径的顶点中，找到离vs最近的顶点(k)。
+    min = INF;
+    for (j = 0; j &lt; G.vexnum; j++)
+    {
+        if (flag[j]==0 &amp;&amp; dist[j]&lt;min)
+        {
+            min = dist[j];
+            k = j;
+        }
+    }
+    // 标记"顶点k"为已经获取到最短路径
+    flag[k] = 1;
+
+    // 修正当前最短路径和前驱顶点
+    // 即，当已经"顶点k的最短路径"之后，更新"未获取最短路径的顶点的最短路径和前驱顶点"。
+    for (j = 0; j &lt; G.vexnum; j++)
+    {
+        tmp = (G.matrix[k][j]==INF ? INF : (min + G.matrix[k][j])); // 防止溢出
+        if (flag[j] == 0 &amp;&amp; (tmp  &lt; dist[j]) )
+        {
+            dist[j] = tmp;
+            prev[j] = k;
+        }
+    }
+}
+
+    // 打印dijkstra最短路径的结果
+    printf("dijkstra(%c): \n", G.vexs[vs]);
+    for (i = 0; i &lt; G.vexnum; i++)
+        printf("  shortest(%c, %c)=%d\n", G.vexs[vs], G.vexs[i], dist[i]);
+}
+</code></pre>
+</div>
+
+
+		  </article>
+		<hr>
+	<br/>
+        <p>
+          本作品由 <a href="mailto:ouyanglip@gmail.com">Lippi.OuYang</a> 创作，采用
+          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="查看协议详细信息" target="_blank">CC BY-NC-SA 3.0 许可协议</a>
+          进行许可。
+        </p>
+	<div style="margin-top:10px;margin-bottom:10px">
+	  
+	  <span class="next">
+	    上篇：
+	    <a href="/blog/2014/11/web-server.html">
+	      也谈如何构建高性能服务端程序
+	    </a>
+	  </span>
+	   
+	  
+	  <span class="prev">
+	    下篇：
+	    <a href="/blog/2014/12/improve-webServer-performance.html">
+	      谈谈如何提高web服务器并发性能
+	    </a>
+	  </span>
+	  
+	</div>
+	</div>
+	
+        
+	<div post-cate="java">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/hibernate-cache-guide.html" class="post-list-item">
+                    <h2>Hibernate缓存配置笔记</h2>
+                    <span class="date">Jul 24, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-virtual-mechine.html" class="post-list-item">
+                    <h2>Java虚拟机简介</h2>
+                    <span class="date">Apr 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-code-opt-one.html" class="post-list-item">
+                    <h2>优化java代码建议(1)</h2>
+                    <span class="date">Apr 12, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/02/cache.html" class="post-list-item">
+                    <h2>谈谈缓存和基本的缓存算法</h2>
+                    <span class="date">Feb 4, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/12/improve-webServer-performance.html" class="post-list-item">
+                    <h2>谈谈如何提高web服务器并发性能</h2>
+                    <span class="date">Dec 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-inner-class.html" class="post-list-item">
+                    <h2>java中内部类</h2>
+                    <span class="date">Nov 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-concurrent-collections.html" class="post-list-item">
+                    <h2>java同步容器与并发容器</h2>
+                    <span class="date">Nov 8, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/java-multithread.html" class="post-list-item">
+                    <h2>java并发和多线程</h2>
+                    <span class="date">Aug 2, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-UI-Thread.html" class="post-list-item">
+                    <h2>Android UI线程和子线程、Service通信</h2>
+                    <span class="date">Jul 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-networkOnMainThreadException.html" class="post-list-item">
+                    <h2>从android.os.NetworkOnMainThreadException引发的思考</h2>
+                    <span class="date">Jul 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="post-list-item">
+                    <h2>Java编程Tips</h2>
+                    <span class="date">Jun 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/15/in-the-rain.html" class="post-list-item">
+                    <h2>在雨中</h2>
+                    <span class="date">Jun 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-code-opt.html" class="post-list-item">
+                    <h2>C代码优化小贴士</h2>
+                    <span class="date">Dec 27, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/libevent.html" class="post-list-item">
+                    <h2>处理并发之二：libevent的eventbuffer</h2>
+                    <span class="date">Aug 24, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/linux-epoll.html" class="post-list-item">
+                    <h2>处理并发之一：LINUX Epoll机制介绍</h2>
+                    <span class="date">Aug 23, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="programming">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="jekyll">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-syntax.html" class="post-list-item">
+                    <h2>Markdown 语法 (简体中文版)</h2>
+                    <span class="date">Jul 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-basics.html" class="post-list-item">
+                    <h2>markdown 快速入门</h2>
+                    <span class="date">Jul 10, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="other">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/vim-plugins.html" class="post-list-item">
+                    <h2>一些强大的Vim插件</h2>
+                    <span class="date">Mar 20, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="reprints">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/09/android-studio-plugins.html" class="post-list-item">
+                    <h2>提高效率的Android Studio插件</h2>
+                    <span class="date">Sep 9, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/android-opensource.html" class="post-list-item">
+                    <h2>值得推荐的android开源框架</h2>
+                    <span class="date">Oct 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="web">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/04/web-transmission-basis.html" class="post-list-item">
+                    <h2>网络传输基础</h2>
+                    <span class="date">Apr 16, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/web-server.html" class="post-list-item">
+                    <h2>也谈如何构建高性能服务端程序</h2>
+                    <span class="date">Nov 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp-analise.html" class="post-list-item">
+                    <h2>XMPP协议分析-具体分析</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-project.html" class="post-list-item">
+                    <h2>Androidpn 消息推送总结</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-to-use-smack.html" class="post-list-item">
+                    <h2>Smack开发手册</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-introduction.html" class="post-list-item">
+                    <h2>AndroidPN消息推送</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp.html" class="post-list-item">
+                    <h2>XMPP协议分析-原理</h2>
+                    <span class="date">Oct 28, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/jsp-jfreechart.html" class="post-list-item">
+                    <h2>使用Jfreechart生成曲线显示到JSP中</h2>
+                    <span class="date">Oct 22, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-http-works.html" class="post-list-item">
+                    <h2>当我们打开网页时发生了什么</h2>
+                    <span class="date">Oct 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="book">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/11/how-to-evaluate-the-hackers-and-painters.html" class="post-list-item">
+                    <h2>如何评价『黑客与画家』</h2>
+                    <span class="date">Nov 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="algorithm">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/skip-list.html" class="post-list-item">
+                    <h2>skip list跳跃表实现</h2>
+                    <span class="date">Dec 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/graph.html" class="post-list-item">
+                    <h2>计算机算法--图算法介绍</h2>
+                    <span class="date">Nov 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/leveldb.html" class="post-list-item">
+                    <h2>leveldb原理剖析</h2>
+                    <span class="date">Nov 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c/c++">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-open-project.html" class="post-list-item">
+                    <h2>值得推荐的C/C++框架和库</h2>
+                    <span class="date">Dec 13, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/android-links.html" class="post-list-item">
+                    <h2>安卓开发者必备的42个链接</h2>
+                    <span class="date">May 19, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/define-custom-view.html" class="post-list-item">
+                    <h2>Android自定义视图教程</h2>
+                    <span class="date">May 17, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/android-studio-prefrence.html" class="post-list-item">
+                    <h2>Android Studio多渠道打包和代码混淆教程</h2>
+                    <span class="date">Mar 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/05/gradle-dependency-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之依赖管理</h2>
+                    <span class="date">May 5, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/gradle-task-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之任务管理</h2>
+                    <span class="date">Apr 30, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="lambda">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/dagger-dependency-injection.html" class="post-list-item">
+                    <h2>Dagger依赖注入浅析</h2>
+                    <span class="date">Aug 13, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/gradle-tasks-guide.html" class="post-list-item">
+                    <h2>彻底理解Gradle的任务</h2>
+                    <span class="date">Jul 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Latex">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/latex-fonts-settings.html" class="post-list-item">
+                    <h2>Latex中英文环境设置</h2>
+                    <span class="date">Aug 22, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Unix/Linux">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/baidu-spider-forbidden.html" class="post-list-item">
+                    <h2>解决百度爬虫无法抓取github pages</h2>
+                    <span class="date">Feb 18, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/apache-configuration-in-ubuntu.html" class="post-list-item">
+                    <h2>Ubuntu下Apache服务器的配置</h2>
+                    <span class="date">Jan 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/tmux-guide.html" class="post-list-item">
+                    <h2>终端复用软件之tmux简介</h2>
+                    <span class="date">Jan 19, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/08/linux-zsh.html" class="post-list-item">
+                    <h2>Zsh-Linux下最好的Shell简介</h2>
+                    <span class="date">Aug 23, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Git">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/git-guide.html" class="post-list-item">
+                    <h2>Git操作手册|命令速查表</h2>
+                    <span class="date">Feb 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="hi">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/hi.html" class="post-list-item">
+                    <h2>hi</h2>
+                    <span class="date">Feb 22, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	 </div>
+
+</div>
+
+
+<!-- Blog Comments -->
+<div class="media">
+  <!-- UY BEGIN 
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2023801"></script>
+UY END -->
+
+<!-- 多说评论框 start -->
+  <div class="post-comment">
+            <span>Comments</span>
+	<div class="ds-thread" data-thread-key="/blog/2014/11/graph" data-title="计算机算法--图算法介绍" data-url="LippiOuYang.github.io/blog/2014/11/graph.html">
+	</div>
+ </div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"lippiouyang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+ 
+</div> 
+</div>
+
+        </div>
+
+	 <div id="top" data-toggle="tooltip" data-placement="left" title="回到顶部">
+	      <a href="javascript:;">
+		<div class="arrow"></div>
+		<div class="stick"></div>
+	      </a>
+	    </div>
+
+        <!-- Blog Sidebar Widgets Column -->
+        <div class="col-md-4">
+          <!-- Blog Search Well -->  
+	
+                    <div class="shadow-corner-curl hidden-xs">
+	  <div class="categories-list-header">站内搜索</div>
+<!-- 使用该代码即表示您同意接受 Google 自定义搜索服务条款。 -->
+<!-- 有关服务条款，请访问 http://www.google.com/cse/docs/tos.html?hl=zh-CN -->
+<form name="cse" id="searchbox_demo" action="/search.html">
+  <input type="hidden" name="cref" value="" />
+  <input type="hidden" name="ie" value="utf-8" />
+  <input type="hidden" name="hl" value="zh-CN" />
+  <input name="q" type="text" size="30" />
+  <input type="submit" name="sa" value="搜索" /> 
+</form>
+<script type="text/javascript" src="http://www.google.com/cse/tools/onthefly?form=searchbox_demo&lang=zh-CN"></script>			      
+     
+            
+</div>
+
+
+
+
+
+
+
+
+          <!-- Blog Categories Well -->
+              
+
+    <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        Categories
+      </div>
+      
+      <a href="/index.html" class="categories-list-item" cate="All">
+        All<span class="my-badge"> 61</span>
+      </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="java">
+          java <span class="my-badge">17</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c">
+          c <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="programming">
+          programming <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="jekyll">
+          jekyll <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="other">
+          other <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="reprints">
+          reprints <span class="my-badge">5</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Android">
+          Android <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="web">
+          web <span class="my-badge">9</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="book">
+          book <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="algorithm">
+          algorithm <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c/c++">
+          c/c++ <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="android">
+          android <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Gradle">
+          Gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="lambda">
+          lambda <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="gradle">
+          gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Latex">
+          Latex <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Unix/Linux">
+          Unix/Linux <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Git">
+          Git <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="hi">
+          hi <span class="my-badge">1</span>
+        </a>
+      
+    </div>
+
+
+
+ 
+         
+              <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        热门文章
+      </div>
+
+ <ul class="list-unstyled">
+      	<li><a href="/blog/2015/03/github-pages-blog.html" class="categories-list-item">利用Github-pages建立个人博客</a></li>	
+<li><a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="categories-list-item">一个合格的程序员应该读过哪些书</a></li>
+<li><a href="/blog/2014/12/c-open-project.html" class="categories-list-item">值得推荐的C/C++框架和库</a></li>
+<li><a href="/blog/2014/12/c-code-opt.html" class="categories-list-item">C代码优化小贴士</a></li>	
+<li><a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="categories-list-item">Java编程Tips</a></li>
+<li><a href="/blog/2015/04/gradle-task-management.html" class="categories-list-item">Gradle系列教程之任务管理</a></li>	
+<li><a href="/blog/2015/05/android-links.html" class="categories-list-item">安卓开发者必备的42个链接</a></li>
+<li><a href="/blog/2015/05/gradle-dependency-management.html" class="categories-list-item">Gradle系列教程之依赖管理</a></li>
+<li><a href="/blog/2014/10/android-opensource.html" class="categories-list-item">值得推荐的android开源框架</a></li>	 
+<li><a href="/blog/2015/07/hibernate-cache-guide.html" class="categories-list-item">Hibernate缓存配置笔记</a></li>	
+	 
+     </ul>
+</div>
+ 
+       
+                   <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        相关链接
+      </div>    
+ <ul class="list-unstyled">
+              <li>
+                <a href="https://github.com/" class="categories-list-item">
+                   GitHub 
+                </a>
+              </li>
+<li>
+                <a href="http://www.stackoverflow.com/" class="categories-list-item">
+                   Stack Overflow 
+                </a>
+              </li>
+<li>
+                <a href="http://jekyllrb.com/docs/posts/" class="categories-list-item">
+                  Jekyll文档 
+                </a>
+              </li>
+               
+               <li>
+                <a href="https://news.ycombinator.com/" class="categories-list-item">
+                   Hacker News 
+                </a>
+              </li>        
+              
+              <li>
+                <a href="http://developer.android.com/" class="categories-list-item">
+                   Android Developer 
+                </a>
+              </li>
+              
+              <li>
+                <a href="http://www.ruanyifeng.com/blog/" class="categories-list-item">
+                   Ruanyifeng's Blog 
+                </a>
+              </li>
+
+
+  <li>
+                <a href="http://www.importnew.com/" class="categories-list-item">
+                   ImportNew 
+                </a>
+              </li>
+<li>
+                <a href="http://guides.codepath.com/android" class="categories-list-item">
+                   CodePath Android Cliffnotes 
+                </a>
+              </li>
+<li>
+                <a href="http://androidweekly.net/" class="categories-list-item">
+                   Androidweekly 	
+                </a>
+              </li>
+<li>
+			<a href="http://mvnrepository.com/" class="categories-list-item">
+                   Mvnrepository 
+                </a>
+              </li>
+<li>
+			<a href="http://www.iteye.com/" class="categories-list-item">
+                  Iteye 
+                </a>
+              </li>
+              		
+            </ul>
+
+</div>
+ 
+
+          <!-- Side Widget Well -->
+           
+        </div>
+      </div>
+
+
+
+      <!-- /.row -->
+      <hr>
+      <!-- Footer -->
+      <footer>
+           <p><small>Designed by <a href="https://github.com/EZLippi">Lippi</a> | Free hosted at <a href="https://github.com/EZLippi/EZLippi.github.io">Github</a> | Copyright 2014 - 2016  
+										</p>
+
+	<!--
+<div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <a href="mailto:ouyanglip@gmail.com"><span class="glyphicon glyphicon-envelope"></span> ouyanglip@gmail.com</a>
+        <span class="point"> · </span>
+        
+          
+          <a href="https://github.com/LippiOuYang">
+            <span class="icon">
+              <svg viewBox="0 0 16 16">
+                <path fill="#aaa" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+            Github
+          </a>
+          
+          
+          <span class="point"> · </span>
+          <span><a href="/feed.xml">RSS</a></span>
+          <span class="point"> · </span>
+          <span>Draw my life with code</span>
+          <span class="point"> · </span>
+          <span>&copy; 2014 LippiOuYang</span>
+          <span class="point"> · </span>
+          <span>Designed by <a href="https://github.com/LippiOuYang">Lippi</a></span>
+
+      </div>
+    </div>
+    </div>
+	-->
+ 
+              <div style="display:none;"><script src="http://s95.cnzz.com/z_stat.php?id=1254799848&web_id=1254799848" language="JavaScript"></script></div>
+ 
+
+      </footer>
+    </div>
+    <!-- /.container -->
+  </body>
+
+</html>

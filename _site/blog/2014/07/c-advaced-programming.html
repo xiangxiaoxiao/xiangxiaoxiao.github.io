@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta name="baidu-site-verification" content="HvuxptDcq6" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="C语言高级编程指南 - Lippi-浮生志 - Lippi.OuYang(ouyanglip@gmail.com)">
+    <title>
+      C语言高级编程指南 - Lippi-浮生志
+    </title>
+    <!-- Bootstrap Core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS 
+    <link href="/css/blog.css" rel="stylesheet">-->
+    <!-- index css -->
+    <link href="/css/index.css" rel="stylesheet">
+	<!-- pagments CSS-->
+	<link href="/css/pygments.css" rel="stylesheet">
+        <!-- jQuery Version 1.11.0 -->
+    <script src="/js/jquery-1.11.0.js"> </script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/bootstrap.min.js"></script>
+   <!-- 回到顶部js-->
+    <script src="/js/index.js"></script>
+
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?085fc257cb1e774f7764a2cf527c393d";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+	<script>
+    (function(){
+     var bp = document.createElement('script');
+	 bp.src = '//push.zhanzhang.baidu.com/push.js';
+	 var s = document.getElementsByTagName("script")[0];
+	 s.parentNode.insertBefore(bp, s);
+	 })();
+	</script>
+
+  </head>
+  
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">
+              Toggle navigation
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+          </button>
+          <a class="navbar-brand" href="/index.html">
+            Lippi-浮生志
+          </a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+            <li>
+              <a href="/categories.html">
+                分 类
+              </a>
+            </li>
+            <li>
+              <a href="/tags.html">
+                标 签
+              </a>
+            </li>
+            <li>
+              <a href="/archives.html">
+                归 档
+              </a>
+            </li>
+            <li>
+              <a href="/faqs.html">
+                备 忘
+              </a>
+            </li>
+            <li>
+              <a href="/about.html">
+                关 于
+              </a>
+            </li>
+          </ul> 
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+        <!-- Blog Entries Column -->
+        <div class="col-md-8">
+          <!-- Blog Post -->
+<!-- Title -->
+<div class="row">
+  <div class="post-area post">
+
+ 	<div class="post-list-body">
+        	<div class="all-posts" post-cate="All">
+ 		<header>
+		<h1>
+		  C语言高级编程指南
+		  <div class="post-date"><a href="https://github.com/LippiOuYang/LippiOuYang.github.io/edit/master/_posts/2014-07-05-c-advaced-programming.md" target="_blank">纠错</a>&nbsp;&nbsp;
+			<span class="glyphicon glyphicon-time"></span>
+			05 Jul 2014
+		  </div>
+		</h1>
+ 		</header>
+		<!-- Author -->
+		<hr>
+		 <article>
+		<p><strong>整形溢出和提升</strong></p>
+
+<p>大部分 C 程序员都以为基本的整形操作都是安全的其实不然,看下面这个例子,
+你觉得输出结果是什么:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>int main(int argc, char** argv) {
+    long i = -1;
+
+    if (i &lt; sizeof(i)) {
+         printf("OK\n");
+    }
+    else {
+         printf("error\n");
+    }
+
+    return 0;
+} 当一个变量转换成无符号整形时,i的值不再是-1,而是 size_t的最大值,因 为sizeof操作返回的是一个 size_t类型的无符号数。 在C99/C11标准里写道:
+</code></pre>
+</div>
+
+<blockquote>
+  <p>“If the operand that has unsigned integer type has rank greater or
+equal to the rank of the type of the other operand, then the operand
+with signed integer type is converted to the type of the operand with
+unsigned integer type.”</p>
+</blockquote>
+
+<p>在C标准里面 size_t至少是一个 16 位的无符号整数,对于给定的架构 size_t 一般对应long,所以sizeof（int）和size_t至少相等,这就带来了可移植性的问题,C标准没有定义 short, int,long,longlong的大小,只是说明了他们的最小长度,对于 x86_64 架构,long在Linux下是64位,而在64位Windows下是32位。一般的方法是采用固定长度的类型比如定义在C99头文件stdint.h中的uint16_t,int32_t,uint_least16_t,uint_fast16_t等。</p>
+
+<p>如果 int可以表示原始类型的所有值,那么这个操作数会转换成 int,否则
+他会转换成 unsigned int。下面这个函数在 32 位平台返回 65536,但是在 16 位系统返回 0。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>uint32_t sum()
+{
+    uint16_t a = 65535;
+    uint16_t b = 1;
+    return a+b;
+}
+</code></pre>
+</div>
+
+<p>对于char 类型到底是 signed 还是 unsigned 取决于硬件架构和操作系统,通常
+由特定平台的 ABI(Application Binary Interface) 指定,如果是 signed char,下面的代码输出-128 和-127,否则输出 128,129(x86 架构)。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>char c = 128;
+char d = 129;
+printf("%d,%d\n",c,d);
+</code></pre>
+</div>
+
+<hr />
+<p>##内存管理和分配</p>
+
+<p>malloc 函数分配制定字节大小的内存,对象未被初始化,如果 size 是 0 取
+决与系统实现。malloc(0)返回一个空指针或者 unique pointer,如果 size 是表达式的运算结果,确保没有整形溢出。</p>
+
+<blockquote>
+  <p>“If the size of the space requested is 0, the behavior is
+implementation- defined: the value returned shall be either a null
+pointer or a unique pointer.”</p>
+</blockquote>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>size_t computed_size;
+
+if (elem_size &amp;&amp; num &gt; SIZE_MAX / elem_size) {
+    errno = ENOMEM;
+    err(1, "overflow");
+}
+
+computed_size = elem_size*num;
+</code></pre>
+</div>
+
+<p>malloc不会给分配的内存初始化，如果要对新分配的内存初始化，可以用calloc代替malloc,一般情况下给序列分配相等大小的元素时,用calloc来代替用表达式计算大小,calloc 会把内存初始化为 0。</p>
+
+<p>realloc 用来对已经分配内存的对象改变大小,如果新的 size 更大,额外的空间
+没 有 被 初 始 化 , 如 果 提 供 给 realloc 的 指 针 是 空 指 针 , realloc 就 等 效 于malloc,如果原指针非空而 new size是0,结果依赖于操作系统的具体实现。</p>
+
+<blockquote>
+  <p>“In case of failure realloc shall return NULL and leave provided memory
+object intact. Thus it is important not only to check for integer
+overflow of size argument, but also to correctly handle object size if
+realloc fails.”</p>
+</blockquote>
+
+<p>下面这段代码可以带你领会malloc,calloc，realloc,free的用法：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;stdio.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;malloc.h&gt;
+#include &lt;errno.h&gt;
+
+#define VECTOR_OK            0
+#define VECTOR_NULL_ERROR    1
+#define VECTOR_SIZE_ERROR    2
+#define VECTOR_ALLOC_ERROR   3
+
+struct vector {
+    int *data;
+    size_t size;
+};
+
+int create_vector(struct vector *vc, size_t num) {
+
+    if (vc == NULL) {
+        return VECTOR_NULL_ERROR;
+    }
+
+    vc-&gt;data = 0;
+    vc-&gt;size = 0;
+
+    /* check for integer and SIZE_MAX overflow */
+    if (num == 0 || SIZE_MAX / num &lt; sizeof(int)) {
+        errno = ENOMEM;
+        return VECTOR_SIZE_ERROR;
+    }
+
+    vc-&gt;data = calloc(num, sizeof(int));
+
+    /* calloc faild */
+    if (vc-&gt;data == NULL) {
+        return VECTOR_ALLOC_ERROR;
+    }
+
+    vc-&gt;size = num * sizeof(int);
+    return VECTOR_OK;
+}
+
+int grow_vector(struct vector *vc) {
+
+    void *newptr = 0;
+    size_t newsize;
+
+    if (vc == NULL) {
+        return VECTOR_NULL_ERROR;
+    }
+
+
+    /* check for integer and SIZE_MAX overflow */
+    if (vc-&gt;size == 0 || SIZE_MAX / 2 &lt; vc-&gt;size) {
+        errno = ENOMEM;
+        return VECTOR_SIZE_ERROR;
+    }
+
+    newsize = vc-&gt;size * 2;
+
+    newptr = realloc(vc-&gt;data, newsize);
+
+    /* realloc faild; vector stays intact size was not changed */
+    if (newptr == NULL) {
+        return VECTOR_ALLOC_ERROR;
+    }
+
+    /* upon success; update new address and size */
+    vc-&gt;data = newptr;
+    vc-&gt;size = newsize;
+    return VECTOR_OK;
+}
+</code></pre>
+</div>
+
+<hr />
+
+<p>##避免重大错误</p>
+
+<ol>
+  <li>
+    <p>使用未初始化的变量，
+ C语言要求所有变量在使用之前要初始化，使用未初始化的变量会造成为定义的行为，这和C++不同，C++保证所有变量在使用之前都得到初始化，Java<strong>尽量保证</strong>变量使用前的得到初始化，如类基本数据成员会被初始化为默认值。</p>
+  </li>
+  <li>
+    <p>free错误
+对空指针调用 free,对不是由 malloc family 函数分配的指针调用 free,或者对
+已经调用 free 的指针再次调用 free。
+一开始初始化指针为NULL可以减少错误,GCC和Clang编译器有-Wuninitialized 选项来对未初始化的变量显示警告信息,另外不要将同一个指针用于静态变量和动态变量。</p>
+  </li>
+</ol>
+
+<blockquote>
+  <div class="highlighter-rouge"><pre class="highlight"><code>char *ptr = NULL;
+void nullfree(void **pptr) {
+    void *ptr = *pptr;
+    assert(ptr != NULL)
+    free(ptr);
+    *pptr = NULL;
+}
+</code></pre>
+  </div>
+</blockquote>
+
+<p>3.对空指针解引用，数组越界访问</p>
+
+<p>对NULL指针或者free’d内存解引用，数组越界访问，是很明显的错误，为了消除这种错误，一般的做法就是增加数组越界检查的功能，比如Java里的array就有下标检查的功能，但是这样会带来严重的性能代价，我们要修改ABI（application binary interface），让每个指针都跟随着它的范围信息，在数值计算中cost is terrible。</p>
+
+<p>4.违反类型规则</p>
+
+<p>把int×指针cast成float×，然后对它解引用，在C里面会引发undefined behavior，C规定这种类型的转换需要使用memset，C++里面有个reinterpret_cast函数用于无关类型之间的转换，reinterpret_cast <new_type> (expression)</new_type></p>
+
+<hr />
+
+<p>##防止内存泄漏</p>
+
+<p>内存泄漏发生在程序不再使用的动态内存没有得到释放，这需要我们掌握动态分配对象的作用域，尤其是什么时候该调用free来释放内存，常用的集中方法如下：</p>
+
+<ol>
+  <li>
+    <p>在程序启动的时候分配
+ 在程序启动的时候分配需要的heap memory，程序退出时把释放的任务交给操作系统，这种方法一般适用于程序运行后马上退出的那种。</p>
+  </li>
+  <li>
+    <p>使用变长数组（VLA）
+ 如果你需要一块变长大小的空间并且作用域在函数中，变长数组可以帮到你，但是也有一个限制，一个函数中的变长数组内存大小一般不超过几百字节，这个数字C标准没有明确的定义，最好是把内存分配到栈上，在栈上允许分配的最大VLA内存是SIZE_MAX，掌握目标平台的栈大小可以有效的防止栈溢出。</p>
+  </li>
+  <li>
+    <p>使用引用计数
+ 引用计数是一个很好的管理内存的方法，特别是当你不希望自己定义的对象被复制时，每一次赋值把引用计数加1,每次失去引用就把引用计数减1,当引用计数等于0时，以为的对象已经不再需要了，我们需要释放对象占用的内存，由于C不提供自动的析构函数，我们必须手动释放内存，看一个例子：</p>
+
+    <div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;stdlib.h&gt;
+#include &lt;stdint.h&gt;
+    
+#define MAX_REF_OBJ 100
+#define RC_ERROR -1
+    
+struct mem_obj_t{
+    void *ptr;
+    uint16_t count;
+};
+    
+static struct mem_obj_t references[MAX_REF_OBJ];
+static uint16_t reference_count = 0;
+    
+/* create memory object and return handle */
+uint16_t create(size_t size){
+    
+    if (reference_count &gt;= MAX_REF_OBJ)
+        return RC_ERROR;
+
+if (size){
+  void *ptr = calloc(1, size);
+
+if (ptr != NULL){
+    references[reference_count].ptr = ptr;
+    references[reference_count].count = 0;
+    return reference_count++;
+                }
+        }
+
+    return RC_ERROR;
+}
+        
+        
+/* get memory object and increment reference counter */
+void* retain(uint16_t handle){
+
+if(handle &lt; reference_count &amp;&amp; handle &gt;= 0){
+    references[handle].count++;
+    return references[handle].ptr;
+    } else {
+        return NULL;
+    }
+}
+    
+/* decrement reference counter */
+void release(uint16_t handle){
+printf("release\n");
+
+if(handle &lt; reference_count &amp;&amp; handle &gt;= 0){
+    struct mem_obj_t *object = &amp;references[handle];
+
+    if (object-&gt;count &lt;= 1){
+        printf("released\n");
+    free(object-&gt;ptr);
+    reference_count--;
+} else {
+    printf("decremented\n");
+    object-&gt;count--;
+        }
+     }
+} C++标准库有个auto_ptr智能指针，能够自动释放指针所指对象的内存，C++ boost库有个boost：：shared_ptr智能指针，内置引用计数，支持拷贝和赋值，看下面这个例子：
+</code></pre>
+    </div>
+  </li>
+</ol>
+
+<blockquote>
+
+  <p>“Objects of shared_ptr types have the ability of taking ownership of a pointer and share that ownership: once they take ownership, the group of owners of a pointer become responsible for its deletion when the last one of them releases that ownership.”</p>
+</blockquote>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;boost/smart_ptr.hpp&gt;
+#include &lt;iostream&gt;
+int main()
+{
+    // Basic useage
+    boost::shared_ptr&lt;int&gt; p1(new int(10));
+    std::cout &lt;&lt; "ref count of p1: " &lt;&lt; p1.use_count() &lt;&lt; std::endl;
+    boost::shared_ptr&lt;int&gt; p2(p1); // or p2 = p1;
+    std::cout &lt;&lt; "ref count of p1: " &lt;&lt; p1.use_count() &lt;&lt; std::endl;
+    *p1 = 999;
+    std::cout &lt;&lt; "*p2: " &lt;&lt; *p2 &lt;&lt; std::endl;
+    p2.reset();
+    std::cout &lt;&lt; "ref count of p1: " &lt;&lt; p1.use_count() &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+</div>
+
+<p>4.内存池，有利于减少内存碎片，看下面这个例子：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;stdlib.h&gt;
+#include &lt;stdint.h&gt;
+
+struct mem_pool_t{
+void* ptr;//指向内存池起始地址
+size_t size;//内存池大小
+size_t used;//已用内存大小
+};
+
+//create memory pool
+struct mem_pool_t* create_pool(size_t size){
+mem_pool_t* pool=calloc(1,sizeof(struct men_pool_t));
+if(pool!=NULL){
+void* mem=calloc(1,size);
+if(mem!=NULL){
+pool-&gt;ptr=mem;
+pool-&gt;size=size;
+pool-&gt;used=0;
+return pool;
+        }
+    }
+return NULL;
+}
+
+//allocate memory from pool
+void* pool_alloc(mem_pool_t* pool,size_t size){
+if(pool=NULL)
+    return NULL;
+size_t bytes_left=pool-&gt;size-pool-&gt;used;
+if(size&amp;&amp;size&lt;=bytes_left){
+    void* mem=pool-&gt;ptr+pool-&gt;used;
+    pool-&gt;used+=size;
+    return mem;
+    }
+return NULL；
+}
+
+／／release memory of the pool
+void pool_free(mem_pool_t* pool){
+if(pool!=NULL){
+free(pool-&gt;ptr);
+free(pool);
+ }
+}
+</code></pre>
+</div>
+
+<p>5.垃圾回收机制
+ 引用计数采用的方法是当内存不再需要时得到手动释放，垃圾回收发生在内存分配失败或者内存到达一定的水位（watermarks），实现垃圾回收最简单的一个算法是MARK AND SWEEP算法，该算法的思路是遍历所有动态分配对象的内存，标记那些还能继续使用的，回收那些没有被标记的内存。
+    Java采用的垃圾回收机制就更复杂了，思路也是回收那些不再使用的内存，JAVA的垃圾回收和C++的析构函数又不一样，C++保证对象在使用之前得到初始化，对象超出作用域之后内存得到释放，而JAVA不能保证对象一定被析构。</p>
+
+<hr />
+
+<p>##指针和数组</p>
+
+<p>我们一般的概念里指针和数组名是可互换的，但是在编译器里他们被不同的对待，当我们说一个对象或者表达式具有某种类型的时候我们一般是说这个对象是个左值（lvalue），当对象不是const的时候，左值是可以修改的，比如对象是复制操作符的左参数，而数组名是一个const左值，指向地一个元素的const指针，所以你不能给数组名赋值或者意图改变数组名，如果表达式是数组类型，数组名通常转换成指向地一个元素的指针。</p>
+
+<p>但是也有例外，什么情况下数组名不是一个指针呢？
+1.当它是sizeof操作符的操作数时，返回数组占的内存字节数
+2.当它是取地址操作&amp;的操作数时，返回一个数组的地址</p>
+
+<p>看下面这个例子：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>short a[] = {1,2,3};
+short *pa;
+short (*px)[];
+
+void init(){
+    pa = a;
+    px = &amp;a;
+
+    printf("a:%p; pa:%p; px:%p\n", a, pa, px);
+
+    printf("a[1]:%i; pa[1]:%i (*px)[1]:%i\n", a[1], pa[1],(*px)[1]);
+}
+</code></pre>
+</div>
+
+<p>a是一个short类型数组，pa是一个指向short类型的指针，px呢？
+px是一个指向数组类型的指针，在a被赋值给pa之前，他的值被转换成一个指向数组第一个元素的指针，下面那个a却没有转换，因为遇到的是&amp;操作符。
+数组下标a[1]等价于<em>(a+1),和p[1]一样，也指向</em>(p+1)，但是两者还是有区别的，a是一个数组，它实际上存储的是第一个元素的地址，所以数组a是用来定位第一个元素的，而pa不一样，它就是一个指针，不是用来定位的。
+再比如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>int a[10];
+int b[10];
+int *a;
+c=&amp;a[0];//c是指向数组a地一个元素的指针
+c=a;//a自动转换成指向第一个元素的指针，实际上是指针拷贝
+b=a;//非法的，你不能用赋值符把一个数组的所有元素赋给另一个数组
+a=c;//非法的，你不能修改const指针的值
+</code></pre>
+</div>
+
+		  </article>
+		<hr>
+	<br/>
+        <p>
+          本作品由 <a href="mailto:ouyanglip@gmail.com">Lippi.OuYang</a> 创作，采用
+          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="查看协议详细信息" target="_blank">CC BY-NC-SA 3.0 许可协议</a>
+          进行许可。
+        </p>
+	<div style="margin-top:10px;margin-bottom:10px">
+	  
+	  <span class="next">
+	    上篇：
+	    <a href="/blog/2014/06/26-methods-to-improve-java-performance.html">
+	      Java编程Tips
+	    </a>
+	  </span>
+	   
+	  
+	  <span class="prev">
+	    下篇：
+	    <a href="/blog/2014/07/markdown-basics.html">
+	      markdown 快速入门
+	    </a>
+	  </span>
+	  
+	</div>
+	</div>
+	
+        
+	<div post-cate="java">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/hibernate-cache-guide.html" class="post-list-item">
+                    <h2>Hibernate缓存配置笔记</h2>
+                    <span class="date">Jul 24, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-virtual-mechine.html" class="post-list-item">
+                    <h2>Java虚拟机简介</h2>
+                    <span class="date">Apr 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-code-opt-one.html" class="post-list-item">
+                    <h2>优化java代码建议(1)</h2>
+                    <span class="date">Apr 12, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/02/cache.html" class="post-list-item">
+                    <h2>谈谈缓存和基本的缓存算法</h2>
+                    <span class="date">Feb 4, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/12/improve-webServer-performance.html" class="post-list-item">
+                    <h2>谈谈如何提高web服务器并发性能</h2>
+                    <span class="date">Dec 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-inner-class.html" class="post-list-item">
+                    <h2>java中内部类</h2>
+                    <span class="date">Nov 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-concurrent-collections.html" class="post-list-item">
+                    <h2>java同步容器与并发容器</h2>
+                    <span class="date">Nov 8, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/java-multithread.html" class="post-list-item">
+                    <h2>java并发和多线程</h2>
+                    <span class="date">Aug 2, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-UI-Thread.html" class="post-list-item">
+                    <h2>Android UI线程和子线程、Service通信</h2>
+                    <span class="date">Jul 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-networkOnMainThreadException.html" class="post-list-item">
+                    <h2>从android.os.NetworkOnMainThreadException引发的思考</h2>
+                    <span class="date">Jul 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="post-list-item">
+                    <h2>Java编程Tips</h2>
+                    <span class="date">Jun 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/15/in-the-rain.html" class="post-list-item">
+                    <h2>在雨中</h2>
+                    <span class="date">Jun 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-code-opt.html" class="post-list-item">
+                    <h2>C代码优化小贴士</h2>
+                    <span class="date">Dec 27, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/libevent.html" class="post-list-item">
+                    <h2>处理并发之二：libevent的eventbuffer</h2>
+                    <span class="date">Aug 24, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/linux-epoll.html" class="post-list-item">
+                    <h2>处理并发之一：LINUX Epoll机制介绍</h2>
+                    <span class="date">Aug 23, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="programming">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="jekyll">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-syntax.html" class="post-list-item">
+                    <h2>Markdown 语法 (简体中文版)</h2>
+                    <span class="date">Jul 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-basics.html" class="post-list-item">
+                    <h2>markdown 快速入门</h2>
+                    <span class="date">Jul 10, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="other">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/vim-plugins.html" class="post-list-item">
+                    <h2>一些强大的Vim插件</h2>
+                    <span class="date">Mar 20, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="reprints">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/09/android-studio-plugins.html" class="post-list-item">
+                    <h2>提高效率的Android Studio插件</h2>
+                    <span class="date">Sep 9, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/android-opensource.html" class="post-list-item">
+                    <h2>值得推荐的android开源框架</h2>
+                    <span class="date">Oct 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="web">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/04/web-transmission-basis.html" class="post-list-item">
+                    <h2>网络传输基础</h2>
+                    <span class="date">Apr 16, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/web-server.html" class="post-list-item">
+                    <h2>也谈如何构建高性能服务端程序</h2>
+                    <span class="date">Nov 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp-analise.html" class="post-list-item">
+                    <h2>XMPP协议分析-具体分析</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-project.html" class="post-list-item">
+                    <h2>Androidpn 消息推送总结</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-to-use-smack.html" class="post-list-item">
+                    <h2>Smack开发手册</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-introduction.html" class="post-list-item">
+                    <h2>AndroidPN消息推送</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp.html" class="post-list-item">
+                    <h2>XMPP协议分析-原理</h2>
+                    <span class="date">Oct 28, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/jsp-jfreechart.html" class="post-list-item">
+                    <h2>使用Jfreechart生成曲线显示到JSP中</h2>
+                    <span class="date">Oct 22, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-http-works.html" class="post-list-item">
+                    <h2>当我们打开网页时发生了什么</h2>
+                    <span class="date">Oct 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="book">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/11/how-to-evaluate-the-hackers-and-painters.html" class="post-list-item">
+                    <h2>如何评价『黑客与画家』</h2>
+                    <span class="date">Nov 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="algorithm">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/skip-list.html" class="post-list-item">
+                    <h2>skip list跳跃表实现</h2>
+                    <span class="date">Dec 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/graph.html" class="post-list-item">
+                    <h2>计算机算法--图算法介绍</h2>
+                    <span class="date">Nov 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/leveldb.html" class="post-list-item">
+                    <h2>leveldb原理剖析</h2>
+                    <span class="date">Nov 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c/c++">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-open-project.html" class="post-list-item">
+                    <h2>值得推荐的C/C++框架和库</h2>
+                    <span class="date">Dec 13, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/android-links.html" class="post-list-item">
+                    <h2>安卓开发者必备的42个链接</h2>
+                    <span class="date">May 19, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/define-custom-view.html" class="post-list-item">
+                    <h2>Android自定义视图教程</h2>
+                    <span class="date">May 17, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/android-studio-prefrence.html" class="post-list-item">
+                    <h2>Android Studio多渠道打包和代码混淆教程</h2>
+                    <span class="date">Mar 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/05/gradle-dependency-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之依赖管理</h2>
+                    <span class="date">May 5, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/gradle-task-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之任务管理</h2>
+                    <span class="date">Apr 30, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="lambda">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/dagger-dependency-injection.html" class="post-list-item">
+                    <h2>Dagger依赖注入浅析</h2>
+                    <span class="date">Aug 13, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/gradle-tasks-guide.html" class="post-list-item">
+                    <h2>彻底理解Gradle的任务</h2>
+                    <span class="date">Jul 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Latex">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/latex-fonts-settings.html" class="post-list-item">
+                    <h2>Latex中英文环境设置</h2>
+                    <span class="date">Aug 22, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Unix/Linux">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/baidu-spider-forbidden.html" class="post-list-item">
+                    <h2>解决百度爬虫无法抓取github pages</h2>
+                    <span class="date">Feb 18, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/apache-configuration-in-ubuntu.html" class="post-list-item">
+                    <h2>Ubuntu下Apache服务器的配置</h2>
+                    <span class="date">Jan 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/tmux-guide.html" class="post-list-item">
+                    <h2>终端复用软件之tmux简介</h2>
+                    <span class="date">Jan 19, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/08/linux-zsh.html" class="post-list-item">
+                    <h2>Zsh-Linux下最好的Shell简介</h2>
+                    <span class="date">Aug 23, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Git">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/git-guide.html" class="post-list-item">
+                    <h2>Git操作手册|命令速查表</h2>
+                    <span class="date">Feb 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="hi">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/hi.html" class="post-list-item">
+                    <h2>hi</h2>
+                    <span class="date">Feb 22, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	 </div>
+
+</div>
+
+
+<!-- Blog Comments -->
+<div class="media">
+  <!-- UY BEGIN 
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2023801"></script>
+UY END -->
+
+<!-- 多说评论框 start -->
+  <div class="post-comment">
+            <span>Comments</span>
+	<div class="ds-thread" data-thread-key="/blog/2014/07/c-advaced-programming" data-title="C语言高级编程指南" data-url="LippiOuYang.github.io/blog/2014/07/c-advaced-programming.html">
+	</div>
+ </div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"lippiouyang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+ 
+</div> 
+</div>
+
+        </div>
+
+	 <div id="top" data-toggle="tooltip" data-placement="left" title="回到顶部">
+	      <a href="javascript:;">
+		<div class="arrow"></div>
+		<div class="stick"></div>
+	      </a>
+	    </div>
+
+        <!-- Blog Sidebar Widgets Column -->
+        <div class="col-md-4">
+          <!-- Blog Search Well -->  
+	
+                    <div class="shadow-corner-curl hidden-xs">
+	  <div class="categories-list-header">站内搜索</div>
+<!-- 使用该代码即表示您同意接受 Google 自定义搜索服务条款。 -->
+<!-- 有关服务条款，请访问 http://www.google.com/cse/docs/tos.html?hl=zh-CN -->
+<form name="cse" id="searchbox_demo" action="/search.html">
+  <input type="hidden" name="cref" value="" />
+  <input type="hidden" name="ie" value="utf-8" />
+  <input type="hidden" name="hl" value="zh-CN" />
+  <input name="q" type="text" size="30" />
+  <input type="submit" name="sa" value="搜索" /> 
+</form>
+<script type="text/javascript" src="http://www.google.com/cse/tools/onthefly?form=searchbox_demo&lang=zh-CN"></script>			      
+     
+            
+</div>
+
+
+
+
+
+
+
+
+          <!-- Blog Categories Well -->
+              
+
+    <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        Categories
+      </div>
+      
+      <a href="/index.html" class="categories-list-item" cate="All">
+        All<span class="my-badge"> 61</span>
+      </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="java">
+          java <span class="my-badge">17</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c">
+          c <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="programming">
+          programming <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="jekyll">
+          jekyll <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="other">
+          other <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="reprints">
+          reprints <span class="my-badge">5</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Android">
+          Android <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="web">
+          web <span class="my-badge">9</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="book">
+          book <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="algorithm">
+          algorithm <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c/c++">
+          c/c++ <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="android">
+          android <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Gradle">
+          Gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="lambda">
+          lambda <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="gradle">
+          gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Latex">
+          Latex <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Unix/Linux">
+          Unix/Linux <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Git">
+          Git <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="hi">
+          hi <span class="my-badge">1</span>
+        </a>
+      
+    </div>
+
+
+
+ 
+         
+              <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        热门文章
+      </div>
+
+ <ul class="list-unstyled">
+      	<li><a href="/blog/2015/03/github-pages-blog.html" class="categories-list-item">利用Github-pages建立个人博客</a></li>	
+<li><a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="categories-list-item">一个合格的程序员应该读过哪些书</a></li>
+<li><a href="/blog/2014/12/c-open-project.html" class="categories-list-item">值得推荐的C/C++框架和库</a></li>
+<li><a href="/blog/2014/12/c-code-opt.html" class="categories-list-item">C代码优化小贴士</a></li>	
+<li><a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="categories-list-item">Java编程Tips</a></li>
+<li><a href="/blog/2015/04/gradle-task-management.html" class="categories-list-item">Gradle系列教程之任务管理</a></li>	
+<li><a href="/blog/2015/05/android-links.html" class="categories-list-item">安卓开发者必备的42个链接</a></li>
+<li><a href="/blog/2015/05/gradle-dependency-management.html" class="categories-list-item">Gradle系列教程之依赖管理</a></li>
+<li><a href="/blog/2014/10/android-opensource.html" class="categories-list-item">值得推荐的android开源框架</a></li>	 
+<li><a href="/blog/2015/07/hibernate-cache-guide.html" class="categories-list-item">Hibernate缓存配置笔记</a></li>	
+	 
+     </ul>
+</div>
+ 
+       
+                   <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        相关链接
+      </div>    
+ <ul class="list-unstyled">
+              <li>
+                <a href="https://github.com/" class="categories-list-item">
+                   GitHub 
+                </a>
+              </li>
+<li>
+                <a href="http://www.stackoverflow.com/" class="categories-list-item">
+                   Stack Overflow 
+                </a>
+              </li>
+<li>
+                <a href="http://jekyllrb.com/docs/posts/" class="categories-list-item">
+                  Jekyll文档 
+                </a>
+              </li>
+               
+               <li>
+                <a href="https://news.ycombinator.com/" class="categories-list-item">
+                   Hacker News 
+                </a>
+              </li>        
+              
+              <li>
+                <a href="http://developer.android.com/" class="categories-list-item">
+                   Android Developer 
+                </a>
+              </li>
+              
+              <li>
+                <a href="http://www.ruanyifeng.com/blog/" class="categories-list-item">
+                   Ruanyifeng's Blog 
+                </a>
+              </li>
+
+
+  <li>
+                <a href="http://www.importnew.com/" class="categories-list-item">
+                   ImportNew 
+                </a>
+              </li>
+<li>
+                <a href="http://guides.codepath.com/android" class="categories-list-item">
+                   CodePath Android Cliffnotes 
+                </a>
+              </li>
+<li>
+                <a href="http://androidweekly.net/" class="categories-list-item">
+                   Androidweekly 	
+                </a>
+              </li>
+<li>
+			<a href="http://mvnrepository.com/" class="categories-list-item">
+                   Mvnrepository 
+                </a>
+              </li>
+<li>
+			<a href="http://www.iteye.com/" class="categories-list-item">
+                  Iteye 
+                </a>
+              </li>
+              		
+            </ul>
+
+</div>
+ 
+
+          <!-- Side Widget Well -->
+           
+        </div>
+      </div>
+
+
+
+      <!-- /.row -->
+      <hr>
+      <!-- Footer -->
+      <footer>
+           <p><small>Designed by <a href="https://github.com/EZLippi">Lippi</a> | Free hosted at <a href="https://github.com/EZLippi/EZLippi.github.io">Github</a> | Copyright 2014 - 2016  
+										</p>
+
+	<!--
+<div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <a href="mailto:ouyanglip@gmail.com"><span class="glyphicon glyphicon-envelope"></span> ouyanglip@gmail.com</a>
+        <span class="point"> · </span>
+        
+          
+          <a href="https://github.com/LippiOuYang">
+            <span class="icon">
+              <svg viewBox="0 0 16 16">
+                <path fill="#aaa" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+            Github
+          </a>
+          
+          
+          <span class="point"> · </span>
+          <span><a href="/feed.xml">RSS</a></span>
+          <span class="point"> · </span>
+          <span>Draw my life with code</span>
+          <span class="point"> · </span>
+          <span>&copy; 2014 LippiOuYang</span>
+          <span class="point"> · </span>
+          <span>Designed by <a href="https://github.com/LippiOuYang">Lippi</a></span>
+
+      </div>
+    </div>
+    </div>
+	-->
+ 
+              <div style="display:none;"><script src="http://s95.cnzz.com/z_stat.php?id=1254799848&web_id=1254799848" language="JavaScript"></script></div>
+ 
+
+      </footer>
+    </div>
+    <!-- /.container -->
+  </body>
+
+</html>

@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta name="baidu-site-verification" content="HvuxptDcq6" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="AndroidPN消息推送 - Lippi-浮生志 - Lippi.OuYang(ouyanglip@gmail.com)">
+    <title>
+      AndroidPN消息推送 - Lippi-浮生志
+    </title>
+    <!-- Bootstrap Core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS 
+    <link href="/css/blog.css" rel="stylesheet">-->
+    <!-- index css -->
+    <link href="/css/index.css" rel="stylesheet">
+	<!-- pagments CSS-->
+	<link href="/css/pygments.css" rel="stylesheet">
+        <!-- jQuery Version 1.11.0 -->
+    <script src="/js/jquery-1.11.0.js"> </script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/bootstrap.min.js"></script>
+   <!-- 回到顶部js-->
+    <script src="/js/index.js"></script>
+
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?085fc257cb1e774f7764a2cf527c393d";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+	<script>
+    (function(){
+     var bp = document.createElement('script');
+	 bp.src = '//push.zhanzhang.baidu.com/push.js';
+	 var s = document.getElementsByTagName("script")[0];
+	 s.parentNode.insertBefore(bp, s);
+	 })();
+	</script>
+
+  </head>
+  
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">
+              Toggle navigation
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+          </button>
+          <a class="navbar-brand" href="/index.html">
+            Lippi-浮生志
+          </a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+            <li>
+              <a href="/categories.html">
+                分 类
+              </a>
+            </li>
+            <li>
+              <a href="/tags.html">
+                标 签
+              </a>
+            </li>
+            <li>
+              <a href="/archives.html">
+                归 档
+              </a>
+            </li>
+            <li>
+              <a href="/faqs.html">
+                备 忘
+              </a>
+            </li>
+            <li>
+              <a href="/about.html">
+                关 于
+              </a>
+            </li>
+          </ul> 
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+        <!-- Blog Entries Column -->
+        <div class="col-md-8">
+          <!-- Blog Post -->
+<!-- Title -->
+<div class="row">
+  <div class="post-area post">
+
+ 	<div class="post-list-body">
+        	<div class="all-posts" post-cate="All">
+ 		<header>
+		<h1>
+		  AndroidPN消息推送
+		  <div class="post-date"><a href="https://github.com/LippiOuYang/LippiOuYang.github.io/edit/master/_posts/2014-10-30-androidDP-introduction.md" target="_blank">纠错</a>&nbsp;&nbsp;
+			<span class="glyphicon glyphicon-time"></span>
+			30 Oct 2014
+		  </div>
+		</h1>
+ 		</header>
+		<!-- Author -->
+		<hr>
+		 <article>
+		<p>Androidpn是韩国Sehwan No写的开源消息推送项目，很多大公司都用这个消息推送方式构建自己的消息推送服务，缺点是导致客户端比较耗电。通信机制分别由客户端和服务器完成。</p>
+
+<p>客户端采用基于java的XMPP协议包asmack（该包依赖于openfire下的开源项目smack）。通过该协议包提供的XMPPConnetcion类与服务器建立持久连接，并通过该连接进行用户注册和登录认证，以及接受服务器消息。</p>
+
+<p>服务器是基于开源的openfire工程，采用java语言实现和Spring框架提供Web服务。主要有两个部分，一个是侦听在5222端口上的XMPP服务，负责与客户端的XMPPConnection类进行通信，作用是用户注册和身份认证，并推送消息。另外是Web服务器，采用一个轻量级的HTTP服务器，负责接收用户的Web请求。</p>
+
+<p>整个基于XMPP的通信中，服务器端和客户端的通信是基于一个session（会话）过程，会话开始，首先客户端会指定端口号，然后把准备的连接信息发送到服务器端，客户端通过XMPP协议做的只有接收消息，其他的管理连接和保存消息等都由服务器负责。消息的传递是以根节点<stream>为起始，以</stream>为结束。</p>
+
+<p>服务器和客户端建立Tcp连接过程如下。首先，建立会话协商，Client 准备connecting to server (127.0.0.1:5222)。其次，服务器询问Client所支持的安全认证。再者，Client发送给服务器要注册的用户。然后，Client根据服务器的要求提交用户信息。最后，Client关闭注册的STREAM元素。</p>
+
+<hr />
+
+<h1 id="section">客户端</h1>
+<p>Client这边包含有消息的收发，解析以及持久连接的发起，重连等功能呢，十分强大，我们开发时完全不用管底层的连接，也不用担心断线，可以专注于业务部分的开发。</p>
+
+<h2 id="section-1">控制器</h2>
+<p>XmppManager是Client的主控制器，主要用来管理连接信息，包括XMPP端口、IP地址、登录的用户名和密码，以及对连接的维护。</p>
+
+<h2 id="section-2">消息解析处理</h2>
+<p>NotificationIQ、NotificationPackerListener以及NotificationIQProvider三个类负责对收到的Notification格式的消息进行解析和处理。</p>
+
+<h2 id="section-3">手机状态监听</h2>
+<p>PersistentConnetcionListener、PhoneStateChangeListener以及ReconnectionThread三个类负责监听手机状态和断线重连。</p>
+
+<p>同时，代码结构也很简单。去除android的Service和BroadCast类以及一些工具类和常量类不谈：</p>
+
+<p>1.NotificationIQ,NotificationIQProvider,NotificationPacketListener三个类负责对收到的Notification格式的消息进行解析和处理，</p>
+
+<p>2.XmppManager是主控制器，NotificationService通过这个类，在后台维护androidpn连接。</p>
+
+<p>3.PersistentConnectionListener，PhoneStateChangeListener，ReconnectionThread.java三个类则负责监听手机的状态并进行断线重连。</p>
+
+<p>我们自定义消息时需要定义3个类：在NotificationIQ中定义消息的实体，在NotificationIQProvider中将消息转化为NotificationIQ实体，在NotificationPacketListener中对实体进行处理，具体的实现可参考NotificationIQ,NotificationIQProvider,NotificationPacketListener三个类。在定义这些类之后，还需要在XmppManager中将这3个类中注册到connection中，代码如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>connection.connect();
+Log.i(LOGTAG, "XMPP connected successfully");
+// packet provider
+ProviderManager.getInstance().addIQProvider("message",
+Constants.NOTIFICATION_NAMESPACE,
+new NotificationIQProvider());
+//packet filter
+PacketFilter packetFilter = new PacketTypeFilter(
+NotificationIQ.class);
+// packet listener
+PacketListener packetListener = xmppManager.getNotificationPacketListener();
+connection.addPacketListener(packetListener, packetFilter);
+</code></pre>
+</div>
+
+<p>需要注意的是，注册NotificationIQProvider时，传入的namespace需要和服务端组装消息时使用的namespace一致，才能正确的收到。
+## 注册 ##</p>
+
+<p>Client在与服务器建立connection后，首先会提交注册任务，在Androidpn项目中，用户注册是采用UUID（通用唯一标识码）来实现的，其每次登录都会利用这个UUID.randomUUID()来产生一个用户名和密码，而且不会重复。</p>
+
+<p>注册方法根据Server的格式要求组装注册消息，发送到服务器，同时使用在connection中添加监听，来获取服务器返回的消息packet。Client会根据消息的类型来判断是否注册成功。</p>
+
+<p>服务端收到Client的注册请求，会通过路由类router来转发到相应的Handler处理，router首先会读取Client发来包Packet的Namespace部分，根据XMPP RFC协议注册packet的namespace为jabber:iq:register，授权packet的namespace为jabber:iq:auth，由此转发到IQRegisterHandler处理注册请求。</p>
+
+<p>如果注册成功，Client会把相应的用户名、密码通过SharePerence保存在Client的共享文件AndroidpnClient中。此外，AndroidpnClient还保存了当前应用的包名、类名、服务器地址、端口、客户端版本、设备ID等。</p>
+
+<h2 id="section-4">登录</h2>
+
+<p>Client的登录是在注册之后进行的，在Client的XmppManager类中，建立连接的时候首先会提交登录任务，然而在提交登录任务的时候都有一个submitRegisterTask()方法，可知，每次登录都会首先提交一个注册任务。</p>
+
+<p>登录的时候，要先通过isAuthenticated()方法判断是否授权，授权处理同样会通过connection发送到服务端，服务端会根据packet的namespace部分进行解析，然后路由类router会根据namespace转发到IQAuthHandler处理。</p>
+
+<p>Client收到服务端返回的消息packet，会使用connection的监听器异步接收消息，并通过XmppManager的context的sendBroadcast(Intentintent)以广播发送出去。</p>
+
+<p>基于tomcat的项目源码<a href="http://pan.baidu.com/s/1kTDUQWJ">http://pan.baidu.com/s/1kTDUQWJ</a></p>
+
+<hr />
+
+<h1 id="section-5">服务器</h1>
+
+<p>服务端架构依赖spring、mina框架，spring完成java Ben管理，mina完成网络通信。另外，服务端还通过jetty潜入了Admin Console Web界面功能。对于spring的依赖导致要把androidpn-server整合潜入项目中时，要考虑和自己项目本身spring环境的整合问题，可能要改造androidpn-server源代码，具体要看项目中spring的环境。对于mina的依赖不存在这个问题，因为mina是类库型框架，而spring是容器型框架。androidpn-server对jetty的使用不是可选的，而是和jetty绑定的，所以要不使用jetty就必须对androidpn-server的源代码进行改造。</p>
+
+<p>另外，对数据的存储使用hibernate框架，androidpn-server在使用hibernate时配置通过ehcache实现二级缓存。官方默认使用的数据库是HSQLDB数据库，你可以改用其他数据库。HSQLDB是用java语言实现的数据库，对其使用请自己学习。Androidpn-server通过In-Process模式（作为应用程序的一部分潜入应用程序）使用HSQLDB的。</p>
+
+<p>服务器主要由以下几个包组成：</p>
+
+<ul>
+  <li>
+    <p>org.androidpn.server.xmpp异常类型定义，包含程序入口类XmppServer。</p>
+  </li>
+  <li>
+    <p>org.androidpn.server.util加载配置文件，获取主机和端口等信息。</p>
+  </li>
+  <li>
+    <p>org.androidpn.server.xmpp.codec是XMPP协议的XML文件解析包，server</p>
+  </li>
+</ul>
+
+<p>收到和发送的消息都要通过这个包来进行xmpp协议编码和解码。</p>
+
+<ul>
+  <li>
+    <p>org.androidpn.server.xmpp.handler负责对不同类型的消息进行处理</p>
+  </li>
+  <li>
+    <p>org.androidpn.server.xmpp.net负责维护与client之间的持久连接，并实现了一些传输方式供发送xmpp消息时使用。</p>
+  </li>
+  <li>
+    <p>org.androidpn.server.xmpp.ssl是对连接进行ssl认证的工具包。</p>
+  </li>
+  <li>
+    <p>org.androidpn.server.xmpp.router包负责将收到的信息包发送到相应的handler进行处理，是一个路由包。</p>
+  </li>
+  <li>
+    <p>org.androidpn.server.xmpp.presence里面只包含PresenceManager类，用来维护client的在线状态。</p>
+  </li>
+  <li>
+    <p>org.androidpn.server.xmpp.push包里面的NotificationManager类包含有向client发送消息的接口。</p>
+
+    <p><strong>服务器中使用ServerStarter类启动服务，服务启动后使用XmppServer来管理连接、加载配置等。</strong></p>
+  </li>
+</ul>
+
+<p>服务器接收处理消息流程</p>
+
+<p>① connection接收到来着Client的packet，使用包codec解码。</p>
+
+<p>② 路由包router根据packet的namespace等信息，将packet路由到相应的Handler。</p>
+
+<p>③ Handler开始处理。</p>
+
+<p>开发中只要根据client发送消息的格式，定义自己的router和handler类，然后在PacketRouter中注册router，在IQRouter中注册handler即可。</p>
+
+<p><strong>服务器发送消息的流程</strong></p>
+
+<p>① 使用NotificationManager接口的push方法。</p>
+
+<p>② 使用SessionManager在Session集合查找相应的client连接。</p>
+
+<p>③ 定义和组装XMPP消息，通过session向client发送。</p>
+
+<p>在这个流程中我们需要修改的是步骤3，也就是需要定义和组装自己的xmpp消息，以便于将适当的信息传到客户端并便于客户端解析。一个简单的消息组装例子如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>private IQ  createMessageIQ(String title, String message, String userId,String json) {
+Element notification =  DocumentHelper.createElement(QName.get(
+"message",  INQURIE_NAMESPACE));
+notification.addElement("title").setText(title);
+notification.addElement("text").setText(message);
+notification.addElement("userId").setText(userId);
+notification.addElement("json").setText(json);
+IQ iq = new IQ();
+iq.setType(IQ.Type.set);
+iq.setChildElement(notification);
+return iq;
+} 要注意的是在创建element的时候，传入的namespace要和client解析使用的namespace相匹配。
+</code></pre>
+</div>
+
+<p><strong>独立部署使用</strong></p>
+
+<p>独立部署使用不需要对androidpn-server源代码进行任何改造，目录结构见上图，只需要修改好配置文件即可，配置文件在conf文件夹下，下面对需要注意的配置项进行说明，其他配置项目使用默认配置就可。</p>
+
+<p>对于config.properties的配置说明如下：</p>
+
+<p>apiKey=1234567890 #暂时发现没什么用处</p>
+
+<p>admin.console.host=127.0.0.1 #web管理控制界面jetty服务监听的地址</p>
+
+<p>admin.console.port=7070 #web管理控制界面jetty服务监听的端口</p>
+
+<p>对于spring-config.xml的配置说明：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&lt;bean id="ioAcceptor" class="org.apache.mina.transport.socket.nio.NioSocketAcceptor"init-method="bind" destroy-method="unbind"&gt;
+
+&lt;property name="defaultLocalAddress" value=":5222" /&gt; &lt;!--mina Socekt服务端监听端口，客户端配置和此配置一致--&gt;
+
+&lt;property name="handler" ref="xmppHandler" /&gt;
+
+&lt;property name="filterChainBuilder" ref="filterChainBuilder" /&gt;
+
+&lt;property name="reuseAddress" value="true" /&gt;
+
+&lt;/bean&gt;
+</code></pre>
+</div>
+
+<p>启动脚本在bin下，windowns和linux的脚本都有，需要配置系统环境变量JAVA_HOME，或者修改启动脚本将JAVA_HOME指定为你本机的具体地址，运行run脚本androidpn启动成功，通过浏览器访问http://127.0.0.1:7070/就可看到console界面。</p>
+
+<p>其他项目通过http方式将需要发送的消息提交给androidpn-server服务，由androidpn-server完成客户端消息推送。</p>
+
+<p>具体应用可以通过程序代码编写方式访问http://192.168.1.24:7070/notification.do地址，将需要的参数以post方式提交。</p>
+
+<p>嵌入项目使用
+若要将androidpn作为应用程序的一部分潜入项目中使用，需要对androidpn-server源代码进行改造。</p>
+
+<p><strong>情况一：若你的项目中没有用到spring</strong></p>
+
+<p>这种情况不用考虑androidpn的spring和你项目中spring配置的融合问题，直接因为spring就可以了，配置文件使用androidpn默认配置文件名称spring-config.xml。配置文件都放在classpath下。</p>
+
+<p>需要在config.properties配置文件中增加配置server.home.dir选项，值指向一个目录，如：server.home.dir=F:\android\download\androidpn-server-0.5.0，该目录下要有子目录conf\security，目录下要放两个文件keystore和truststore，用来进行SSL安全传输用的密钥和证书，利用androdpn-server自带的就可以。</p>
+
+<p>接下来就是修改org.androidpn.server.xmpp. XmppServer类，将启动admin console的代码注释掉，如下截图红框框住的部分。如果你需要启动admin console的话，需要将原始androidpn中console文件夹放到合适的路径下，这个还没有试。</p>
+
+<p><strong>Androidpn-server主启动类</strong></p>
+
+<p>org.androidpn.server.xmpp.XmppServer修改完后，你就可以在你的应用程序这样调用：</p>
+
+<p>XmppServerserver = XmppServer.getInstance();</p>
+
+<p>这样XmppServer通过加载spring启动了mina监听服务，这时手机客户端应用已经可以连接服务端了。</p>
+
+<p>你的应用程序需要推送消息时，实例化</p>
+
+<p>org.androidpn.server.xmpp.push.NotificationManager，调用其提供的sendBroadcast和sendNotifcationToUser方法，如下代码调用：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>NotificationManager notificationManager = new NotificationManager();
+notificationManager.sendBroadcast("1234567890", "Hello","Hello BalanceJia!", "uri");
+或
+notificationManager.sendNotifcationToUser(apiKey,username, title, message, uri);
+</code></pre>
+</div>
+
+<p><strong>情况二：若你的项目中用到spring</strong></p>
+
+<p>和你的项目中spring配置融合，需要注意spring容器不能重复启动的问题。所以要将androidpn-server的spring配置增加到你的spring配置中，需要修改XmppServer启动spring的地方，另外androidpn-server spring中配置的ben名字和你项目中的本名字不能重复，因为androidpn-server中用到的ben  id有：dataSource、dataSource、transactionManager、userDao、userService。还有数据源冲突的问题。</p>
+
+<p><strong>情况三：基于tomcat部署</strong></p>
+
+<p>1.依据ServerStart类写一个servlet，在servlet中启动时创建XmppServer实例。然后在web.xml中配置为自启动。</p>
+
+<p>2.将androidpn自带的配置目录conf拷贝到WEB-INF下面，并且把spring-config.xml文件从conf目录移动到WEB-INF目录。</p>
+
+<p>3.修改默认的spring-config.xml文件，在文件schema的头部<beans>下面加入如下内容<import resource="applicationContext.xml"></import>，其中，加载顺序会默认先加载applicationContext文件，然后会加载spring-config文件后面的内容。</beans></p>
+
+<p>原因是spring-config文件中有个&lt;bean id=”xmppHandler” …/&gt;组件会在web服务启动的时候加载，该组件也会初始化XmppServer，导致与servlet的加载发生冲突。</p>
+
+<p>由于未使用使用hibernate-cfg.xml文件，需要在spring-config文件加入如下内容：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&lt;bean id="sessionFactory"
+   class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
+   &lt;property name="dataSource" ref="dataSource" /&gt;
+   &lt;property name="mappingResources" &gt;
+  &lt;list&gt;
+&lt;value&gt;org/androidpn/server/model/User.hbm.xml&lt;/value&gt;
+  &lt;/list&gt;
+&lt;/property&gt;
+&lt;property name="hibernateProperties"&gt;
+   &lt;props&gt;
+ &lt;prop key="hibernate.dialect"&gt;
+  org.hibernate.dialect.SQLServerDialect
+ &lt;/prop&gt;
+ &lt;prop key="hibernate.show_sql"&gt;true&lt;/prop&gt;
+ &lt;prop key="hibernate.hbm2ddl.auto"&gt;update&lt;/prop&gt;
+  &lt;/props&gt;
+ &lt;/property&gt;
+ &lt;/bean&gt;
+</code></pre>
+</div>
+
+<p>在spring-config.xml文件中，配置组件<bean: id="ioAcceptor">的listenrPort属性</bean:></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&lt;bean id="listenrPort" class="java.net.InetSocketAddress"&gt;
+ &lt;constructor-arg value="localhost"/&gt;
+ &lt;constructor-arg value="5222"/&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+
+<p>此外，Androidpn默认采用spring-mvc方式配置，所以需要修改action指向。修改org.androidpn.server.console.controller包下面的三个类，改为继承自struct2的ActionSupport方式，并修改默认的调用方法，然后配置struct.xml文件。</p>
+
+		  </article>
+		<hr>
+	<br/>
+        <p>
+          本作品由 <a href="mailto:ouyanglip@gmail.com">Lippi.OuYang</a> 创作，采用
+          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="查看协议详细信息" target="_blank">CC BY-NC-SA 3.0 许可协议</a>
+          进行许可。
+        </p>
+	<div style="margin-top:10px;margin-bottom:10px">
+	  
+	  <span class="next">
+	    上篇：
+	    <a href="/blog/2014/10/xmpp.html">
+	      XMPP协议分析-原理
+	    </a>
+	  </span>
+	   
+	  
+	  <span class="prev">
+	    下篇：
+	    <a href="/blog/2014/10/how-to-use-smack.html">
+	      Smack开发手册
+	    </a>
+	  </span>
+	  
+	</div>
+	</div>
+	
+        
+	<div post-cate="java">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/hibernate-cache-guide.html" class="post-list-item">
+                    <h2>Hibernate缓存配置笔记</h2>
+                    <span class="date">Jul 24, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-virtual-mechine.html" class="post-list-item">
+                    <h2>Java虚拟机简介</h2>
+                    <span class="date">Apr 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/java-code-opt-one.html" class="post-list-item">
+                    <h2>优化java代码建议(1)</h2>
+                    <span class="date">Apr 12, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/02/cache.html" class="post-list-item">
+                    <h2>谈谈缓存和基本的缓存算法</h2>
+                    <span class="date">Feb 4, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/12/improve-webServer-performance.html" class="post-list-item">
+                    <h2>谈谈如何提高web服务器并发性能</h2>
+                    <span class="date">Dec 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-inner-class.html" class="post-list-item">
+                    <h2>java中内部类</h2>
+                    <span class="date">Nov 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/java-concurrent-collections.html" class="post-list-item">
+                    <h2>java同步容器与并发容器</h2>
+                    <span class="date">Nov 8, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/java-multithread.html" class="post-list-item">
+                    <h2>java并发和多线程</h2>
+                    <span class="date">Aug 2, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-UI-Thread.html" class="post-list-item">
+                    <h2>Android UI线程和子线程、Service通信</h2>
+                    <span class="date">Jul 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/android-networkOnMainThreadException.html" class="post-list-item">
+                    <h2>从android.os.NetworkOnMainThreadException引发的思考</h2>
+                    <span class="date">Jul 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="post-list-item">
+                    <h2>Java编程Tips</h2>
+                    <span class="date">Jun 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/06/15/in-the-rain.html" class="post-list-item">
+                    <h2>在雨中</h2>
+                    <span class="date">Jun 14, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-code-opt.html" class="post-list-item">
+                    <h2>C代码优化小贴士</h2>
+                    <span class="date">Dec 27, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/libevent.html" class="post-list-item">
+                    <h2>处理并发之二：libevent的eventbuffer</h2>
+                    <span class="date">Aug 24, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/linux-epoll.html" class="post-list-item">
+                    <h2>处理并发之一：LINUX Epoll机制介绍</h2>
+                    <span class="date">Aug 23, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="programming">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/c-advaced-programming.html" class="post-list-item">
+                    <h2>C语言高级编程指南</h2>
+                    <span class="date">Jul 5, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="jekyll">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-syntax.html" class="post-list-item">
+                    <h2>Markdown 语法 (简体中文版)</h2>
+                    <span class="date">Jul 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/markdown-basics.html" class="post-list-item">
+                    <h2>markdown 快速入门</h2>
+                    <span class="date">Jul 10, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="other">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/03/vim-plugins.html" class="post-list-item">
+                    <h2>一些强大的Vim插件</h2>
+                    <span class="date">Mar 20, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/install-texlive-in-ubuntu.html" class="post-list-item">
+                    <h2>在Ubuntu下安装和编译LaTex</h2>
+                    <span class="date">Mar 15, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/github-pages-blog.html" class="post-list-item">
+                    <h2>利用github-pages建立个人博客</h2>
+                    <span class="date">Mar 1, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="reprints">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/09/returning-null.html" class="post-list-item">
+                    <h2>关于返回 Null 值的问题</h2>
+                    <span class="date">Sep 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/why-jdk-string-is-final.html" class="post-list-item">
+                    <h2>为什么 jdk 中把 String 类设计成 final</h2>
+                    <span class="date">Aug 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/08/78-golden-rules-of-the-java-programming.html" class="post-list-item">
+                    <h2>java编程的78条黄金法则</h2>
+                    <span class="date">Aug 16, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/use-jekyll-build-blog-on-github.html" class="post-list-item">
+                    <h2>使用jekyll在Github上搭建博客</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="post-list-item">
+                    <h2>一个合格的程序员应该读过哪些书</h2>
+                    <span class="date">Jul 15, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/09/android-studio-plugins.html" class="post-list-item">
+                    <h2>提高效率的Android Studio插件</h2>
+                    <span class="date">Sep 9, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/android-opensource.html" class="post-list-item">
+                    <h2>值得推荐的android开源框架</h2>
+                    <span class="date">Oct 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="web">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/04/web-transmission-basis.html" class="post-list-item">
+                    <h2>网络传输基础</h2>
+                    <span class="date">Apr 16, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/web-server.html" class="post-list-item">
+                    <h2>也谈如何构建高性能服务端程序</h2>
+                    <span class="date">Nov 19, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp-analise.html" class="post-list-item">
+                    <h2>XMPP协议分析-具体分析</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-project.html" class="post-list-item">
+                    <h2>Androidpn 消息推送总结</h2>
+                    <span class="date">Oct 31, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-to-use-smack.html" class="post-list-item">
+                    <h2>Smack开发手册</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/androidDP-introduction.html" class="post-list-item">
+                    <h2>AndroidPN消息推送</h2>
+                    <span class="date">Oct 30, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/xmpp.html" class="post-list-item">
+                    <h2>XMPP协议分析-原理</h2>
+                    <span class="date">Oct 28, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/jsp-jfreechart.html" class="post-list-item">
+                    <h2>使用Jfreechart生成曲线显示到JSP中</h2>
+                    <span class="date">Oct 22, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/10/how-http-works.html" class="post-list-item">
+                    <h2>当我们打开网页时发生了什么</h2>
+                    <span class="date">Oct 11, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="book">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/11/how-to-evaluate-the-hackers-and-painters.html" class="post-list-item">
+                    <h2>如何评价『黑客与画家』</h2>
+                    <span class="date">Nov 1, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="algorithm">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/skip-list.html" class="post-list-item">
+                    <h2>skip list跳跃表实现</h2>
+                    <span class="date">Dec 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/graph.html" class="post-list-item">
+                    <h2>计算机算法--图算法介绍</h2>
+                    <span class="date">Nov 29, 2014</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2014/11/leveldb.html" class="post-list-item">
+                    <h2>leveldb原理剖析</h2>
+                    <span class="date">Nov 18, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="c/c++">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2014/12/c-open-project.html" class="post-list-item">
+                    <h2>值得推荐的C/C++框架和库</h2>
+                    <span class="date">Dec 13, 2014</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="android">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/volley-source-code.html" class="post-list-item">
+                    <h2>Volley源码分析</h2>
+                    <span class="date">Aug 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/android-links.html" class="post-list-item">
+                    <h2>安卓开发者必备的42个链接</h2>
+                    <span class="date">May 19, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/05/define-custom-view.html" class="post-list-item">
+                    <h2>Android自定义视图教程</h2>
+                    <span class="date">May 17, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/03/android-studio-prefrence.html" class="post-list-item">
+                    <h2>Android Studio多渠道打包和代码混淆教程</h2>
+                    <span class="date">Mar 18, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/05/gradle-dependency-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之依赖管理</h2>
+                    <span class="date">May 5, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/04/gradle-task-management.html" class="post-list-item">
+                    <h2>Gradle系列教程之任务管理</h2>
+                    <span class="date">Apr 30, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="lambda">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/06/java-lambda-expression.html" class="post-list-item">
+                    <h2>Java Lambda简明教程</h2>
+                    <span class="date">Jun 3, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="gradle">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/dagger-dependency-injection.html" class="post-list-item">
+                    <h2>Dagger依赖注入浅析</h2>
+                    <span class="date">Aug 13, 2015</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/07/gradle-tasks-guide.html" class="post-list-item">
+                    <h2>彻底理解Gradle的任务</h2>
+                    <span class="date">Jul 27, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Latex">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2015/08/latex-fonts-settings.html" class="post-list-item">
+                    <h2>Latex中英文环境设置</h2>
+                    <span class="date">Aug 22, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Unix/Linux">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/baidu-spider-forbidden.html" class="post-list-item">
+                    <h2>解决百度爬虫无法抓取github pages</h2>
+                    <span class="date">Feb 18, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/apache-configuration-in-ubuntu.html" class="post-list-item">
+                    <h2>Ubuntu下Apache服务器的配置</h2>
+                    <span class="date">Jan 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2016/01/tmux-guide.html" class="post-list-item">
+                    <h2>终端复用软件之tmux简介</h2>
+                    <span class="date">Jan 19, 2016</span>
+                  </a>
+		</li>
+                
+              
+                
+		<li>
+                  <a href="/blog/2015/08/linux-zsh.html" class="post-list-item">
+                    <h2>Zsh-Linux下最好的Shell简介</h2>
+                    <span class="date">Aug 23, 2015</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="Git">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/git-guide.html" class="post-list-item">
+                    <h2>Git操作手册|命令速查表</h2>
+                    <span class="date">Feb 20, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	<div post-cate="hi">
+          <ul class="posts">
+            
+              
+                
+              
+            
+              
+                
+		<li>
+                  <a href="/blog/2016/02/hi.html" class="post-list-item">
+                    <h2>hi</h2>
+                    <span class="date">Feb 22, 2016</span>
+                  </a>
+		</li>
+                
+              
+            
+          </ul>
+	</div>
+        
+	 </div>
+
+</div>
+
+
+<!-- Blog Comments -->
+<div class="media">
+  <!-- UY BEGIN 
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2023801"></script>
+UY END -->
+
+<!-- 多说评论框 start -->
+  <div class="post-comment">
+            <span>Comments</span>
+	<div class="ds-thread" data-thread-key="/blog/2014/10/androidDP-introduction" data-title="AndroidPN消息推送" data-url="LippiOuYang.github.io/blog/2014/10/androidDP-introduction.html">
+	</div>
+ </div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"lippiouyang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+ 
+</div> 
+</div>
+
+        </div>
+
+	 <div id="top" data-toggle="tooltip" data-placement="left" title="回到顶部">
+	      <a href="javascript:;">
+		<div class="arrow"></div>
+		<div class="stick"></div>
+	      </a>
+	    </div>
+
+        <!-- Blog Sidebar Widgets Column -->
+        <div class="col-md-4">
+          <!-- Blog Search Well -->  
+	
+                    <div class="shadow-corner-curl hidden-xs">
+	  <div class="categories-list-header">站内搜索</div>
+<!-- 使用该代码即表示您同意接受 Google 自定义搜索服务条款。 -->
+<!-- 有关服务条款，请访问 http://www.google.com/cse/docs/tos.html?hl=zh-CN -->
+<form name="cse" id="searchbox_demo" action="/search.html">
+  <input type="hidden" name="cref" value="" />
+  <input type="hidden" name="ie" value="utf-8" />
+  <input type="hidden" name="hl" value="zh-CN" />
+  <input name="q" type="text" size="30" />
+  <input type="submit" name="sa" value="搜索" /> 
+</form>
+<script type="text/javascript" src="http://www.google.com/cse/tools/onthefly?form=searchbox_demo&lang=zh-CN"></script>			      
+     
+            
+</div>
+
+
+
+
+
+
+
+
+          <!-- Blog Categories Well -->
+              
+
+    <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        Categories
+      </div>
+      
+      <a href="/index.html" class="categories-list-item" cate="All">
+        All<span class="my-badge"> 61</span>
+      </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="java">
+          java <span class="my-badge">17</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c">
+          c <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="programming">
+          programming <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="jekyll">
+          jekyll <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="other">
+          other <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="reprints">
+          reprints <span class="my-badge">5</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Android">
+          Android <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="web">
+          web <span class="my-badge">9</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="book">
+          book <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="algorithm">
+          algorithm <span class="my-badge">3</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="c/c++">
+          c/c++ <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="android">
+          android <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Gradle">
+          Gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="lambda">
+          lambda <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="gradle">
+          gradle <span class="my-badge">2</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Latex">
+          Latex <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Unix/Linux">
+          Unix/Linux <span class="my-badge">4</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="Git">
+          Git <span class="my-badge">1</span>
+        </a>
+      
+        <a href="javascript:;" class="categories-list-item" cate="hi">
+          hi <span class="my-badge">1</span>
+        </a>
+      
+    </div>
+
+
+
+ 
+         
+              <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        热门文章
+      </div>
+
+ <ul class="list-unstyled">
+      	<li><a href="/blog/2015/03/github-pages-blog.html" class="categories-list-item">利用Github-pages建立个人博客</a></li>	
+<li><a href="/blog/2014/07/qualified-programmer-should-read-what-books.html" class="categories-list-item">一个合格的程序员应该读过哪些书</a></li>
+<li><a href="/blog/2014/12/c-open-project.html" class="categories-list-item">值得推荐的C/C++框架和库</a></li>
+<li><a href="/blog/2014/12/c-code-opt.html" class="categories-list-item">C代码优化小贴士</a></li>	
+<li><a href="/blog/2014/06/26-methods-to-improve-java-performance.html" class="categories-list-item">Java编程Tips</a></li>
+<li><a href="/blog/2015/04/gradle-task-management.html" class="categories-list-item">Gradle系列教程之任务管理</a></li>	
+<li><a href="/blog/2015/05/android-links.html" class="categories-list-item">安卓开发者必备的42个链接</a></li>
+<li><a href="/blog/2015/05/gradle-dependency-management.html" class="categories-list-item">Gradle系列教程之依赖管理</a></li>
+<li><a href="/blog/2014/10/android-opensource.html" class="categories-list-item">值得推荐的android开源框架</a></li>	 
+<li><a href="/blog/2015/07/hibernate-cache-guide.html" class="categories-list-item">Hibernate缓存配置笔记</a></li>	
+	 
+     </ul>
+</div>
+ 
+       
+                   <div class="shadow-corner-curl hidden-xs">
+      <div class="categories-list-header">
+        相关链接
+      </div>    
+ <ul class="list-unstyled">
+              <li>
+                <a href="https://github.com/" class="categories-list-item">
+                   GitHub 
+                </a>
+              </li>
+<li>
+                <a href="http://www.stackoverflow.com/" class="categories-list-item">
+                   Stack Overflow 
+                </a>
+              </li>
+<li>
+                <a href="http://jekyllrb.com/docs/posts/" class="categories-list-item">
+                  Jekyll文档 
+                </a>
+              </li>
+               
+               <li>
+                <a href="https://news.ycombinator.com/" class="categories-list-item">
+                   Hacker News 
+                </a>
+              </li>        
+              
+              <li>
+                <a href="http://developer.android.com/" class="categories-list-item">
+                   Android Developer 
+                </a>
+              </li>
+              
+              <li>
+                <a href="http://www.ruanyifeng.com/blog/" class="categories-list-item">
+                   Ruanyifeng's Blog 
+                </a>
+              </li>
+
+
+  <li>
+                <a href="http://www.importnew.com/" class="categories-list-item">
+                   ImportNew 
+                </a>
+              </li>
+<li>
+                <a href="http://guides.codepath.com/android" class="categories-list-item">
+                   CodePath Android Cliffnotes 
+                </a>
+              </li>
+<li>
+                <a href="http://androidweekly.net/" class="categories-list-item">
+                   Androidweekly 	
+                </a>
+              </li>
+<li>
+			<a href="http://mvnrepository.com/" class="categories-list-item">
+                   Mvnrepository 
+                </a>
+              </li>
+<li>
+			<a href="http://www.iteye.com/" class="categories-list-item">
+                  Iteye 
+                </a>
+              </li>
+              		
+            </ul>
+
+</div>
+ 
+
+          <!-- Side Widget Well -->
+           
+        </div>
+      </div>
+
+
+
+      <!-- /.row -->
+      <hr>
+      <!-- Footer -->
+      <footer>
+           <p><small>Designed by <a href="https://github.com/EZLippi">Lippi</a> | Free hosted at <a href="https://github.com/EZLippi/EZLippi.github.io">Github</a> | Copyright 2014 - 2016  
+										</p>
+
+	<!--
+<div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <a href="mailto:ouyanglip@gmail.com"><span class="glyphicon glyphicon-envelope"></span> ouyanglip@gmail.com</a>
+        <span class="point"> · </span>
+        
+          
+          <a href="https://github.com/LippiOuYang">
+            <span class="icon">
+              <svg viewBox="0 0 16 16">
+                <path fill="#aaa" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+            Github
+          </a>
+          
+          
+          <span class="point"> · </span>
+          <span><a href="/feed.xml">RSS</a></span>
+          <span class="point"> · </span>
+          <span>Draw my life with code</span>
+          <span class="point"> · </span>
+          <span>&copy; 2014 LippiOuYang</span>
+          <span class="point"> · </span>
+          <span>Designed by <a href="https://github.com/LippiOuYang">Lippi</a></span>
+
+      </div>
+    </div>
+    </div>
+	-->
+ 
+              <div style="display:none;"><script src="http://s95.cnzz.com/z_stat.php?id=1254799848&web_id=1254799848" language="JavaScript"></script></div>
+ 
+
+      </footer>
+    </div>
+    <!-- /.container -->
+  </body>
+
+</html>
