@@ -5,26 +5,22 @@ title: "关于：About"
 
 ## 个人简介：
 
-* 欧阳利平
-* Web后台开发、Android应用开发爱好者
-* 来自江西 现居广州
+* 李鸣
+* C++后台开发，机器学习算法爱好者
+* 来自湖北，武汉
+* 话唠，有点自嘲的意思，这样觉得为人谦虚有趣，先生呢，就是自嘲中又带着一点。。。。额。。。一点绅士，，，正经，恩。                          　　　　　　　　　　　　　　　　　　－－傻CC对话唠先生的解读
 
 ## 联系方式
-
-<p class="contact">
- <a href="http://weibo.com/ouyanglip" title="微博联系我"><img src="http://www.sinaimg.cn/blog/developer/wiki/LOGO_32x32.png" width="24" height="24" style="display:inline-block;vertical-align:middle"></a><br/>
-        <a href="http://www.zhihu.com/people/lippi-ouyang" title="知乎联系我"><img src="http://www.zhihu.com/favicon.ico" width="24" height="24" style="display:inline-block;vertical-align:middle"></a><br/>
- <a href="https://github.com/LippiOuYang" title="Github联系我"><img src="http://www.github.com/favicon.ico" width="24" height="24" style="display:inline-block;vertical-align:middle"></a><br/>
-邮箱: ouyanglip@gmail.com 
-</p>
+邮箱: 362471259@qq.com
 
 ### 关于本站：
 
-* 搭建于[Github](https://github.com/LippiOuYang/LippiOuYang.github.io),欢迎Fork
+* 搭建于[Github](https://github.com/xiangxiaoxiao/xiangxiaoxiao.github.io.git).欢迎Fork
 * 模板及样式来源[Useful Paradigm](http://usefulparadigm.com/)
-* 折腾开始于2014年6月1日，基本在2014年6月15日完工。
+* 折腾开始于2016年5月1日，基本在2016年5月15日完工。
+* （部分博客从原来的新浪微博转载过来）
 
 ## 其他流言
-* 未**女昏**人士；
-* 阿森纳球迷；
-* 实况足球忠实粉丝；
+* 篮球等各种运动爱好者；
+* 湖人球迷，勇士球迷；
+* 球鞋爱好者，小吃爱好者；

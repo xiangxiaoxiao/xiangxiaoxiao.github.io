@@ -3,11 +3,10 @@ include: ['.htaccess']
 exclude: [".rvmrc", ".rbenv-version", "README.md", "Rakefile", "changelog.md", "CNAME", "Gemfile", "Gemfile.lock"]
 markdown: kramdown
 highlights: pygments
-url: 
-cdn_url: 7u2t01.com1.z0.glb.clouddn.com
+url: https://github.com/xiangxiaoxiao/xiangxiaoxiao.github.io.git
 lsi: false
 safe: true
-timezone: Asia/Shanghai
+timezone: Asia/Wuhan
 auto: false 
 
 paginate: 8
@@ -25,11 +24,11 @@ JB :
 
 # presonal config
 domain: http://coolshell.info
-title: Lippi-浮生志
-description: Draw my life with code
-author: Lippi.OuYang
-email: ouyanglip@gmail.com
-github: LippiOuYang
+title: 话唠先生
+description: love live,love code,love life
+author: Li Ming
+email: 362471259@qq.com
+github: xiangxiaoxiao
 
 config:
   js_dir:
