@@ -4,12 +4,118 @@
  <title>话唠先生</title>
  <link href="http://http://coolshell.info/atom.xml" rel="self"/>
  <link href="http://http://coolshell.info"/>
- <updated>2016-07-29T07:31:22+00:00</updated>
+ <updated>2016-08-05T14:20:10+00:00</updated>
  <author>
    <name>Li Ming</name>
    <email>362471259@qq.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Markdown Designer_pattern</title>
+   <link href="http://http://coolshell.info/blog/2016/08/markdown-Designer_Pattern.html"/>
+   <updated>2016-08-03T00:00:00+00:00</updated>
+   <id>/blog/2016/08/markdown-Designer_Pattern</id>
+   <content type="html">&lt;h4 id=&quot;section&quot;&gt;桥接模式： 将抽象部分与它的实现部分分离，使它们都可以独立地变化。&lt;/h4&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;常用的场景&lt;/p&gt;
+
+  &lt;p&gt;1.当一个对象有多个变化因素的时候，考虑依赖于抽象的实现，而不是具体的实现。如上面例子中手机品牌有2种变化因素，一个是品牌，一个是功能。&lt;/p&gt;
+
+  &lt;p&gt;2.当多个变化因素在多个对象间共享时，考虑将这部分变化的部分抽象出来再聚合/合成进来，如上面例子中的通讯录和游戏，其实是可以共享的。&lt;/p&gt;
+
+  &lt;p&gt;3.当我们考虑一个对象的多个变化因素可以动态变化的时候，考虑使用桥接模式，如上面例子中的手机品牌是变化的，手机的功能也是变化的，所以将他们分离出来，独立的变化。
+缺点：
+（1）.客户必须知道选择哪一种类型的实现&lt;/p&gt;
+
+  &lt;p&gt;优点：
+（1）分离抽象接口及其实现部分。 
+（2）桥接模式有时类似于多继承方案，但是多继承方案违背了类的单一职责原则（即一个类只有一个变化的原因），复用性比较差，而且多继承结构中类的个数非常庞大，桥接模式是比多继承方案更好的解决方法。
+（3）桥接模式提高了系统的可扩充性，在两个变化维度中任意扩展一个维度，都 不需要修改原有系统。
+（4）实现细节对客户透明，可以对用户隐藏实现细节。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;section-1&quot;&gt;工厂模式：&lt;/h4&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;简单工厂、工厂模式和抽象工厂模式
+下面总结一下“工厂系列”设计模式，简单工厂模式只有一份抽象的产品，工厂是具体的；（普通）工厂模式的同样也只有一份抽象的产品，但工厂有抽象的了；抽象工厂模式工厂当然是抽象的，但是它独特的地方在于产品至少有两份是抽象的。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;section-2&quot;&gt;建造者模式：&lt;/h4&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;建造者模式包含一个抽象的Builder类，还有它的若干子类——ConcreteBuilder，不用理会UML图上的Product，关键是看Director，Director里面的方法Construct()其实包含了Builder指针或引用的形参，由客户端传入某个ConcreateBuilder对象。Construct(Builder*
+builder)的方法大致如下： Construct(Builder* builder) {
+         Builder-&amp;gt;BuildPartA();
+         Builder-&amp;gt;BuildPartB();
+         … } 由多态性可知，客户端传进来的ConcreteBuilder是谁，就调用谁的方法。 原型模式： 当一个类中包含了指针，那么这个类一定要显示规定三个东西：拷贝构造函数，重载”=”操作符以及析构函数。如果程序员使用编译器默认产生的这三个函数，那么得到的对象是原来对象的“浅拷贝”，即只是简单拷贝了指针的值（只复制了地址），没有复制指针指向空间的内容。“浅拷贝”只会保留最近的修改结果，而且在析构时容易出现重复析构的错误。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;section-3&quot;&gt;单例模式：&lt;/h4&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;要使一个类只能生成一个对象，就是要限制使用它的构造函数，即将构造函数定义为private或protected的，然后另辟一个公有方法Instance，在这个方法里检查instance（instance是指向本类的一个指针或引用，这在C++语法中是可以的）是否为空指针，若为空指针，则说明是第一次生成对象，那么操作是允许的，instance = new Singleton()，若指针非空，说明在之前已经有一个对象（实例）了，单例模式不允许再次生成实例，因此直接返回之前生成的对象的地址。 将instance定义成static变量，就更符合“单例”模式了，因为static变量只有一份，它属于这个类，不属于某个对象。相应的Instance()方法应该也定义成static的，用Singleton::Instance()来调用。注意这里的static方法和变量是必须的，如果函数不是static，则要事先生成对象才能调用Instance，就破坏了“单例”的思想了，如果变量不是static，那么静态函数Instance又不能引用非static变量。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;未完待续。。。&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Markdown Typedef用法</title>
+   <link href="http://http://coolshell.info/blog/2016/04/markdown-Typedef%E7%94%A8%E6%B3%95.html"/>
+   <updated>2016-04-05T00:00:00+00:00</updated>
+   <id>/blog/2016/04/markdown-Typedef用法</id>
+   <content type="html">&lt;h3 id=&quot;section&quot;&gt;用途一：&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;定义一种类型的别名，而不只是简单的宏替换。可以用作同时声明指针型的多个对象。比如： char* pa, pb; //
+这多数不符合我们的意图，它只声明了一个指向字符变量的指针，&lt;/p&gt;
+
+  &lt;p&gt;// 和一个字符变量；&lt;/p&gt;
+
+  &lt;p&gt;以下则可行：&lt;/p&gt;
+
+  &lt;p&gt;typedef char* PCHAR;&lt;/p&gt;
+
+  &lt;p&gt;PCHAR pa, pb;   这种用法很有用，特别是char* pa,
+pb的定义，初学者往往认为是定义了两个字符型指针，其实不是，而用typedef char*
+PCHAR就不会出现这样的问题，减少了错误的发生。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;section-1&quot;&gt;用途二:&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;用在旧的C代码中，帮助struct。以前的代码中，声明struct新对象时，必须要带上struct，即形式为： struct 结构名对象名。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;section-2&quot;&gt;用途三：&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;用typedef来定义与平台无关的类型。比如定义一个叫 REAL 的浮点类型，在目标平台一上，让它表示最高精度的类型为： typedef
+long double REAL;&lt;/p&gt;
+
+  &lt;p&gt;在不支持 long double 的平台二上，改为：&lt;/p&gt;
+
+  &lt;p&gt;typedef double REAL;&lt;/p&gt;
+
+  &lt;p&gt;在连 double 都不支持的平台三上，改为：&lt;/p&gt;
+
+  &lt;p&gt;typedef float REAL;&lt;/p&gt;
+
+  &lt;p&gt;也就是说，当跨平台时，只要改下 typedef
+本身就行，不用对其他源码做任何修改。标准库就广泛使用了这个技巧，比如size_t。另外，因为typedef是定义了一种类型的新别名，不是简单的字符串替换，所以它比宏来得稳健。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;section-3&quot;&gt;用途四：&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;为复杂的声明定义一个新的简单的别名。方法是：在原来的声明里逐步用别名替换一部分复杂声明，如此循环，把带变量名的部分留到最后替换，得到的就是原声明的最简化。&lt;/p&gt;
+&lt;/blockquote&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Git操作手册|命令速查表</title>
@@ -2452,13 +2558,13 @@ UY END --&gt;
 &lt;!-- 多说评论框 start --&gt;
   &lt;div class=&quot;post-comment&quot;&gt;
             &lt;span&gt;Comments&lt;/span&gt;
-	&lt;div class=&quot;ds-thread&quot; data-thread-key=&quot;/blog/2015/02/cache&quot; data-title=&quot;谈谈缓存和基本的缓存算法&quot; data-url=&quot;LippiOuYang.github.io/blog/2015/02/cache.html&quot;&gt;
+	&lt;div class=&quot;ds-thread&quot; data-thread-key=&quot;/blog/2015/02/cache&quot; data-title=&quot;谈谈缓存和基本的缓存算法&quot; data-url=&quot;xiangxiaoxiao.github.io/blog/2015/02/cache.html&quot;&gt;
 	&lt;/div&gt;
  &lt;/div&gt;
 &lt;!-- 多说评论框 end --&gt;
 &lt;!-- 多说公共JS代码 start (一个网页只需插入一次) --&gt;
 &lt;script type=&quot;text/javascript&quot;&gt;
-var duoshuoQuery = {short_name:&quot;lippiouyang&quot;};
+var duoshuoQuery = {short_name:&quot;接下来的路才真正的开始&quot;};
 	(function() {
 		var ds = document.createElement(&#39;script&#39;);
 		ds.type = &#39;text/javascript&#39;;ds.async = true;
@@ -2589,7 +2695,7 @@ layout: default
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;     Hello TOBI
      Hello tobi has 4 letters!
-     Hello 2016 Jul
+     Hello 2016 Aug
     &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;返回字符串大写的结果：TOBI

@@ -1,0 +1,46 @@
+<h3 id="section">用途一：</h3>
+
+<blockquote>
+  <p>定义一种类型的别名，而不只是简单的宏替换。可以用作同时声明指针型的多个对象。比如： char* pa, pb; //
+这多数不符合我们的意图，它只声明了一个指向字符变量的指针，</p>
+
+  <p>// 和一个字符变量；</p>
+
+  <p>以下则可行：</p>
+
+  <p>typedef char* PCHAR;</p>
+
+  <p>PCHAR pa, pb;   这种用法很有用，特别是char* pa,
+pb的定义，初学者往往认为是定义了两个字符型指针，其实不是，而用typedef char*
+PCHAR就不会出现这样的问题，减少了错误的发生。</p>
+</blockquote>
+
+<h3 id="section-1">用途二:</h3>
+
+<blockquote>
+  <p>用在旧的C代码中，帮助struct。以前的代码中，声明struct新对象时，必须要带上struct，即形式为： struct 结构名对象名。</p>
+</blockquote>
+
+<h3 id="section-2">用途三：</h3>
+
+<blockquote>
+  <p>用typedef来定义与平台无关的类型。比如定义一个叫 REAL 的浮点类型，在目标平台一上，让它表示最高精度的类型为： typedef
+long double REAL;</p>
+
+  <p>在不支持 long double 的平台二上，改为：</p>
+
+  <p>typedef double REAL;</p>
+
+  <p>在连 double 都不支持的平台三上，改为：</p>
+
+  <p>typedef float REAL;</p>
+
+  <p>也就是说，当跨平台时，只要改下 typedef
+本身就行，不用对其他源码做任何修改。标准库就广泛使用了这个技巧，比如size_t。另外，因为typedef是定义了一种类型的新别名，不是简单的字符串替换，所以它比宏来得稳健。</p>
+</blockquote>
+
+<h3 id="section-3">用途四：</h3>
+
+<blockquote>
+  <p>为复杂的声明定义一个新的简单的别名。方法是：在原来的声明里逐步用别名替换一部分复杂声明，如此循环，把带变量名的部分留到最后替换，得到的就是原声明的最简化。</p>
+</blockquote>
